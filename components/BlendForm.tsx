@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import React, { useState , useCallback , useEffect} from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -38,7 +41,7 @@ export default function BlendForm({
   setEditingBlendId,
   availableTeas,
   setAvailableTeas,
-  blendAllocations,
+  // blendAllocations,
   setBlendAllocations,
   blendNameSequence,
   setBlendNameSequence,
@@ -258,7 +261,27 @@ export default function BlendForm({
       })
     )
 
-    setNewBlend({ id: "", name: "", blendNo: "", allocations: [], totalQuantity: 0, toAllocate: 0, balance: 0, status: 'draft', createdAt: new Date() })
+    setNewBlend({
+        id: "",
+        name: "",
+        blendNo: "",
+        allocations: [],
+        totalQuantity: 0,
+        toAllocate: 0,
+        balance: 0,
+        status: 'draft',
+        createdAt: new Date(),
+        exportQuantity: 0,
+        allocatedQuantity: 0,
+        allocatedQuantityDate: null,
+        customerOrderNo: "",
+        orderLineNumber: "",
+        sampleAllocationDate: null,
+        requiredDate: null,
+        packagingType: 'bulk',
+        averagePrice: 0,
+        teaCost: 0
+    })
     setEditingBlendId(null)
 
     toast({
