@@ -1,56 +1,50 @@
-import React from "react"
-import { Plus, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import React, { useState, useMemo } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Search } from "lucide-react"
 import { Tea, BlendAllocation } from "@/components/types"
 
-interface TeaAllocationDialogProps {
+interface TeaSelectionDialogProps {
+
   isOpen: boolean
-  setIsOpen: (isOpen: boolean) => void
-  newBlend: BlendAllocation
-  setNewBlend: React.Dispatch<React.SetStateAction<BlendAllocation>>
+  onOpenChange: (open: boolean) => void
   availableTeas: Tea[]
-  isReadOnly: boolean
+  newBlend: BlendAllocation
   addTeaToBlend: (tea: Tea, quantity: number, packages: number) => void
-  searchTerm: string
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
-  allocationMode: 'kg' | 'package'
-  setAllocationMode: React.Dispatch<React.SetStateAction<'kg' | 'package'>>
 }
 
-export default function TeaAllocationDialog({
+export default function TeaSelectionDialog({
   isOpen,
-  setIsOpen,
-  newBlend,
-  setNewBlend,
+  onOpenChange,
   availableTeas,
-  isReadOnly,
-  addTeaToBlend,
-  searchTerm,
-  setSearchTerm,
-  allocationMode,
-  setAllocationMode
-}: TeaAllocationDialogProps) {
-  const filteredTeas = availableTeas.filter(tea => 
-    tea.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tea.lotNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tea.teaStandard.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tea.gardenMark.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  newBlend,
+  addTeaToBlend
+}: TeaSelectionDialogProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [allocationMode, setAllocationMode] = useState<'kg' | 'package'>('kg')
+
+  const filteredTeas = useMemo(() => {
+    return availableTeas.filter(tea => 
+      tea.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tea.lotNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tea.teaStandard.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tea.gardenMark.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [availableTeas, searchTerm])
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button disabled={isReadOnly}>Add Tea</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[800px] bg-[white] border-gray-700 text-black">
         <DialogHeader>
           <DialogTitle>Available Teas</DialogTitle>
+          <DialogDescription>
+            Select teas to add to your blend allocation.
+          </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <div className="flex items-center space-x-2 mb-4">
@@ -117,10 +111,8 @@ export default function TeaAllocationDialog({
                                 const quantity = parseInt(input.value || '0')
                                 const packages = Math.ceil(quantity / tea.packageWeight)
                                 addTeaToBlend(tea, quantity, packages)
-                                setIsOpen(false)
                               }}
                             >
-                              <Plus className="h-4 w-4 mr-2" />
                               Add
                             </Button>
                           </TableCell>
@@ -176,10 +168,8 @@ export default function TeaAllocationDialog({
                                 const packages = parseInt(input.value || '0')
                                 const quantity = packages * tea.packageWeight
                                 addTeaToBlend(tea, quantity, packages)
-                                setIsOpen(false)
                               }}
                             >
-                              <Plus className="h-4 w-4 mr-2" />
                               Add
                             </Button>
                           </TableCell>

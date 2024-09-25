@@ -1,4 +1,5 @@
-import TeaBlendAllocation from '@/components/tea-blend-allocation'
+import TeaBlendAllocation from '@/components/TeaBlendAllocation'
+
 export default function Home() {
   return (
    <>

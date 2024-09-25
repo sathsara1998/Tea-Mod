@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogDescription , DialogOverlay} from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -475,8 +475,9 @@ export default function TeaBlendAllocation() {
                   <DialogTrigger asChild>
                     <Button disabled={isReadOnly}>Add Tea</Button>
                   </DialogTrigger>
-                  <DialogContent  className="sm:max-w-[800px] bg-background">
-                    <DialogHeader>
+
+                  <DialogContent className="sm:max-w-[800px] bg-[white] border-gray-700 text-black">
+                  <DialogHeader>
                       <DialogTitle>Available Teas</DialogTitle>
                       <DialogDescription>
       Select teas to add to your blend allocation.
