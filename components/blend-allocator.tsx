@@ -75,7 +75,7 @@ type ConfirmedSaleOrder = {
   customer_name: string;
 }
 
-export default function BlendAllocator() {
+export function BlendAllocatorComponent() {
   const [confirmedSaleOrders, setConfirmedSaleOrders] = useState<ConfirmedSaleOrder[]>([])
   const [selectedSalesOrders, setSelectedSalesOrders] = useState<SalesOrder[]>([])
   const [blends, setBlends] = useState<Blend[]>([])
@@ -271,7 +271,7 @@ export default function BlendAllocator() {
   return (
     <div className="container mx-auto p-4 flex flex-col md:flex-row">
       {/* Left Side - Blends */}
-      <div className="w-full md:w-1/6 mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-1/4 mb-4 md:mb-0 md:mr-4">
         <Card>
           <CardHeader>
             <CardTitle>Blends</CardTitle>
@@ -298,7 +298,7 @@ export default function BlendAllocator() {
                         View Allocations
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-120">
+                    <PopoverContent className="w-80">
                       <h4 className="font-semibold mb-2">Allocations</h4>
                       <ScrollArea className="h-60">
                         <Table>
@@ -330,7 +330,7 @@ export default function BlendAllocator() {
       </div>
 
       {/* Middle - Blend Creation */}
-      <div className="w-full md:w-4/6 mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
         <Card>
           <CardHeader>
             <CardTitle>Create Blend</CardTitle>
@@ -463,7 +463,7 @@ export default function BlendAllocator() {
       </div>
 
       {/* Right Side - Total Demand */}
-      <div className="w-full md:w-1/6">
+      <div className="w-full md:w-1/4">
         <Card className="bg-blue-50">
           <CardHeader>
             <CardTitle>Total Demand</CardTitle>
