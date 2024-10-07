@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, AlertTriangle, RefreshCw, X, ArrowRight, Info } from "lucide-react"
+import { Loader2, AlertTriangle, RefreshCw, X, ArrowRight, Info, Plus, Edit, Trash2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -17,6 +17,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 type TeaBlendDetail = {
   product_id: number;
@@ -49,6 +59,7 @@ type SalesOrder = {
 }
 
 type BlendAllocation = {
+  id?: number;
   salesOrderId: number;
   salesOrderName: string;
   lineId: number;
@@ -58,6 +69,7 @@ type BlendAllocation = {
 
 type Blend = {
   id: string;
+  name: string;
   blendName: string;
   quantity: number;
   status: 'draft' | 'confirmed';
@@ -75,6 +87,26 @@ type ConfirmedSaleOrder = {
   customer_name: string;
 }
 
+const API_BASE_URL = 'https://teatang-erp-dev-15377276.dev.odoo.com/api';
+const API_KEY = '1c0054e7bd055658f79528f2bbf0ba1d1640abc4'; // Replace with your actual API key
+
+async function apiRequest(endpoint: string, method: string, data?: any) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`,
+    },
+    body: data ? JSON.stringify(data) : undefined,
+  });
+
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 export default function BlendAllocator() {
   const [confirmedSaleOrders, setConfirmedSaleOrders] = useState<ConfirmedSaleOrder[]>([])
   const [selectedSalesOrders, setSelectedSalesOrders] = useState<SalesOrder[]>([])
@@ -83,17 +115,15 @@ export default function BlendAllocator() {
   const [isConfirming, setIsConfirming] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [newBlendName, setNewBlendName] = useState('')
+  const [editingBlend, setEditingBlend] = useState<Blend | null>(null)
   const { toast } = useToast()
 
   const fetchConfirmedSaleOrders = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch('https://teatang-erp-dev-15377276.dev.odoo.com/api/confirmed_sale_orders')
-      if (!response.ok) {
-        throw new Error('Failed to fetch confirmed sale orders')
-      }
-      const data = await response.json()
+      const data = await apiRequest('/confirmed_sale_orders', 'GET');
       setConfirmedSaleOrders(data)
     } catch (err) {
       setError('Error fetching confirmed sale orders. Please try again.')
@@ -103,19 +133,30 @@ export default function BlendAllocator() {
     }
   }, [])
 
+  const fetchBlends = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await apiRequest('/get_blends', 'GET');
+      setBlends(data)
+    } catch (err) {
+      setError('Error fetching blends. Please try again.')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchConfirmedSaleOrders()
-  }, [fetchConfirmedSaleOrders])
+    fetchBlends()
+  }, [fetchConfirmedSaleOrders, fetchBlends])
 
   const fetchSalesOrderDetails = async (saleOrderNumber: string) => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(`https://teatang-erp-dev-15377276.dev.odoo.com/api/tea_blend_sales?sale_order_number=${saleOrderNumber}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch sales order details')
-      }
-      const data = await response.json()
+      const data = await apiRequest(`/tea_blend_sales?sale_order_number=${saleOrderNumber}`, 'GET');
       if (data.length > 0) {
         return data[0]
       } else {
@@ -201,41 +242,113 @@ export default function BlendAllocator() {
 
     setIsConfirming(true)
 
-    // Simulating API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      const totalDemand = calculateTotalDemand()
+      for (const demand of totalDemand) {
+        const allocations = selectedSalesOrders.flatMap(order =>
+          order.order_lines.map(line => ({
+            lineId: line.line_id,
+            quantity: selectedBlends.find(b => b.blendName === demand.blendName)?.quantities[line.line_id] || 0
+          })).filter(a => a.quantity > 0)
+        )
 
-    const totalDemand = calculateTotalDemand()
-    const newBlends = totalDemand.map((demand, index) => {
-      const allocations: BlendAllocation[] = []
-      selectedSalesOrders.forEach(order => {
-        order.order_lines.forEach(line => {
-          const quantity = selectedBlends.find(b => b.blendName === demand.blendName)?.quantities[line.line_id] || 0
-          if (quantity > 0) {
-            allocations.push({
-              salesOrderId: order.id,
-              salesOrderName: order.name,
-              lineId: line.line_id,
-              productName: line.product_name,
-              quantity: quantity
-            })
-          }
+        await apiRequest('/create_blend', 'POST', {
+          blendName: demand.blendName,
+          allocations: allocations
         })
-      })
-      return {
-        id: `BLEND${blends.length + index + 1}`,
-        blendName: demand.blendName,
-        quantity: demand.totalQuantity,
-        status: 'draft' as const,
-        allocations: allocations
       }
-    })
 
-    setBlends(prev => [...prev, ...newBlends])
-    setIsConfirming(false)
-    toast({
-      title: "Blends Created",
-      description: `Created ${newBlends.length} new blend(s).`,
-    })
+      await fetchBlends()
+      toast({
+        title: "Blends Created",
+        description: `Created ${totalDemand.length} new blend(s).`,
+      })
+    } catch (error) {
+      console.error('Error creating blends:', error)
+      toast({
+        title: "Error",
+        description: "Failed to create blends. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsConfirming(false)
+    }
+  }
+
+  const handleCreateNewBlend = async () => {
+    if (newBlendName.trim() === '') return
+
+    try {
+      await apiRequest('/create_blend', 'POST', {
+        blendName: newBlendName,
+        allocations: []
+      })
+
+      await fetchBlends()
+      setNewBlendName('')
+      toast({
+        title: "New Blend Created",
+        description: `Created new blend: ${newBlendName}`,
+      })
+    } catch (error) {
+      console.error('Error creating new blend:', error)
+      toast({
+        title: "Error",
+        description: "Failed to create new blend. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEditBlend = (blend: Blend) => {
+    setEditingBlend(blend)
+  }
+
+  const handleUpdateBlend = async () => {
+    if (!editingBlend) return
+
+    try {
+      await apiRequest(`/update_blend/${editingBlend.id}`, 'PUT', {
+        blendName: editingBlend.blendName,
+        status: editingBlend.status,
+        allocations: editingBlend.allocations.map(a => ({
+          lineId: a.lineId,
+          quantity: a.quantity
+        }))
+      })
+
+      await fetchBlends()
+      setEditingBlend(null)
+      toast({
+        title: "Blend Updated",
+        description: `Updated blend: ${editingBlend.blendName}`,
+      })
+    } catch (error) {
+      console.error('Error updating blend:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update blend. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteBlend = async (blendId: string) => {
+    try {
+      await apiRequest(`/delete_blend/${blendId}`, 'DELETE')
+      await fetchBlends()
+      toast({
+        title: "Blend Deleted",
+        description: `Deleted blend with ID: ${blendId}`,
+      })
+    } catch (error) {
+      console.error('Error deleting blend:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete blend. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const getQuantityColor = (allocated: number, total: number) => {
@@ -271,10 +384,42 @@ export default function BlendAllocator() {
   return (
     <div className="container mx-auto p-4 flex flex-col md:flex-row">
       {/* Left Side - Blends */}
-      <div className="w-full md:w-1/6 mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-1/4 mb-4 md:mb-0 md:mr-4">
         <Card>
           <CardHeader>
-            <CardTitle>Blends</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+              Blends
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Blend
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Blend</DialogTitle>
+                    <DialogDescription>Enter a name for the new blend.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="name" className="text-right">
+                        Name
+                      </Label>
+                      <Input
+                        id="name"
+                        value={newBlendName}
+                        onChange={(e) => setNewBlendName(e.target.value)}
+                        className="col-span-3"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleCreateNewBlend}>Create Blend</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[calc(100vh-200px)]">
@@ -291,37 +436,47 @@ export default function BlendAllocator() {
                   </div>
                   <small>Blend: {blend.blendName}</small>
                   <small>Quantity: {blend.quantity.toFixed(3)}</small>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        <Info className="h-4 w-4 mr-2" />
-                        View Allocations
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-120">
-                      <h4 className="font-semibold mb-2">Allocations</h4>
-                      <ScrollArea className="h-60">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Order</TableHead>
-                              <TableHead>Product</TableHead>
-                              <TableHead>Quantity</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {blend.allocations.map((allocation, index) => (
-                              <TableRow key={index}>
-                                <TableCell>{allocation.salesOrderName}</TableCell>
-                                <TableCell>{allocation.productName}</TableCell>
-                                <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
+                  <div className="flex justify-between mt-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Info className="h-4 w-4 mr-2" />
+                          View Allocations
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <h4 className="font-semibold mb-2">Allocations</h4>
+                        <ScrollArea className="h-60">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Order</TableHead>
+                                <TableHead>Product</TableHead>
+                                <TableHead>Quantity</TableHead>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </ScrollArea>
-                    </PopoverContent>
-                  </Popover>
+                            </TableHeader>
+                            <TableBody>
+                              {blend.allocations.map((allocation, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>{allocation.salesOrderName}</TableCell>
+                                  <TableCell>{allocation.productName}</TableCell>
+                                  <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </ScrollArea>
+                      </PopoverContent>
+                    </Popover>
+                    <Button variant="outline" size="sm" onClick={() => handleEditBlend(blend)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDeleteBlend(blend.id)}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               ))}
             </ScrollArea>
@@ -330,7 +485,7 @@ export default function BlendAllocator() {
       </div>
 
       {/* Middle - Blend Creation */}
-      <div className="w-full md:w-4/6 mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
         <Card>
           <CardHeader>
             <CardTitle>Create Blend</CardTitle>
@@ -463,7 +618,7 @@ export default function BlendAllocator() {
       </div>
 
       {/* Right Side - Total Demand */}
-      <div className="w-full md:w-1/6">
+      <div className="w-full md:w-1/4">
         <Card className="bg-blue-50">
           <CardHeader>
             <CardTitle>Total Demand</CardTitle>
@@ -488,6 +643,68 @@ export default function BlendAllocator() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Blend Dialog */}
+      {editingBlend && (
+        <Dialog open={!!editingBlend} onOpenChange={() => setEditingBlend(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Blend: {editingBlend.blendName}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="edit-name"
+                  value={editingBlend.blendName}
+                  onChange={(e) => setEditingBlend({ ...editingBlend, blendName: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-status" className="text-right">
+                  Status
+                </Label>
+                <Select
+                  value={editingBlend.status}
+                  onValueChange={(value) => setEditingBlend({ ...editingBlend, status: value as 'draft' | 'confirmed' })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {editingBlend.allocations.map((allocation, index) => (
+                <div key={index} className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor={`edit-allocation-${index}`} className="text-right">
+                    {allocation.productName}
+                  </Label>
+                  <Input
+                    id={`edit-allocation-${index}`}
+                    type="number"
+                    value={allocation.quantity}
+                    onChange={(e) => {
+                      const newAllocations = [...editingBlend.allocations];
+                      newAllocations[index] = { ...allocation, quantity: Number(e.target.value) };
+                      setEditingBlend({ ...editingBlend, allocations: newAllocations });
+                    }}
+                    className="col-span-3"
+                  />
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button onClick={handleUpdateBlend}>Update Blend</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
