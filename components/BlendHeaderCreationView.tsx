@@ -59,16 +59,17 @@ type SalesOrder = {
 }
 
 type BlendAllocation = {
-  id?: number;
-  salesOrderId: number;
-  salesOrderName: string;
-  lineId: number;
-  productName: string;
+  id: number;
+  sale_order_id: number;
+  sale_order_name: string;
+  sale_order_line_id: number;
+  product_id: number;
+  product_name: string;
   quantity: number;
 }
 
 type Blend = {
-  id: string;
+  id: number;
   name: string;
   blendName: string;
   quantity: number;
@@ -138,7 +139,16 @@ export default function BlendAllocator() {
     setError(null)
     try {
       const data = await apiRequest('/get_blends', 'GET');
-      setBlends(data)
+      // Transform the data to match our Blend type
+      const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
+        id: blend.id,
+        name: blend.name,
+        blendName: blend.blendName,
+        quantity: blend.quantity,
+        status: blend.status,
+        allocations: blend.allocations
+      }));
+      setBlends(transformedBlends)
     } catch (err) {
       setError('Error fetching blends. Please try again.')
       console.error(err)
@@ -312,7 +322,7 @@ export default function BlendAllocator() {
         blendName: editingBlend.blendName,
         status: editingBlend.status,
         allocations: editingBlend.allocations.map(a => ({
-          lineId: a.lineId,
+          lineId: a.sale_order_line_id,
           quantity: a.quantity
         }))
       })
@@ -333,7 +343,7 @@ export default function BlendAllocator() {
     }
   }
 
-  const handleDeleteBlend = async (blendId: string) => {
+  const handleDeleteBlend = async (blendId: number) => {
     try {
       await apiRequest(`/delete_blend/${blendId}`, 'DELETE')
       await fetchBlends()
@@ -429,7 +439,7 @@ export default function BlendAllocator() {
                   className="p-2 mb-2 rounded bg-secondary flex flex-col"
                 >
                   <div className="flex justify-between items-center">
-                    <span>{blend.id}</span>
+                    <span>{blend.name}</span>
                     <Badge variant={blend.status === 'confirmed' ? 'default' : 'secondary'}>
                       {blend.status}
                     </Badge>
@@ -458,8 +468,8 @@ export default function BlendAllocator() {
                             <TableBody>
                               {blend.allocations.map((allocation, index) => (
                                 <TableRow key={index}>
-                                  <TableCell>{allocation.salesOrderName}</TableCell>
-                                  <TableCell>{allocation.productName}</TableCell>
+                                  <TableCell>{allocation.sale_order_name}</TableCell>
+                                  <TableCell>{allocation.product_name}</TableCell>
                                   <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
                                 </TableRow>
                               ))}
@@ -683,7 +693,7 @@ export default function BlendAllocator() {
               {editingBlend.allocations.map((allocation, index) => (
                 <div key={index} className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor={`edit-allocation-${index}`} className="text-right">
-                    {allocation.productName}
+                    {allocation.product_name}
                   </Label>
                   <Input
                     id={`edit-allocation-${index}`}
