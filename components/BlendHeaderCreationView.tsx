@@ -7,26 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Loader2, AlertTriangle, RefreshCw, X, ArrowRight, Info, Plus, Edit, Trash2 } from "lucide-react"
+import { Loader2, AlertTriangle, RefreshCw, ArrowRight } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+import BlendCard from './BlendHeaderCreationViewComponents/BlendCard';
+import { SelectedSalesOrders } from './BlendHeaderCreationViewComponents/SelectedSalesOrders';
+import NewBlendDialog from './BlendHeaderCreationViewComponents/NewBlendDialog'
+import EditBlendDialog from './BlendHeaderCreationViewComponents/EditBlendDialog';
+import TotalDemandCard from './BlendHeaderCreationViewComponents/TotalDemandCard';
+import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
 
 type TeaBlendDetail = {
   product_id: number;
@@ -46,7 +36,7 @@ type OrderLine = {
   tea_blend_details: TeaBlendDetail[];
 }
 
-type SalesOrder = {
+export type SalesOrder = {
   id: number;
   name: string;
   partner_id: number;
@@ -68,7 +58,7 @@ type BlendAllocation = {
   quantity: number;
 }
 
-type Blend = {
+export type Blend = {
   id: number;
   name: string;
   blendName: string;
@@ -77,20 +67,21 @@ type Blend = {
   allocations: BlendAllocation[];
 }
 
-type SelectedBlend = {
+export type SelectedBlend = {
   blendName: string;
   quantities: Record<number, number>; // lineId: quantity
 }
 
-type ConfirmedSaleOrder = {
+export type ConfirmedSaleOrder = {
   id: number;
   name: string;
   customer_name: string;
 }
 
-const API_BASE_URL = 'https://teatang-erp-dev-15377276.dev.odoo.com/api';
-const API_KEY = '1c0054e7bd055658f79528f2bbf0ba1d1640abc4'; // Replace with your actual API key
+const API_BASE_URL = 'https://teatang-erp-dev-15719068.dev.odoo.com/api';
+const API_KEY = 'daac9bf886540121de51681cd0f164dee3d13925';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiRequest(endpoint: string, method: string, data?: any) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
@@ -140,6 +131,7 @@ export default function BlendAllocator() {
     try {
       const data = await apiRequest('/get_blends', 'GET');
       // Transform the data to match our Blend type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
         id: blend.id,
         name: blend.name,
@@ -399,95 +391,22 @@ export default function BlendAllocator() {
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               Blends
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Blend
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Blend</DialogTitle>
-                    <DialogDescription>Enter a name for the new blend.</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right">
-                        Name
-                      </Label>
-                      <Input
-                        id="name"
-                        value={newBlendName}
-                        onChange={(e) => setNewBlendName(e.target.value)}
-                        className="col-span-3"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleCreateNewBlend}>Create Blend</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <NewBlendDialog
+                newBlendName={newBlendName}
+                setNewBlendName={setNewBlendName}
+                handleCreateNewBlend={handleCreateNewBlend}
+              />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[calc(100vh-200px)]">
               {blends.map((blend) => (
-                <div
-                  key={blend.id}
-                  className="p-2 mb-2 rounded bg-secondary flex flex-col"
-                >
-                  <div className="flex justify-between items-center">
-                    <span>{blend.name}</span>
-                    <Badge variant={blend.status === 'confirmed' ? 'default' : 'secondary'}>
-                      {blend.status}
-                    </Badge>
-                  </div>
-                  <small>Blend: {blend.blendName}</small>
-                  <small>Quantity: {blend.quantity.toFixed(3)}</small>
-                  <div className="flex justify-between mt-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Info className="h-4 w-4 mr-2" />
-                          View Allocations
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <h4 className="font-semibold mb-2">Allocations</h4>
-                        <ScrollArea className="h-60">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Order</TableHead>
-                                <TableHead>Product</TableHead>
-                                <TableHead>Quantity</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {blend.allocations.map((allocation, index) => (
-                                <TableRow key={index}>
-                                  <TableCell>{allocation.sale_order_name}</TableCell>
-                                  <TableCell>{allocation.product_name}</TableCell>
-                                  <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </ScrollArea>
-                      </PopoverContent>
-                    </Popover>
-                    <Button variant="outline" size="sm" onClick={() => handleEditBlend(blend)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDeleteBlend(blend.id)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
+               <BlendCard
+                key={blend.id}
+                data={blend}
+                onEdit={handleEditBlend}
+                onDelete={handleDeleteBlend}
+             />
               ))}
             </ScrollArea>
           </CardContent>
@@ -496,224 +415,32 @@ export default function BlendAllocator() {
 
       {/* Middle - Blend Creation */}
       <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Create Blend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select onValueChange={handleSalesOrderSelect}>
-              <SelectTrigger className="w-full mb-4">
-                <SelectValue placeholder="Select a sales order" />
-              </SelectTrigger>
-              <SelectContent>
-                {confirmedSaleOrders.map((order) => (
-                  <SelectItem key={order.id} value={order.id.toString()}>
-                    {order.name} - {order.customer_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {selectedSalesOrders.length > 0 && (
-              <div className="mb-4 flex flex-wrap gap-2">
-                {selectedSalesOrders.map((order) => (
-                  <Badge key={order.id} variant="secondary" className="flex items-center gap-1">
-                    {order.name} - {order.partner_name}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0"
-                      onClick={() => handleRemoveSalesOrder(order.id)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-
-            {selectedSalesOrders.length > 0 && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sales Order</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Product Quantity</TableHead>
-                    <TableHead>Blend</TableHead>
-                    <TableHead>Blend Quantity</TableHead>
-                    <TableHead>Allocated Blend Quantity</TableHead>
-                    <TableHead>Select</TableHead>
-                    <TableHead>Allocate</TableHead>
-                    <TableHead>Auto Allocate</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedSalesOrders.flatMap((order) =>
-                    order.order_lines.map((line) => (
-                      <TableRow key={`${order.id}-${line.line_id}`}>
-                        <TableCell>{order.name}</TableCell>
-                        <TableCell>{line.product_name}</TableCell>
-                        <TableCell>{line.product_uom_qty} {line.product_uom}</TableCell>
-                        <TableCell>
-                          {line.tea_blend_details.map((blend) => (
-                            <div key={blend.product_id}>{blend.product_name}</div>
-                          ))}
-                        </TableCell>
-                        <TableCell>
-                          {line.tea_blend_details.map((blend) => (
-                            <div key={blend.product_id}>{blend.quantity} {blend.uom}</div>
-                          ))}
-                        </TableCell>
-                        <TableCell>{line.allocated_blend_quantity}</TableCell>
-                        <TableCell>
-                          {line.tea_blend_details.map((blend) => (
-                            <div key={blend.product_id}>
-                              <Checkbox
-                                checked={selectedBlends.some(b => b.blendName === blend.product_name && b.quantities.hasOwnProperty(line.line_id))}
-                                onCheckedChange={(checked) => handleBlendSelect(blend.product_name, line.line_id, checked === true)}
-                              />
-                            </div>
-                          ))}
-                        </TableCell>
-                        <TableCell>
-                          {line.tea_blend_details.map((blend) => (
-                            <div key={blend.product_id}>
-                              <Input
-                                type="number"
-                                value={selectedBlends.find(b => b.blendName === blend.product_name)?.quantities[line.line_id] || 0}
-                                onChange={(e) => handleBlendQuantityChange(blend.product_name, line.line_id, Number(e.target.value))}
-                                max={blend.quantity}
-                                className={`w-20 ${getQuantityColor(
-                                  selectedBlends.find(b => b.blendName === blend.product_name)?.quantities[line.line_id] || 0,
-                                  blend.quantity
-                                )}`}
-                                disabled={!selectedBlends.some(b => b.blendName === blend.product_name && b.quantities.hasOwnProperty(line.line_id))}
-                              />
-                            </div>
-                          ))}
-                        </TableCell>
-                        <TableCell>
-                          {line.tea_blend_details.map((blend) => (
-                            <div key={blend.product_id}>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleAllocateFullQuantity(blend.product_name, line.line_id, blend.quantity)}
-                                disabled={!selectedBlends.some(b => b.blendName === blend.product_name && b.quantities.hasOwnProperty(line.line_id))}
-                              >
-                                <ArrowRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            )}
-
-            <Button onClick={handleConfirm} className="mt-4" disabled={isConfirming || selectedBlends.length === 0}>
-              {isConfirming ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Confirming
-                </>
-              ) : (
-                'Confirm and Generate Blends'
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+        <BlendCreation
+          confirmedSaleOrders={confirmedSaleOrders}
+          selectedSalesOrders={selectedSalesOrders}
+          selectedBlends={selectedBlends}
+          isConfirming={isConfirming}
+          handleSalesOrderSelect={handleSalesOrderSelect}
+          handleRemoveSalesOrder={handleRemoveSalesOrder}
+          handleBlendSelect={handleBlendSelect}
+          handleBlendQuantityChange={handleBlendQuantityChange}
+          handleAllocateFullQuantity={handleAllocateFullQuantity}
+          handleConfirm={handleConfirm}
+        />
       </div>
 
       {/* Right Side - Total Demand */}
       <div className="w-full md:w-1/4">
-        <Card className="bg-blue-50">
-          <CardHeader>
-            <CardTitle>Total Demand</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Blend</TableHead>
-                  <TableHead>Total Quantity</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {calculateTotalDemand().map((demand) => (
-                  <TableRow key={demand.blendName}>
-                    <TableCell>{demand.blendName}</TableCell>
-                    <TableCell>{demand.totalQuantity.toFixed(3)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <TotalDemandCard totalDemand={calculateTotalDemand()} />
       </div>
 
       {/* Edit Blend Dialog */}
       {editingBlend && (
-        <Dialog open={!!editingBlend} onOpenChange={() => setEditingBlend(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Blend: {editingBlend.blendName}</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="edit-name"
-                  value={editingBlend.blendName}
-                  onChange={(e) => setEditingBlend({ ...editingBlend, blendName: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-status" className="text-right">
-                  Status
-                </Label>
-                <Select
-                  value={editingBlend.status}
-                  onValueChange={(value) => setEditingBlend({ ...editingBlend, status: value as 'draft' | 'confirmed' })}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {editingBlend.allocations.map((allocation, index) => (
-                <div key={index} className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor={`edit-allocation-${index}`} className="text-right">
-                    {allocation.product_name}
-                  </Label>
-                  <Input
-                    id={`edit-allocation-${index}`}
-                    type="number"
-                    value={allocation.quantity}
-                    onChange={(e) => {
-                      const newAllocations = [...editingBlend.allocations];
-                      newAllocations[index] = { ...allocation, quantity: Number(e.target.value) };
-                      setEditingBlend({ ...editingBlend, allocations: newAllocations });
-                    }}
-                    className="col-span-3"
-                  />
-                </div>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button onClick={handleUpdateBlend}>Update Blend</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <EditBlendDialog
+        editingBlend={editingBlend}
+        setEditingBlend={setEditingBlend}
+        handleUpdateBlend={handleUpdateBlend}
+      />
       )}
     </div>
   )
