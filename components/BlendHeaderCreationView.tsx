@@ -321,9 +321,9 @@ export default function BlendAllocator() {
   }
 
   return (
-    <div className="container mx-auto p-4 flex flex-col md:flex-row">
+    <div className="container p-4 flex flex-col md:flex-row">
       {/* Left Side - Blends */}
-      <div className="w-full md:w-1/4 mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-1/4 mb-4 md:mb-0 md:mr-4 ml-0">
         <BlendsList blends={blends} fetchBlends={fetchBlends} />
       </div>
 

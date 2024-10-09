@@ -1,46 +1,60 @@
-import React, { useState } from "react"
+'use client'
+import React, { useState } from 'react'
+import { ShoppingCart, FileText, PieChart, ListCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, FileText, PieChart , ListCheck } from "lucide-react"
+import Link from 'next/link'
+import { cn } from "@/lib/utils"
+import { usePathname } from 'next/navigation'
 
-interface SidebarProps {
-  activeView: 'purchasing' | 'allocation' | 'dashboard' |'blend Creation'
-  setActiveView: (view: 'purchasing' | 'allocation' | 'dashboard' |'blend Creation') => void
-}
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
+const Sidebar: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const pathname = usePathname();
 
-  const getIcon = (view: string) => {
-    switch (view) {
-      case 'blend Creation': return <ListCheck className="h-5 w-5" />
-      case 'purchasing': return <ShoppingCart className="h-5 w-5" />
-      case 'allocation': return <FileText className="h-5 w-5" />
-      case 'dashboard': return <PieChart className="h-5 w-5" />
-      default: return null
-    }
-  }
+  const handleExpand = (expanded: boolean) => {
+    setIsExpanded(expanded);
+  };
+
+  const menuItems = [
+    { name: 'Dashboard', icon: <PieChart />, route: '/dashboard' },
+    { name: 'Purchasing', icon: <ShoppingCart />, route: '/purchase' },
+    { name: 'Blend Creation', icon: <FileText />, route: '/create' },
+    { name: 'Allocation', icon: <ListCheck />, route: '/allocate' },
+  ]
 
   return (
-    <div 
-      className={`bg-gray-800 text-white p-4 transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-16'}`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+    <div
+      className={cn(
+        "bg-gray-800 text-white transition-all duration-20 ease-in-out h-full flex flex-col",
+        isExpanded ? "w-64" : "w-16"
+      )}
+      onMouseEnter={() => handleExpand(true)}
+      onMouseLeave={() => handleExpand(false)}
     >
-      <h2 className={`text-2xl font-bold mb-6 ${isExpanded ? 'block' : 'hidden'}`}>Tea Management</h2>
-      <nav>
+      <div className="p-4 font-bold text-xl mb-8 h-16 flex items-center">
+        <span className="truncate">
+          {isExpanded ? "Tea Management" : "TM"}
+        </span>
+      </div>
+      <nav className="flex-1 px-2">
         <ul className="space-y-2">
-          {['dashboard','purchasing','blend Creation', 'allocation'].map((view) => (
-            <li key={view}>
-              <Button 
-                variant={activeView === view ? 'secondary' : 'ghost'} 
-                className={`w-full justify-start ${isExpanded ? 'px-4' : 'px-2'}`}
-                onClick={() => setActiveView(view as 'purchasing' | 'allocation' | 'dashboard' | 'blend Creation')}
-              >
-                {getIcon(view)}
-                <span className={`ml-2 ${isExpanded ? 'inline-block' : 'hidden'}`}>
-                  {view.charAt(0).toUpperCase() + view.slice(1)}
-                </span>
-              </Button>
+          {menuItems.map((item) => (
+            <li key={item.name}>
+              <Link href={item.route} className="block">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full !text-white text-left hover:bg-gray-700 transition-colors rounded-lg justify-start",
+                    isExpanded ? "px-2 py-7 my-5" : "px-2 py-7 my-5",
+                    "flex items-center", pathname === item.route && "bg-gray-700"
+                  )}
+                >
+                  <span className={cn("flex items-center", isExpanded ? "mr-3" : "mr-0")}>
+                    {item.icon}
+                  </span>
+                  {isExpanded && <span>{item.name}</span>}
+                </Button>
+              </Link>
             </li>
           ))}
         </ul>

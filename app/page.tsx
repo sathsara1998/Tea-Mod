@@ -1,9 +1,5 @@
-import TeaBlendAllocation from '@/components/TeaBlendAllocation'
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return (
-   <>
-   <TeaBlendAllocation/>
-   </>
-  );
+  redirect('/dashboard');
 }

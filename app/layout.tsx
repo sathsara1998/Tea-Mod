@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster"
+import Sidebar from "@/components/SideBar";
 
 
 const geistSans = localFont({
@@ -27,12 +28,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    >
+      <div className="flex h-screen transition-all duration-600">
+        <Sidebar />
+        <main className={`flex-1 p-4 transition-all duration-600 ml-4`}>
+          {children}
+        </main>
         <Toaster />
-        </body>
-    </html>
+      </div>
+    </body>
+  </html>
   );
 }
