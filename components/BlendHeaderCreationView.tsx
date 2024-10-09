@@ -1,22 +1,13 @@
 "use client"
-
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, AlertTriangle, RefreshCw, ArrowRight } from "lucide-react"
+import { Loader2, AlertTriangle, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import BlendCard from './BlendHeaderCreationViewComponents/BlendCard';
-import { SelectedSalesOrders } from './BlendHeaderCreationViewComponents/SelectedSalesOrders';
-import NewBlendDialog from './BlendHeaderCreationViewComponents/NewBlendDialog'
 import EditBlendDialog from './BlendHeaderCreationViewComponents/EditBlendDialog';
 import TotalDemandCard from './BlendHeaderCreationViewComponents/TotalDemandCard';
 import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
+import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
 
 type TeaBlendDetail = {
   product_id: number;
@@ -78,8 +69,8 @@ export type ConfirmedSaleOrder = {
   customer_name: string;
 }
 
-const API_BASE_URL = 'https://teatang-erp-dev-15719068.dev.odoo.com/api';
-const API_KEY = 'daac9bf886540121de51681cd0f164dee3d13925';
+export const API_BASE_URL = 'https://teatang-erp-dev-15755094.dev.odoo.com/api';
+export const API_KEY = 'f030caaab4b0b324312994565d5f272d5adb05ea';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiRequest(endpoint: string, method: string, data?: any) {
@@ -107,7 +98,6 @@ export default function BlendAllocator() {
   const [isConfirming, setIsConfirming] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<Blend | null>(null)
   const { toast } = useToast()
 
@@ -277,35 +267,6 @@ export default function BlendAllocator() {
     }
   }
 
-  const handleCreateNewBlend = async () => {
-    if (newBlendName.trim() === '') return
-
-    try {
-      await apiRequest('/create_blend', 'POST', {
-        blendName: newBlendName,
-        allocations: []
-      })
-
-      await fetchBlends()
-      setNewBlendName('')
-      toast({
-        title: "New Blend Created",
-        description: `Created new blend: ${newBlendName}`,
-      })
-    } catch (error) {
-      console.error('Error creating new blend:', error)
-      toast({
-        title: "Error",
-        description: "Failed to create new blend. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleEditBlend = (blend: Blend) => {
-    setEditingBlend(blend)
-  }
-
   const handleUpdateBlend = async () => {
     if (!editingBlend) return
 
@@ -333,30 +294,6 @@ export default function BlendAllocator() {
         variant: "destructive",
       })
     }
-  }
-
-  const handleDeleteBlend = async (blendId: number) => {
-    try {
-      await apiRequest(`/delete_blend/${blendId}`, 'DELETE')
-      await fetchBlends()
-      toast({
-        title: "Blend Deleted",
-        description: `Deleted blend with ID: ${blendId}`,
-      })
-    } catch (error) {
-      console.error('Error deleting blend:', error)
-      toast({
-        title: "Error",
-        description: "Failed to delete blend. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const getQuantityColor = (allocated: number, total: number) => {
-    if (allocated === total) return 'bg-green-200'
-    if (allocated < total) return 'bg-yellow-200'
-    return 'bg-blue-200'
   }
 
   if (isLoading) {
@@ -387,30 +324,7 @@ export default function BlendAllocator() {
     <div className="container mx-auto p-4 flex flex-col md:flex-row">
       {/* Left Side - Blends */}
       <div className="w-full md:w-1/4 mb-4 md:mb-0 md:mr-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              Blends
-              <NewBlendDialog
-                newBlendName={newBlendName}
-                setNewBlendName={setNewBlendName}
-                handleCreateNewBlend={handleCreateNewBlend}
-              />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[calc(100vh-200px)]">
-              {blends.map((blend) => (
-               <BlendCard
-                key={blend.id}
-                data={blend}
-                onEdit={handleEditBlend}
-                onDelete={handleDeleteBlend}
-             />
-              ))}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+        <BlendsList blends={blends} fetchBlends={fetchBlends} />
       </div>
 
       {/* Middle - Blend Creation */}

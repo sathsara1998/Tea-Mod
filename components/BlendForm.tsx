@@ -27,7 +27,7 @@ interface BlendFormProps {
   setBlendNameSequence: React.Dispatch<React.SetStateAction<number>>
   blendNumberSequence: number
   setBlendNumberSequence: React.Dispatch<React.SetStateAction<number>>
-  toast: (props: typeof Toast) => void
+  toast?: (props: typeof Toast) => void
   fetchTeaCost: (blendId: string) => Promise<number>
 }
 

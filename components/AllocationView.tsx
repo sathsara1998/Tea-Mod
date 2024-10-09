@@ -1,8 +1,13 @@
-import React, { useState, useCallback } from "react"
-import BlendList from "./BlendList"
+import React, { useCallback, useEffect, useState } from "react"
 import BlendForm from "./BlendForm"
 import { Tea, BlendAllocation } from "./types"
 import { useToast } from "@/components/ui/use-toast"
+import BlendsList from "./BlendHeaderCreationViewComponents/BlendsList"
+import { API_BASE_URL, API_KEY, Blend } from "./BlendHeaderCreationView"
+import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "./ui/button"
+
 
 interface AllocationViewProps {
   availableTeas: Tea[]
@@ -37,23 +42,87 @@ export default function AllocationView({
     status: 'draft',
     createdAt: new Date()
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [blends, setBlends] = useState<Blend[]>([])
+  const [error, setError] = useState<string | null>(null)
+
   const { toast } = useToast()
 
-  const loadBlendAllocation = useCallback((blendId: string) => {
-    const blendToLoad = blendAllocations.find(blend => blend.id === blendId)
-    if (blendToLoad) {
-      setNewBlend(blendToLoad)
-      setEditingBlendId(blendId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function apiRequest(endpoint: string, method: string, data?: any) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
     }
-  }, [blendAllocations])
+  
+    return response.json();
+  }
 
+  const fetchBlends = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await apiRequest('/get_blends', 'GET');
+      // Transform the data to match our Blend type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
+        id: blend.id,
+        name: blend.name,
+        blendName: blend.blendName,
+        quantity: blend.quantity,
+        status: blend.status,
+        allocations: blend.allocations
+      }));
+      setBlends(transformedBlends)
+    } catch (err) {
+      setError('Error fetching blends. Please try again.')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchBlends()
+  }, [fetchBlends])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button onClick={fetchBlends} variant="outline">
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Retry
+        </Button>
+      </div>
+    )
+  }
+  
   return (
     <div className="flex-1 flex">
-      <BlendList 
-        blendAllocations={blendAllocations} 
-        editingBlendId={editingBlendId}
-        loadBlendAllocation={loadBlendAllocation}
-      />
+      <div className=" p-4">
+      <BlendsList blends={blends} fetchBlends={fetchBlends}/>
+      </div>
       <BlendForm
         newBlend={newBlend}
         setNewBlend={setNewBlend}
