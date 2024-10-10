@@ -26,6 +26,7 @@ export default function TeaSelectionDialog({
   addTeaToBlend
 }: TeaSelectionDialogProps) {
   const [searchTerm, setSearchTerm] = useState("")
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [allocationMode, setAllocationMode] = useState<'kg' | 'package'>('kg')
 
   const filteredTeas = useMemo(() => {

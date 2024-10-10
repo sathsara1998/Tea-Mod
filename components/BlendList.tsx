@@ -22,7 +22,7 @@ export default function BlendList({ blendAllocations, editingBlendId, loadBlendA
           <p className="text-sm text-gray-600">{blend.blendNo}</p>
           <p className="text-sm">{blend.totalQuantity} kg</p>
           <Badge 
-            variant={blend.status === 'draft' ? 'default' : blend.status === 'confirmed' ? 'success' : 'destructive'}
+            variant={blend.status === 'draft' ? 'default' : blend.status === 'confirmed' ? 'outline' : 'destructive'}
           >
             {blend.status.charAt(0).toUpperCase() + blend.status.slice(1)}
           </Badge>

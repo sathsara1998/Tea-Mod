@@ -11,6 +11,7 @@ export interface Tea {
     freeQuantity: number
     packageWeight: number
     packages: number
+    buyingPrice:number
   }
   
   export interface BlendAllocation {
@@ -27,14 +28,14 @@ export interface Tea {
     balance: number
     status: 'draft' | 'confirmed' | 'cancel'
     createdAt: Date
-    exportQuantity: number
-    allocatedQuantity: number
-    allocatedQuantityDate: Date
-    customerOrderNo: string
-    orderLineNumber: string
-    sampleAllocationDate: Date
-    requiredDate: Date
-    packagingType: 'bulk' | 'packet' | 'tea bag'
-    averagePrice: number
-    teaCost: number
+    exportQuantity?: number
+    allocatedQuantity?: number
+    allocatedQuantityDate?: Date
+    customerOrderNo?: string
+    orderLineNumber?: string
+    sampleAllocationDate?: Date
+    requiredDate?: Date
+    packagingType?: 'bulk' | 'packet' | 'tea bag'
+    averagePrice?: number
+    teaCost?: number
   }
