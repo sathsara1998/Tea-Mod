@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Download } from "lucide-react"
 import { Tea, BlendAllocation } from "./types"
-import { Toast } from "@/components/ui/toast"
+import { useToast } from './ui/use-toast'
 import TeaSelectionDialog from './TeaSelectionDialog'
 import AllocationTable from './AllocationTable'
 import StatusChangeDialog from './StatusChangeDialog '
@@ -27,7 +27,6 @@ interface BlendFormProps {
   setBlendNameSequence: React.Dispatch<React.SetStateAction<number>>
   blendNumberSequence: number
   setBlendNumberSequence: React.Dispatch<React.SetStateAction<number>>
-  toast?: (props: typeof Toast) => void
   fetchTeaCost: (blendId: string) => Promise<number>
 }
 
@@ -44,15 +43,18 @@ export default function BlendForm({
   setBlendNameSequence,
   blendNumberSequence,
   setBlendNumberSequence,
-  toast,
   fetchTeaCost,
 }: BlendFormProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isStatusChangeDialogOpen, setIsStatusChangeDialogOpen] = useState(false)
+  const { toast } = useToast()
+
 
   const isReadOnly = newBlend.status === 'confirmed' || newBlend.status === 'cancel'
   const [lastGeneratedBlend, setLastGeneratedBlend] = useState<BlendAllocation | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [teaCost, setTeaCost] = useState<number>(0)
+  
 
   const generateBlend = () => {
     const currentYear = new Date().getFullYear().toString().slice(-2)
@@ -108,6 +110,7 @@ export default function BlendForm({
   useEffect(() => {
     const averagePrice = calculateAveragePrice();
     setNewBlend(prev => ({ ...prev, averagePrice }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newBlend.allocations, calculateAveragePrice]);
 
   useEffect(() => {
@@ -127,6 +130,7 @@ export default function BlendForm({
       }
     };
     fetchCost();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newBlend.id, fetchTeaCost]);
 
 
@@ -270,11 +274,11 @@ export default function BlendForm({
         createdAt: new Date(),
         exportQuantity: 0,
         allocatedQuantity: 0,
-        allocatedQuantityDate: null,
+        allocatedQuantityDate: undefined,
         customerOrderNo: "",
         orderLineNumber: "",
-        sampleAllocationDate: null,
-        requiredDate: null,
+        sampleAllocationDate: undefined,
+        requiredDate: undefined,
         packagingType: 'bulk',
         averagePrice: 0,
         teaCost: 0

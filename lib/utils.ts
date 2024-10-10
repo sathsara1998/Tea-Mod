@@ -30,7 +30,8 @@ export const generateTeas = (): Tea[] => {
       invoiceNumber: `INV-${Math.floor(Math.random() * 10000)}`,
       freeQuantity: packageWeight * packages,
       packageWeight: packageWeight,
-      packages: packages
+      packages: packages,
+      buyingPrice: 0
     })
   }
   
@@ -61,8 +62,8 @@ export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) 
   if (typeof window === 'undefined') return; // Ensure we're on the client side
 
   try {
-    const jsPDF = (await import('jspdf')).default;
-    await import('jspdf-autotable');
+    const { default: jsPDF } = await import('jspdf');  // Dynamic import of jsPDF
+    const autoTable = (await import('jspdf-autotable')).default; 
 
     const doc = new jsPDF();
     
@@ -91,7 +92,7 @@ export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) 
       ];
     });
     
-    doc.autoTable({
+    autoTable(doc, {
       startY: 65,
       head: [['Tea Name', 'Lot Number', 'Quantity (kg)', 'Packages', 'Grade', 'Garden Mark', 'Tea Standard']],
       body: tableData,

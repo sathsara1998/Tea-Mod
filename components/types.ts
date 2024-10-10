@@ -11,6 +11,7 @@ export interface Tea {
     freeQuantity: number
     packageWeight: number
     packages: number
+    buyingPrice:number
   }
   
   export interface BlendAllocation {

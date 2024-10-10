@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react"
 import BlendForm from "./BlendForm"
 import { Tea, BlendAllocation } from "./types"
-import { useToast } from "@/components/ui/use-toast"
 import BlendsList from "./BlendHeaderCreationViewComponents/BlendsList"
 import { API_BASE_URL, API_KEY, Blend } from "./BlendHeaderCreationView"
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
@@ -46,8 +45,6 @@ export default function AllocationView({
   const [blends, setBlends] = useState<Blend[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const { toast } = useToast()
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function apiRequest(endpoint: string, method: string, data?: any) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -89,6 +86,19 @@ export default function AllocationView({
       setIsLoading(false)
     }
   }, [])
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const fetchTeaCost = async (blendId: string): Promise<number> => {
+    try {
+      // Assume some API call here to get the tea cost for a blend
+      // const response = await fetch(`/api/teaCost?blendId=${blendId}`);
+      // const data = await response.json();
+      return 23;
+    } catch (error) {
+      console.error("Error fetching tea cost:", error);
+      return 0; // Fallback cost
+    }
+  };
 
   useEffect(() => {
     fetchBlends()
@@ -135,9 +145,9 @@ export default function AllocationView({
         blendNameSequence={blendNameSequence}
         setBlendNameSequence={setBlendNameSequence}
         blendNumberSequence={blendNumberSequence}
-        setBlendNumberSequence={setBlendNumberSequence}
-        toast={toast}
-      />
+        setBlendNumberSequence={setBlendNumberSequence} 
+        fetchTeaCost={fetchTeaCost}      
+        />
     </div>
   )
 }

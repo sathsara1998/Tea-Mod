@@ -27,13 +27,11 @@ export default function TeaAllocationDialog({
   isOpen,
   setIsOpen,
   newBlend,
-  setNewBlend,
   availableTeas,
   isReadOnly,
   addTeaToBlend,
   searchTerm,
   setSearchTerm,
-  allocationMode,
   setAllocationMode
 }: TeaAllocationDialogProps) {
   const filteredTeas = availableTeas.filter(tea => 
