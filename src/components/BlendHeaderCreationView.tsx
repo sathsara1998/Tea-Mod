@@ -9,69 +9,15 @@ import TotalDemandCard from './BlendHeaderCreationViewComponents/TotalDemandCard
 import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
 import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
 import { useApiMethods } from '@/hooks/useApiMethods'
-
-type TeaBlendDetail = {
-  product_id: number;
-  product_name: string;
-  quantity: number;
-  uom: string;
-}
-
-type OrderLine = {
-  line_id: number;
-  product_id: number;
-  product_name: string;
-  product_uom_qty: number;
-  product_uom: string;
-  tea_blend_quantity: number;
-  allocated_blend_quantity: number;
-  tea_blend_details: TeaBlendDetail[];
-}
-
-export type SalesOrder = {
-  id: number;
-  name: string;
-  partner_id: number;
-  partner_name: string;
-  date_order: string;
-  amount_total: number;
-  currency_id: string;
-  state: string;
-  order_lines: OrderLine[];
-}
-
-type BlendAllocation = {
-  id: number;
-  sale_order_id: number;
-  sale_order_name: string;
-  sale_order_line_id: number;
-  product_id: number;
-  product_name: string;
-  quantity: number;
-}
-
-export type Blend = {
-  id: number;
-  name: string;
-  blendName: string;
-  quantity: number;
-  status: 'draft' | 'confirmed';
-  allocations: BlendAllocation[];
-}
-
-export type SelectedBlend = {
-  blendName: string;
-  quantities: Record<number, number>; // lineId: quantity
-}
-
-export type ConfirmedSaleOrder = {
-  id: number;
-  name: string;
-  customer_name: string;
-}
-
-export const API_BASE_URL = 'https://teatang-erp-dev-15755094.dev.odoo.com/api';
-export const API_KEY = 'f030caaab4b0b324312994565d5f272d5adb05ea';
+import { 
+  TeaBlendDetail, 
+  OrderLine, 
+  SalesOrder, 
+  BlendAllocation, 
+  Blend, 
+  SelectedBlend, 
+  ConfirmedSaleOrder 
+} from './types'
 
 
 export default function BlendAllocator() {

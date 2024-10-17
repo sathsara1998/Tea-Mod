@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import BlendForm from "./BlendForm"
 import { Tea, BlendAllocation } from "./types"
 import BlendsList from "./BlendHeaderCreationViewComponents/BlendsList"
-import { API_BASE_URL, API_KEY, Blend } from "./BlendHeaderCreationView"
+import { Blend } from "./types"
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "./ui/button"
@@ -32,17 +32,17 @@ export default function AllocationView({
   setBlendNumberSequence
 }: AllocationViewProps) {
   const [editingBlendId, setEditingBlendId] = useState<string | null>(null)
-  const [newBlend, setNewBlend] = useState<BlendAllocation>({ 
-    id: "", 
-    name: "", 
-    blendNo: "", 
-    allocations: [], 
-    totalQuantity: 0, 
-    toAllocate: 0,
-    balance: 0,
-    status: 'draft',
-    createdAt: new Date()
-  })
+  // const [newBlend, setNewBlend] = useState<BlendAllocation>({ 
+  //   id: "", 
+  //   name: "", 
+  //   blendNo: "", 
+  //   allocations: [], 
+  //   totalQuantity: 0, 
+  //   toAllocate: 0,
+  //   balance: 0,
+  //   status: 'draft',
+  //   createdAt: new Date()
+  // })
   const [isLoading, setIsLoading] = useState(false)
   const [blends, setBlends] = useState<Blend[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -85,9 +85,9 @@ export default function AllocationView({
     }
   };
 
-  useEffect(() => {
-    fetchBlends()
-  }, [fetchBlends])
+  // useEffect(() => {
+  //   fetchBlends()
+  // }, [fetchBlends])
 
   if (isLoading) {
     return (
@@ -115,9 +115,9 @@ export default function AllocationView({
   
   return (
     <div className="flex-1 flex">
-      <div className="p-4">
+      {/* <div className="p-4">
       <BlendsList blends={blends} fetchBlends={fetchBlends}/>
-      </div>
+      </div> */}
       <AllocationTableView />
       {/* <BlendForm
         newBlend={newBlend}

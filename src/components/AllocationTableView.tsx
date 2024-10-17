@@ -15,6 +15,8 @@ import BlendInformationSection from './BlendInformation'
 import BlendList from './BlendList'
 import AvailableTeaDialog from './AvailableTeaDialog'
 import { BlendAllocation } from './types'
+import SelectBlendsDialog from './SelectBlendsDialog'
+import { Blend } from "./BlendHeaderCreationView"
 
 
 interface Tea {
@@ -33,13 +35,6 @@ interface Allocation {
   teaId: string
   quantity: number
   packages: number
-}
-
-interface Blend {
-  name: string
-  number: string
-  totalQuantity: number
-  status: 'draft' | 'confirmed' | 'cancelled'
 }
 
 
@@ -74,20 +69,25 @@ interface Blend {
 
 export default function AllocationTableView() {
   const [blend, setBlend] = useState<Blend>({
+    id: 0,
     name: '',
-    number: '',
-    totalQuantity: 0,
-    status: 'draft'
+    blendName: '',
+    quantity: 0,
+    status: 'draft',
+    allocations: []
   })
   const [allocations, setAllocations] = useState<Allocation[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isBlendDialogOpen, setIsBlendDialogOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [availableTeas, setAvailableTeas] = useState<Tea[]>([])
   const [selectedTeas, setSelectedTeas] = useState<Tea[]>([])
   const [selectedRowCount, setSelectedRowCount] = useState(0)
+  const [selectedBlend, setSelectedBlend] = useState<Blend>();
   
   const allocationsTableRef = useRef(null)
+  const blendsTableRef = useRef(null)
   const availableTeaTableRef = useRef(null)
   const tabulatorRef = useRef<Tabulator>(null)
 
@@ -311,9 +311,33 @@ export default function AllocationTableView() {
   return (
   <>
   
-    <div className="p-4">
+    <div className="p-4 mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Tea Blend Allocation</h1>
       <div className="flex gap-4">
+        <div>
+        <Card className="flex-grow">
+          <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
+            <CardTitle>Selected Blend</CardTitle>
+            <div className="flex gap-2">
+              <label className="text-md">
+                {selectedBlend? selectedBlend.blendName : '-'}
+              </label>
+              <Dialog open={isBlendDialogOpen} onOpenChange={setIsBlendDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-600 text-white">Select Blend</Button>
+                </DialogTrigger>
+                <SelectBlendsDialog
+                  isOpen={isBlendDialogOpen}
+                  onClose={() => setIsBlendDialogOpen(false)}
+                  onSelectBlend={setSelectedBlend}
+                />
+              </Dialog>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div ref={blendsTableRef}></div>
+          </CardContent>
+        </Card>
         <Card className="flex-grow">
           <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
             <CardTitle>Tea Allocations</CardTitle>
@@ -348,11 +372,13 @@ export default function AllocationTableView() {
             <div ref={allocationsTableRef}></div>
           </CardContent>
         </Card>
+        </div>
         <BlendInformationSection 
          blendInfo={blendInfo} 
          onBlendInfoChange={handleBlendInfoChange}
          onGenerateBlendSheet={handleGenerateBlendSheet}
-        />      </div>
+        />
+      </div>
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <DialogContent>
           <DialogHeader>
