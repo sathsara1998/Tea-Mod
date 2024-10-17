@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import BlendCard from '../BlendHeaderCreationViewComponents/BlendCard'
 import NewBlendDialog from '../BlendHeaderCreationViewComponents/NewBlendDialog'
 import EditBlendDialog from '../BlendHeaderCreationViewComponents/EditBlendDialog'
-import { API_BASE_URL,API_KEY } from '../BlendHeaderCreationView'
+import { useApiMethods } from '@/hooks/useApiMethods'
 
 export type Blend = {
   id: number;
@@ -31,34 +31,17 @@ type BlendsComponentProps = {
   fetchBlends: () => Promise<void>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function apiRequest(endpoint: string, method: string, data?: any) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-  
-    return response.json();
-  }
-
 export default function BlendsComponent({ blends, fetchBlends }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<Blend | null>(null)
   const { toast } = useToast()
+  const { createBlend, updateBlend, deleteBlend } = useApiMethods();
 
   const handleCreateNewBlend = async () => {
     if (newBlendName.trim() === '') return
 
     try {
-      await apiRequest('/create_blend', 'POST', {
+      await createBlend({
         blendName: newBlendName,
         allocations: []
       })
@@ -87,7 +70,7 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
     if (!editingBlend) return
 
     try {
-      await apiRequest(`/update_blend/${editingBlend.id}`, 'PUT', {
+      await updateBlend(editingBlend.id, {
         blendName: editingBlend.blendName,
         status: editingBlend.status,
         allocations: editingBlend.allocations.map(a => ({
@@ -114,7 +97,7 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
 
   const handleDeleteBlend = async (blendId: number) => {
     try {
-      await apiRequest(`/delete_blend/${blendId}`, 'DELETE')
+      await deleteBlend(blendId)
       await fetchBlends()
       toast({
         title: "Blend Deleted",

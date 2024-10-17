@@ -8,6 +8,7 @@ import EditBlendDialog from './BlendHeaderCreationViewComponents/EditBlendDialog
 import TotalDemandCard from './BlendHeaderCreationViewComponents/TotalDemandCard';
 import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
 import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
+import { useApiMethods } from '@/hooks/useApiMethods'
 
 type TeaBlendDetail = {
   product_id: number;
@@ -72,23 +73,6 @@ export type ConfirmedSaleOrder = {
 export const API_BASE_URL = 'https://teatang-erp-dev-15755094.dev.odoo.com/api';
 export const API_KEY = 'f030caaab4b0b324312994565d5f272d5adb05ea';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function apiRequest(endpoint: string, method: string, data?: any) {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY}`,
-    },
-    body: data ? JSON.stringify(data) : undefined,
-  });
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
-  }
-
-  return response.json();
-}
 
 export default function BlendAllocator() {
   const [confirmedSaleOrders, setConfirmedSaleOrders] = useState<ConfirmedSaleOrder[]>([])
@@ -100,16 +84,27 @@ export default function BlendAllocator() {
   const [error, setError] = useState<string | null>(null)
   const [editingBlend, setEditingBlend] = useState<Blend | null>(null)
   const { toast } = useToast()
+  const { 
+    getConfirmedSaleOrders, 
+    getBlends, 
+    getTeaBlendSales, 
+    createBlend,
+    updateBlend
+  } = useApiMethods();
 
   const fetchConfirmedSaleOrders = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await apiRequest('/confirmed_sale_orders', 'GET');
+      const data = await getConfirmedSaleOrders();
       setConfirmedSaleOrders(data)
     } catch (err) {
       setError('Error fetching confirmed sale orders. Please try again.')
-      console.error(err)
+      toast({
+        title: "Error",
+        description: 'Error fetching confirmed sale orders. Please try again.',
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -119,7 +114,7 @@ export default function BlendAllocator() {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await apiRequest('/get_blends', 'GET');
+      const data = await getBlends();
       // Transform the data to match our Blend type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
@@ -131,9 +126,13 @@ export default function BlendAllocator() {
         allocations: blend.allocations
       }));
       setBlends(transformedBlends)
-    } catch (err) {
+    } catch (err: any) {
       setError('Error fetching blends. Please try again.')
-      console.error(err)
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -148,15 +147,15 @@ export default function BlendAllocator() {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await apiRequest(`/tea_blend_sales?sale_order_number=${saleOrderNumber}`, 'GET');
-      if (data.length > 0) {
-        return data[0]
-      } else {
-        throw new Error('No data found for the selected sales order')
-      }
-    } catch (err) {
+      const data = await getTeaBlendSales(saleOrderNumber);
+      return data;
+    } catch (err: any) {
       setError('Error fetching sales order details. Please try again.')
-      console.error(err)
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
       return null
     } finally {
       setIsLoading(false)
@@ -244,7 +243,7 @@ export default function BlendAllocator() {
           })).filter(a => a.quantity > 0)
         )
 
-        await apiRequest('/create_blend', 'POST', {
+        await createBlend({
           blendName: demand.blendName,
           allocations: allocations
         })
@@ -271,7 +270,7 @@ export default function BlendAllocator() {
     if (!editingBlend) return
 
     try {
-      await apiRequest(`/update_blend/${editingBlend.id}`, 'PUT', {
+      await updateBlend(editingBlend.id, {
         blendName: editingBlend.blendName,
         status: editingBlend.status,
         allocations: editingBlend.allocations.map(a => ({

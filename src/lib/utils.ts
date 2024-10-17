@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Tea , BlendAllocation } from '@/components/types'
+import { AxiosRequestConfig } from "axios"
+import axios from "axios"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -107,3 +109,22 @@ export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) 
     return false; // Indicate failure
   }
 };
+
+type ApiclientConfig = {
+  url: string;
+  data?: Object;
+  method: string
+}
+
+// For external api calls
+export const apiClient = (configs: ApiclientConfig) => {
+  const token: String = 'f030caaab4b0b324312994565d5f272d5adb05ea';
+  const mainConfigs: AxiosRequestConfig = {
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+  }
+  return axios({ ...configs, ...mainConfigs});
+}

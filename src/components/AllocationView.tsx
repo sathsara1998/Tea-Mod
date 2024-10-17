@@ -6,6 +6,7 @@ import { API_BASE_URL, API_KEY, Blend } from "./BlendHeaderCreationView"
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "./ui/button"
+import { useApiMethods } from '@/hooks/useApiMethods'
 
 
 interface AllocationViewProps {
@@ -44,30 +45,13 @@ export default function AllocationView({
   const [isLoading, setIsLoading] = useState(false)
   const [blends, setBlends] = useState<Blend[]>([])
   const [error, setError] = useState<string | null>(null)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async function apiRequest(endpoint: string, method: string, data?: any) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-  
-    return response.json();
-  }
+  const { getBlends } = useApiMethods();
 
   const fetchBlends = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await apiRequest('/get_blends', 'GET');
+      const data = await getBlends()
       // Transform the data to match our Blend type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({

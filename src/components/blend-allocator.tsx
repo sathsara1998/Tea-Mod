@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useApiMethods } from '@/hooks/useApiMethods'
 
 type TeaBlendDetail = {
   product_id: number;
@@ -84,20 +85,21 @@ export function BlendAllocatorComponent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const { getConfirmedSaleOrders, getTeaBlendSales } = useApiMethods()
 
   const fetchConfirmedSaleOrders = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch('https://teatang-erp-dev-15377276.dev.odoo.com/api/confirmed_sale_orders')
-      if (!response.ok) {
-        throw new Error('Failed to fetch confirmed sale orders')
-      }
-      const data = await response.json()
+      const data = await getConfirmedSaleOrders();
       setConfirmedSaleOrders(data)
-    } catch (err) {
+    } catch (err: any) {
       setError('Error fetching confirmed sale orders. Please try again.')
-      console.error(err)
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -111,19 +113,15 @@ export function BlendAllocatorComponent() {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(`https://teatang-erp-dev-15377276.dev.odoo.com/api/tea_blend_sales?sale_order_number=${saleOrderNumber}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch sales order details')
-      }
-      const data = await response.json()
-      if (data.length > 0) {
-        return data[0]
-      } else {
-        throw new Error('No data found for the selected sales order')
-      }
-    } catch (err) {
+      const data = await getTeaBlendSales(saleOrderNumber);
+      return data;
+    } catch (err: any) {
       setError('Error fetching sales order details. Please try again.')
-      console.error(err)
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
       return null
     } finally {
       setIsLoading(false)
