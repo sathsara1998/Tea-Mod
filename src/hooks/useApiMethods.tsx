@@ -48,7 +48,7 @@ export const useApiMethods = () => {
     // Get Tea blend sales
     const getTeaBlendSales = useCallback(async (saleOrderNumber: string) => {
         const config: CustomConfig = {
-            url: `/api/get_tea_blend_sales?sale_order_number=${saleOrderNumber}`,
+            url: `/api/salesOrder/get_tea_blend_sales?sale_order_number=${saleOrderNumber}`,
             errorMessage: "Error fetching sales order details. Please try again.",
             method: 'get'
         }

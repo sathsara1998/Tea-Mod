@@ -110,6 +110,50 @@ export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) 
   }
 };
 
+export const generateTestData = (): Tea[] => {
+  const teaTypes = ['Black', 'Green', 'Oolong', 'White', 'Pu-erh', 'Yellow', 'Purple']
+  const origins = ['China', 'India', 'Sri Lanka', 'Japan', 'Taiwan', 'Kenya', 'Nepal']
+  const grades = ['SFTGFOP1', 'FTGFOP1', 'TGFOP1', 'FOP', 'OP', 'BOP', 'FBOP', 'Sencha', 'Gyokuro', 'Matcha']
+  const types = ['BB', 'BG', 'STRL']
+
+  const generateRandomDate = (start: Date, end: Date) => {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0]
+  }
+
+  const generateRealisticPackageWeight = (): number => {
+    return Math.floor(20 + Math.random() * 31)
+  }
+
+  const generateRealisticQuantity = (packageWeight: number): number => {
+    const numberOfPackages = Math.floor(5 + Math.random() * 46)
+    return numberOfPackages * packageWeight
+  }
+
+  const teas: Tea[] = []
+
+  for (let i = 0; i < 500; i++) {
+    const teaType = teaTypes[Math.floor(Math.random() * teaTypes.length)]
+    const origin = origins[Math.floor(Math.random() * origins.length)]
+    const grade = grades[Math.floor(Math.random() * grades.length)]
+    const packageWeight = generateRealisticPackageWeight()
+    const type = types[Math.floor(Math.random() * types.length)]
+
+    teas.push({
+      id: (i + 1).toString(),
+      name: `${origin} ${teaType} Tea`,
+      lotNumber: `${teaType.substring(0, 2).toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`,
+      freeQuantity: generateRealisticQuantity(packageWeight),
+      packageWeight: packageWeight,
+      origin: origin,
+      harvestDate: generateRandomDate(new Date('2023-01-01'), new Date('2023-12-31')),
+      grade: grade,
+      type: type  // New attribute
+    })
+  }
+
+  return teas
+}
+
 type ApiclientConfig = {
   url: string;
   data?: Object;

@@ -7,6 +7,7 @@ import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "./ui/button"
 import { useApiMethods } from '@/hooks/useApiMethods'
+import AllocationTableView from "./AllocationTableView"
 
 
 interface AllocationViewProps {
@@ -114,10 +115,11 @@ export default function AllocationView({
   
   return (
     <div className="flex-1 flex">
-      <div className=" p-4">
+      <div className="p-4">
       <BlendsList blends={blends} fetchBlends={fetchBlends}/>
       </div>
-      <BlendForm
+      <AllocationTableView />
+      {/* <BlendForm
         newBlend={newBlend}
         setNewBlend={setNewBlend}
         editingBlendId={editingBlendId}
@@ -131,7 +133,7 @@ export default function AllocationView({
         blendNumberSequence={blendNumberSequence}
         setBlendNumberSequence={setBlendNumberSequence} 
         fetchTeaCost={fetchTeaCost}      
-        />
+        /> */}
     </div>
   )
 }
