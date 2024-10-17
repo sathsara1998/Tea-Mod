@@ -1,5 +1,6 @@
 'use client'
 import AllocationView from '@/components/AllocationView'
+import ThemeToggle from '@/components/ThemeToggle'
 import { BlendAllocation, Tea } from '@/components/types'
 import { generateTeas } from '@/lib/utils'
 import React, { useState } from 'react'
@@ -23,6 +24,8 @@ const Page: React.FC = () => {
           blendNumberSequence={blendNumberSequence}
           setBlendNumberSequence={setBlendNumberSequence}
         />   
+                <ThemeToggle />
+
         </>
     )
 }

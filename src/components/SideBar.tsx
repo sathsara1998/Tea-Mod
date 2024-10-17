@@ -1,19 +1,39 @@
 'use client'
-import React, { useState } from 'react'
-import { ShoppingCart, FileText, PieChart, ListCheck } from "lucide-react"
+import React, { useState, useEffect } from 'react'
+import { ShoppingCart, FileText, PieChart, ListCheck, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import { cn } from "@/lib/utils"
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-
+import { createBrowserClient } from '@/utils/supabase'
 
 const Sidebar: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createBrowserClient();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
 
   const handleExpand = (expanded: boolean) => {
     setIsExpanded(expanded);
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+    } else {
+      router.push('/login');
+    }
   };
 
   const menuItems = [
@@ -22,7 +42,6 @@ const Sidebar: React.FC = () => {
     { name: 'Blend Creation', icon: <FileText />, route: '/create' },
     { name: 'Allocation', icon: <ListCheck />, route: '/allocate' },
   ]
-
 
   return (
     <div
@@ -62,24 +81,24 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
 
-      {/* Added a logout button and avatar display here */}
       <div className="flex flex-col items-center justify-center p-4">
-          <Avatar className="h-10 w-10 mb-2">
-            <AvatarImage src={'https://picsum.photos/200/300'} alt="User Avatar" />
-            <AvatarFallback>{'aravinda@gmail.com'}</AvatarFallback>
-          </Avatar>
-          {isExpanded && (
-            <>
-            <span className="text-sm text-gray-300 mb-2">{'aravinda@gmail.com'}</span>
+        <Avatar className="h-10 w-10 mb-2">
+          <AvatarImage src={user?.user_metadata?.avatar_url || 'https://picsum.photos/200/300'} alt="User Avatar" />
+          <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+        </Avatar>
+        {isExpanded && (
+          <>
+            <span className="text-sm text-gray-300 mb-2">{user?.email || 'Loading...'}</span>
             <Button
-            className="bg-red-600 hover:bg-red-700 rounded-md px-4 py-2 w-full text-white mt-2"
-          >
-            Logout
-          </Button>
-            </>
-          )}
-        </div>
-      {/* End of newly added logout and avatar section */}
+              className="bg-red-600 hover:bg-red-700 rounded-md px-4 py-2 w-full text-white mt-2 flex items-center justify-center"
+              onClick={handleSignOut}
+            >
+              <LogOut className="mr-2" size={16} />
+              Logout
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   )
 }
