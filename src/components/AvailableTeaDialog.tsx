@@ -50,7 +50,6 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         description: err.message,
         variant: "destructive",
       })
-    } finally {
     }
   }, [])
 
@@ -60,7 +59,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
     }
   }, [isOpen])
 
-  const teaTypes = useMemo(() => ['All', ...new Set(availableTeas.map(tea => tea.blend_line_type))], [availableTeas])
+  const teaTypes = useMemo(() => ['All', ...Array.from(new Set(availableTeas.map(tea => tea.blend_line_type)))], [availableTeas]);
 
   const filteredTeas = useMemo(() => 
     availableTeas.filter(tea => 

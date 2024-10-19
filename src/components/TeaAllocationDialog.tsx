@@ -7,12 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tea, BlendAllocation } from "@/components/types"
+import { Tea, BlendAllocation, Blend } from "@/components/types"
 
 interface TeaAllocationDialogProps {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
-  newBlend: BlendAllocation
+  newBlend: Blend
   setNewBlend: React.Dispatch<React.SetStateAction<BlendAllocation>>
   availableTeas: Tea[]
   isReadOnly: boolean
@@ -61,10 +61,10 @@ export default function TeaAllocationDialog({
           </div>
           <div className="flex justify-between mb-2">
             <Badge variant="secondary">
-              Current: {newBlend.totalQuantity} kg
+              Current: {newBlend.quantity} kg
             </Badge>
             <Badge variant="secondary">
-              To Allocate: {newBlend.toAllocate} kg
+              To Allocate: {newBlend.quantity} kg
             </Badge>
           </div>
           <Tabs defaultValue="kg" onValueChange={(value) => setAllocationMode(value as 'kg' | 'package')}>
@@ -86,7 +86,7 @@ export default function TeaAllocationDialog({
                   </TableHeader>
                   <TableBody>
                     {filteredTeas.map((tea) => {
-                      const allocatedQuantity = newBlend.allocations.find(a => a.teaId === tea.id)?.quantity || 0
+                      const allocatedQuantity = newBlend.allocations.find(a => a.id.toString() === tea.id)?.quantity || 0
                       return (
                         <TableRow key={tea.id}>
                           <TableCell>{tea.name}</TableCell>
@@ -144,7 +144,7 @@ export default function TeaAllocationDialog({
                   </TableHeader>
                   <TableBody>
                     {filteredTeas.map((tea) => {
-                      const allocatedPackages = newBlend.allocations.find(a => a.teaId === tea.id)?.packages || 0
+                      const allocatedPackages = newBlend.allocations.find(a => a.id.toString() === tea.id)?.quantity || 0
                       return (
                         <TableRow key={tea.id}>
                           <TableCell>{tea.name}</TableCell>

@@ -15,17 +15,17 @@ export default function BlendList({ blendAllocations, editingBlendId, loadBlendA
       {blendAllocations.map((blend) => (
         <div 
           key={blend.id} 
-          className={`mb-2 p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50 transition-colors ${editingBlendId === blend.id ? 'ring-2 ring-primary' : ''}`}
-          onClick={() => loadBlendAllocation(blend.id)}
+          className={`mb-2 p-2 bg-white rounded shadow cursor-pointer hover:bg-gray-50 transition-colors ${editingBlendId === blend.id.toString() ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => loadBlendAllocation(blend.id.toString())}
         >
-          <p className="font-medium">{blend.name}</p>
-          <p className="text-sm text-gray-600">{blend.blendNo}</p>
-          <p className="text-sm">{blend.totalQuantity} kg</p>
-          <Badge 
+          <p className="font-medium">{blend.sale_order_name}</p>
+          <p className="text-sm text-gray-600">{blend.sale_order_id}</p>
+          <p className="text-sm">{blend.quantity} kg</p>
+          {/* <Badge 
             variant={blend.status === 'draft' ? 'default' : blend.status === 'confirmed' ? 'outline' : 'destructive'}
           >
             {blend.status.charAt(0).toUpperCase() + blend.status.slice(1)}
-          </Badge>
+          </Badge> */}
         </div>
       ))}
     </div>

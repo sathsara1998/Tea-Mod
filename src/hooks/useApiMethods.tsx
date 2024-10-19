@@ -133,7 +133,7 @@ export const useApiMethods = () => {
         }
         try {
             const response = await apiClient(config);
-            const data : ConfirmedSaleOrder[] = response.data;
+            const data = response.data;
             return data;
         } catch (error) {
             throw new Error(config.errorMessage);
@@ -150,7 +150,7 @@ export const useApiMethods = () => {
         }
         try {
             const response = await apiClient(config);
-            const data : ConfirmedSaleOrder[] = response.data;
+            const data = response.data;
             return data;
         } catch (error) {
             throw new Error(config.errorMessage);

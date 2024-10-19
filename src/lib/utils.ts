@@ -190,7 +190,7 @@ export const generateTestData = (): TeaAllocation[] => {
 
 type ApiclientConfig = {
   url: string;
-  data?: Object;
+  data?: object;
   method: string
 }
 

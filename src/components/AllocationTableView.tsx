@@ -21,23 +21,10 @@ import {
   Blend, 
   BlendInfo, 
   TeaAllocation, 
-  BlendAllocation, 
+  Tea, 
   ManufacturingAllocationTableData, 
   TeaBlend
 } from './types'
-
-
-interface Tea {
-  id: string
-  name: string
-  lotNumber: string
-  freeQuantity: number
-  packageWeight: number
-  origin: string
-  harvestDate: string
-  grade: string,
-  type:string
-}
 
 interface Allocation {
   teaId: string
@@ -72,7 +59,7 @@ export default function AllocationTableView() {
   const allocationsTableRef = useRef(null)
   const blendsTableRef = useRef(null)
   const availableTeaTableRef = useRef(null)
-  const tabulatorRef = useRef<Tabulator>(null)
+  const tabulatorRef = useRef<Tabulator | null>(null)
 
   useEffect(() => {
     if (allocationsTableRef.current) {
@@ -258,7 +245,7 @@ export default function AllocationTableView() {
 
   const handleGenerateBlendSheet = useCallback(async () => {
     // Create a BlendAllocation object from blendInfo and allocations
-    const blendAllocation: BlendAllocation = {
+    const blendAllocation: any = {
       ...blendInfo,
       allocations: allocations,
       // Add any other necessary fields
@@ -312,7 +299,6 @@ export default function AllocationTableView() {
         description: err.message,
         variant: "destructive",
       })
-    } finally {
     }
   }, [])
 

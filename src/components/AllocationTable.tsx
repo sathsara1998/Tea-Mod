@@ -6,7 +6,7 @@ import { Plus, Minus, X } from "lucide-react"
 import { Tea, BlendAllocation } from "./types"
 
 interface AllocationTableProps {
-  newBlend: BlendAllocation
+  newBlend: any
   availableTeas: Tea[]
   handleQuantityChange: (teaId: string, quantity: number, packages: number) => void
   removeTeaFromBlend: (teaId: string) => void
@@ -31,7 +31,7 @@ export default function AllocationTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {newBlend.allocations.map((allocation) => {
+        {newBlend.allocations.map((allocation: any) => {
           const tea = availableTeas.find(t => t.id === allocation.teaId)!
           return (
             <TableRow key={allocation.teaId}>

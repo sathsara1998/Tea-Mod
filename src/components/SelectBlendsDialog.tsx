@@ -38,7 +38,6 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         description: err.message,
         variant: "destructive",
       })
-    } finally {
     }
   }, [])
 
@@ -48,7 +47,7 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
     }
   }, [isOpen])
 
-  const statusTypes = useMemo(() => ['All', ...new Set(availableBlends.map(blend => blend.status))], [availableBlends])
+  const statusTypes = useMemo(() => ['All', ...Array.from(new Set(availableBlends.map(blend => blend.status)))], [availableBlends]);
 
   const filteredBlends = useMemo(() => 
     availableBlends.filter(blend => 

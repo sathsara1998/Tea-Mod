@@ -14,7 +14,7 @@ interface TeaSelectionDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   availableTeas: Tea[]
-  newBlend: BlendAllocation
+  newBlend: any
   addTeaToBlend: (tea: Tea, quantity: number, packages: number) => void
 }
 
@@ -83,7 +83,7 @@ export default function TeaSelectionDialog({
                   </TableHeader>
                   <TableBody>
                     {filteredTeas.map((tea) => {
-                      const allocatedQuantity = newBlend.allocations.find(a => a.teaId === tea.id)?.quantity || 0
+                      const allocatedQuantity = newBlend.allocations.find((a:any) => a.id === tea.id)?.quantity || 0
                       return (
                         <TableRow key={tea.id}>
                           <TableCell>{tea.name}</TableCell>
@@ -139,7 +139,7 @@ export default function TeaSelectionDialog({
                   </TableHeader>
                   <TableBody>
                     {filteredTeas.map((tea) => {
-                      const allocatedPackages = newBlend.allocations.find(a => a.teaId === tea.id)?.packages || 0
+                      const allocatedPackages = newBlend.allocations.find((a:any) => a.id === tea.id)?.packages || 0
                       return (
                         <TableRow key={tea.id}>
                           <TableCell>{tea.name}</TableCell>
