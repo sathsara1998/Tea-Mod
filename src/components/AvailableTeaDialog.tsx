@@ -7,7 +7,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator.min.css"
 import { generateTestData } from '@/lib/utils'
-import { TeaAllocation } from './types'
+import { AddAllocationObject, TeaAllocation } from './types'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from './ui/use-toast'
 
@@ -24,18 +24,19 @@ interface Tea {
 }
 
 interface AvailableTeaDialogProps {
+  blendId: number
   isOpen: boolean
   onClose: () => void
   onAddTeas: (selectedTeas: TeaAllocation[]) => void
 }
 
-const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose, onAddTeas }) => {
+const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId, onClose, onAddTeas }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('All')
   const [selectedTeas, setSelectedTeas] = useState<TeaAllocation[]>([])
   const [availableTeas, setAvailableTeas] = useState<TeaAllocation[]>([])
   const availableTeaTableRef = useRef(null)
-  const { getAllAuctionData } = useApiMethods();
+  const { getAllAuctionData, addAllocationtoBlend } = useApiMethods();
   const { toast } = useToast()
 
   const fetchAllocations = useCallback(async () => {
@@ -53,6 +54,36 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
     }
   }, [])
 
+  const addAllocations = async () => {
+    try {
+      if (blendId) {
+        console.log("in add", selectedTeas);
+        
+        const allocations : AddAllocationObject[] = selectedTeas.map(item => {
+          return {
+            blend_id: blendId,
+            lot_id: Number(item.id),
+            quantity_packages: 1,
+            quantity_kgs: item.net_weight
+          }
+        })
+        console.log("alloc", allocations);
+        
+        await addAllocationtoBlend(allocations)
+        
+        // close on success
+        onAddTeas(selectedTeas)
+        onClose()
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
       fetchAllocations()
@@ -64,7 +95,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   const filteredTeas = useMemo(() => 
     availableTeas.filter(tea => 
       (tea.standard.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       tea.lot_no.toLowerCase().includes(searchTerm.toLowerCase())) &&
+       tea.box_number.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (selectedType === 'All' || tea.blend_line_type === selectedType)
     ), [availableTeas, searchTerm, selectedType]
   )
@@ -108,8 +139,9 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   }, [filteredTeas])
 
   const handleAddSelectedTeas = () => {
-    onAddTeas(selectedTeas)
-    onClose()
+    if (selectedTeas.length) {
+      addAllocations()
+    }
   }
 
   return (

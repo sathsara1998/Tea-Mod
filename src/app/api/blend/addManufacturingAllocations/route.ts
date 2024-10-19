@@ -1,0 +1,22 @@
+import { apiClient } from '@/lib/utils';
+import { NextResponse } from 'next/server';
+
+// Get Blend data by id
+export async function POST(req: Request) {
+    const data = await req.json();
+
+    try {
+        const response = await apiClient({
+            url: '/tea_blends/add_manufacturing_allocations',
+            method: 'POST',
+            data: {
+                allocations: data
+            }
+        });
+
+        return NextResponse.json(response.data);
+    } catch (err) {
+        console.log(err);
+        return NextResponse.json({ error: 'An error occurred while Adding Allocations.' }, { status: 500 });
+    }
+}

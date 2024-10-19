@@ -117,6 +117,7 @@ export interface BlendInfo {
   balanceToAllocate: number;
   teaCost: number;
   allocations?: Array<ManufacturingAllocationTableData>;
+  export_quantity?: number;
 }
 
 export interface TeaAllocation {
@@ -142,20 +143,24 @@ export interface TeaAllocation {
 export interface ManufacturingAllocation {
   id: number;
   lot_id: number;
-  lot_name: string;
+  box_number: string;
   quantity_kgs: number;
   quantity_packages: number;
+  net_weight: number;
   unit_cost: number;
 }
 
 export interface ManufacturingAllocationTableData {
   id: number;
   lot_id: number;
-  lot_name: string;
+  box_number: string;
   quantity_kgs: number;
   quantity_packages: number;
   unit_cost: number;
-  allocated_qty: number;
+  net_weight: number;
+  package_diff: number;
+  weight_diff: number;
+  total_cost: number;
 }
 
 interface Allocation {
@@ -184,4 +189,12 @@ export interface TeaBlend {
   average_cost: number;
   allocations: Allocation[];
   manufacturing_allocations: ManufacturingAllocation[];
+}
+
+
+export interface AddAllocationObject {
+  blend_id: number;
+  lot_id: number;
+  quantity_packages: number;
+  quantity_kgs: number;
 }

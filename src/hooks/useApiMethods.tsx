@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useApiClient from "./useApiClient";
 import { AxiosRequestConfig } from "axios";
-import { ConfirmedSaleOrder } from "@/components/types";
+import { AddAllocationObject, ConfirmedSaleOrder } from "@/components/types";
 
 interface CustomConfig extends AxiosRequestConfig {
     url: string;
@@ -158,6 +158,42 @@ export const useApiMethods = () => {
     }, [apiClient]);
 
 
+    // Add allocation to blend
+    const addAllocationtoBlend = useCallback(async (data: AddAllocationObject[]) => {
+        const config: CustomConfig = {
+            url: "/api/blend/addManufacturingAllocations",
+            errorMessage: "An error occurred while Adding Allocations.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Update allocations
+    const updateAllocations = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/updateManufacturingAllocations`,
+            errorMessage: "An error occurred while Updating Allocations.",
+            method: 'put',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
     return {
         getConfirmedSaleOrders,
         getBlends,
@@ -166,6 +202,8 @@ export const useApiMethods = () => {
         updateBlend,
         deleteBlend,
         getAllAuctionData,
-        getBlendById
+        getBlendById,
+        addAllocationtoBlend,
+        updateAllocations
     }
 }

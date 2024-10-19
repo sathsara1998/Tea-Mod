@@ -32,6 +32,12 @@ interface Allocation {
   packages: number
 }
 
+interface SavingAllocation {
+  id: number;
+  quantity_packages: number;
+  quantity_kgs: number;
+}
+
 export default function AllocationTableView() {
   const [blend, setBlend] = useState<Blend>({
     id: 0,
@@ -53,34 +59,43 @@ export default function AllocationTableView() {
   const [isDraftBlend, setIsDraftBlend] = useState(true);
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false);
 
-  const { getBlendById } = useApiMethods();
+  const { getBlendById, updateAllocations } = useApiMethods();
   const { toast } = useToast()
   
   const allocationsTableRef = useRef(null)
   const blendsTableRef = useRef(null)
   const availableTeaTableRef = useRef(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
+  const updatedRows = useRef<number[]>([]);
+  const originalAllocations = useRef<ManufacturingAllocationTableData[]>([]);
 
   useEffect(() => {
     if (allocationsTableRef.current) {
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         data: allocations,
-        height: "600px",
+        height: "500px",
         selectableRows: isDraftBlend,
         columns: [
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
-          { title: "Tea", field: "lot_name", hozAlign: "center"},
-          { title: "Lot Number", field: "lot_id", hozAlign: "center"},
-          { title: "Allocated Quantity (kg)", field: "allocated_qty", hozAlign: "center"},
-          { title: "Package Weight (kg)", field: "quantity_kgs", hozAlign: "center", editor: "number", editorParams: {
-            min: 0,
-            step: 0.1,
-          }},
+          { title: "Box Number", field: "box_number", hozAlign: "center"},
+          { title: "Quantity", field: "quantity_kgs", hozAlign: "center"},
+          { title: "Allocated Quantity (kg)", field: "quantity_kgs", hozAlign: "center"},
+          { title: "Package Weight (kg)", field: "net_weight", hozAlign: "center"},
           { title: "Allocated Packages", field: "quantity_packages", hozAlign: "center", editor: "number", editorParams: {
             min: 0,
             step: 1,
           }},
+          { title: "Cost", field: "total_cost", hozAlign: "center"},
+          { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
         ],
+        rowFormatter: (row) => {
+          const rowData = row.getData();
+          if (rowData.weight_diff > 0) {
+            row.getElement().style.backgroundColor = "green";
+          } else if (rowData.weight_diff < 0) {
+            row.getElement().style.backgroundColor = "red";
+          }
+        }
       })
 
       tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
@@ -91,9 +106,9 @@ export default function AllocationTableView() {
         const row = cell.getRow()
         const data = row.getData()
         if (cell.getField() === "quantity_kgs") {
-          handleQuantityChange(data.lot_name, cell.getValue(), 'kg')
-        } else if (cell.getField() === "packages") {
-          handleQuantityChange(data.lot_name, cell.getValue(), 'packages')
+          // handleQuantityChange(data.lot_name, cell.getValue(), 'kg')
+        } else if (cell.getField() === "quantity_packages") {
+          handleQuantityChange(data.box_number, cell.getValue(), 'packages', data.id)
         }
       })
 
@@ -134,13 +149,25 @@ export default function AllocationTableView() {
     }
   }, [availableTeas, searchTerm])
 
-  const handleQuantityChange = (lotName: string, newValue: number, unit: 'kg' | 'packages') => {
-    setAllocations(prev => prev.map(a => {
-      if (a.lot_name === lotName) {
+  const handleQuantityChange = (boxNumber: string, newValue: number, unit: 'kg' | 'packages', id: number) => {
+    setAllocations(prev => prev.map((a, index) => {
+      if (a.box_number === boxNumber) {
           if (unit === 'kg') {
             // return { ...a, quantity: Math.max(0, newValue), packages: Math.ceil(newValue / tea.packageWeight) }
           } else {
-            return { ...a, allocated_qty: newValue * a.quantity_kgs, quantity_packages: Math.max(0, newValue) }
+            const newQuantity = newValue*a.net_weight;
+            if (newQuantity != a.quantity_kgs) {
+              updatedRows.current.push(id);
+            }
+            
+            return { 
+              ...a, 
+              package_diff: (newValue - originalAllocations.current[index].quantity_packages), 
+              weight_diff: (newQuantity - originalAllocations.current[index].quantity_kgs), 
+              total_cost: a.unit_cost*newQuantity, 
+              quantity_kgs: newQuantity, 
+              quantity_packages: Math.max(0, newValue) 
+            }
           }
       }
       return a
@@ -149,10 +176,10 @@ export default function AllocationTableView() {
   }
 
   const addTeaToBlend = (tea: TeaAllocation, quantity: number) => {
-    const existingAllocation = allocations.find(a => a.lot_name === tea.box_number)
+    const existingAllocation = allocations.find(a => a.box_number === tea.box_number)
     if (existingAllocation) {
       setAllocations(prev => prev.map(a => 
-        a.lot_name === tea.box_number 
+        a.box_number === tea.box_number 
           ? { 
               ...a, 
               quantity: a.allocated_qty + quantity, 
@@ -164,23 +191,24 @@ export default function AllocationTableView() {
     } else {
       const newAllocation : ManufacturingAllocationTableData = {
         id: Math.random(),
-        lot_name: tea.box_number,
+        box_number: tea.box_number,
         lot_id: Number(tea.lot_no),
         allocated_qty: tea.allocated_qty,
         quantity_kgs: tea.net_weight,
         quantity_packages: tea.allocated_packages,
-        unit_cost: tea.purchased_price
+        unit_cost: tea.purchased_price,
+        net_weight: 0
       }
       setAllocations(prev => [...prev, newAllocation])
     }
     updateTotalQuantity()
   }
 
+  
   const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
-    selectedTeas.forEach(tea => {
-      addTeaToBlend(tea, tea.net_weight)
-    })
-    setIsDialogOpen(false)
+    if (selectedBlend) {
+      fetchBlendData(selectedBlend.name)
+    }
   }
 
   const updateTotalQuantity = () => {
@@ -283,16 +311,19 @@ export default function AllocationTableView() {
         averagePrice: teas.average_cost,
         averageCostToAllocate: teas.average_cost,
         balanceToAllocate: teas.export_quantity,
-        teaCost: teas.average_cost
+        teaCost: teas.average_cost,
       }
       setBlendInfo(teablendInfo);
       const tableData = teas.manufacturing_allocations.map(item => {
         return {
          ...item,
-         allocated_qty: item.quantity_kgs * item.quantity_packages
+         package_diff: 0,
+         weight_diff: 0,
+         total_cost: item.unit_cost*item.quantity_kgs
         }
       })
       setAllocations(tableData)
+      originalAllocations.current = tableData;
     } catch (err: any) {
       toast({
         title: "Error",
@@ -301,6 +332,53 @@ export default function AllocationTableView() {
       })
     }
   }, [])
+
+
+  const saveTableData = async () => {
+    const updatingObjs = updatedRows.current.map(item => {
+      const allocation : ManufacturingAllocationTableData | undefined = allocations.find(alloc => item === alloc.id);
+      if (allocation) {
+        return {
+          id: allocation.id,
+          quantity_packages: allocation.quantity_packages,
+          quantity_kgs: allocation.quantity_kgs
+        }
+      }
+    }).filter(item => item != undefined)
+    
+    if (updatingObjs.length > 0) {
+      try {
+        await updateAllocations(updatingObjs);
+        toast({
+          title: "Success",
+          description: "Allocation data updated successfully",
+          variant: "default",
+        })
+        if (selectedBlend) {
+          fetchBlendData(selectedBlend.name)
+        }
+      } catch(err: any) {
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        })
+      }
+    }
+  }
+
+
+  const addTeaBtnClick = () => {
+    if (selectedBlend) {
+      setIsDialogOpen(true);
+    } else {
+      toast({
+        title: "Error",
+        description: "Please select a Blend first",
+        variant: "destructive",
+      })
+    }
+  }
 
   useEffect(() => {
     if (selectedBlend) {
@@ -341,6 +419,7 @@ export default function AllocationTableView() {
               <FormField label="Avg Cost to Allocate" value={blendInfo.averageCostToAllocate} readOnly />
               <FormField label="Balance to Allocate" value={blendInfo.balanceToAllocate} readOnly />
               <FormField label="Tea Cost" value={blendInfo.teaCost} readOnly />
+              {blendInfo.export_quantity != undefined && <FormField label="Export Quantity" value={blendInfo.export_quantity?.toString()} readOnly />}
             </div>
             <div ref={blendsTableRef}></div>
           </CardContent>
@@ -363,20 +442,11 @@ export default function AllocationTableView() {
               >
                 Remove Selected Teas ({selectedRowCount})
               </Button>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-green-600 text-white">Add Tea</Button>
-                </DialogTrigger>
-                <AvailableTeaDialog
-                  isOpen={isDialogOpen}
-                  onClose={() => setIsDialogOpen(false)}
-                  onAddTeas={addSelectedTeasToBlend}
-                />
-              </Dialog>
+              <Button className="bg-green-600 text-white" onClick={addTeaBtnClick} >Add Tea</Button>
             </div>
             )}
           </CardHeader>
-          <CardContent>
+          <CardContent className='w-[750px]'>
             <div ref={allocationsTableRef}></div>
           </CardContent>
         </Card>
@@ -385,6 +455,7 @@ export default function AllocationTableView() {
          blendInfo={blendInfo} 
          onBlendInfoChange={handleBlendInfoChange}
          onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
+         onSaveTableData={() => saveTableData()}
         />
       </div>
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
@@ -421,6 +492,15 @@ export default function AllocationTableView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {selectedBlend && (
+        <AvailableTeaDialog
+          blendId={selectedBlend.id}
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          onAddTeas={addSelectedTeasToBlend}
+        />
+      )}
     </div>
   </>
   )

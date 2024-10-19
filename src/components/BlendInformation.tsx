@@ -12,12 +12,14 @@ interface BlendInformationSectionProps {
     blendInfo: BlendInfo;
     onBlendInfoChange: (info: Partial<BlendInfo>) => void;
     onGenerateBlendSheet: () => void;  // New prop for handling Generate Blend Sheet action
+    onSaveTableData: () => void;
   }
 
   const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({ 
     blendInfo, 
     onBlendInfoChange, 
-    onGenerateBlendSheet 
+    onGenerateBlendSheet,
+    onSaveTableData
   }) => {
       return (
     <Card className="w-full">
@@ -46,9 +48,10 @@ interface BlendInformationSectionProps {
         </Tabs>
         <Separator className="my-6" />
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={onGenerateBlendSheet}>Generate Blend Sheet</Button>
-          <Button variant="outline">Edit Blend Sheet</Button>
-          <Button variant="outline">Add/Remove CD</Button>
+          <Button className="flex-1" variant="outline" onClick={onSaveTableData}>Save data</Button>
+          <Button className="flex-2" variant="outline" onClick={onGenerateBlendSheet}>Generate Blend Sheet</Button>
+          <Button className="flex-3" variant="outline">Edit Blend Sheet</Button>
+          {/* <Button variant="outline">Add/Remove CD</Button> */}
         </div>
       </CardContent>
     </Card>
