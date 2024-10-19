@@ -23,8 +23,10 @@ import {
   TeaAllocation, 
   Tea, 
   ManufacturingAllocationTableData, 
-  TeaBlend
+  TeaBlend,
+  StockLot
 } from './types'
+import AllocationDetailsDialog from './AllocationDetailsDialog'
 
 interface Allocation {
   teaId: string
@@ -58,6 +60,8 @@ export default function AllocationTableView() {
   const [selectedBlend, setSelectedBlend] = useState<TeaBlend>();
   const [isDraftBlend, setIsDraftBlend] = useState(true);
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false);
+  const [isAllocationDetailsOpen, setIsAllocationDetailsOpen] = useState(false);
+  const [allocationDetailsId, setAllocationDetailsId] = useState<number>(0);
 
   const { getBlendById, updateAllocations } = useApiMethods();
   const { toast } = useToast()
@@ -77,6 +81,25 @@ export default function AllocationTableView() {
         selectableRows: isDraftBlend,
         columns: [
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
+          {
+            title: "View Details",
+            field: "view",
+            hozAlign: "center",
+            formatter: (cell) => {
+              const cellValue = cell.getValue();
+              return `
+                <span style="display: flex; alight-items: center; justify-content: center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-black hover:text-gray-700">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12c0 0 3-9 9-9s9 9 9 9-3 9-9 9-9-9-9-9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" />
+                  </svg>
+                </span>`;
+            },
+            cellClick: (e, cell) => {
+              const rowData = cell.getRow().getData();
+              handleViewDetails(rowData.lot_id);
+            }
+          },
           { title: "Box Number", field: "box_number", hozAlign: "center"},
           { title: "Quantity", field: "quantity_kgs", hozAlign: "center"},
           { title: "Allocated Quantity (kg)", field: "quantity_kgs", hozAlign: "center"},
@@ -105,7 +128,8 @@ export default function AllocationTableView() {
       tabulatorRef.current.on("cellEdited", function(cell: any){
         const row = cell.getRow()
         const data = row.getData()
-        if (cell.getField() === "quantity_kgs") {
+        if (cell.getField() === "view") {
+          const rowData = cell.getRow().getData();
           // handleQuantityChange(data.lot_name, cell.getValue(), 'kg')
         } else if (cell.getField() === "quantity_packages") {
           handleQuantityChange(data.box_number, cell.getValue(), 'packages', data.id)
@@ -148,6 +172,11 @@ export default function AllocationTableView() {
       }
     }
   }, [availableTeas, searchTerm])
+
+  const handleViewDetails = (id: number) => {
+    setAllocationDetailsId(id);
+    setIsAllocationDetailsOpen(true);
+  }
 
   const handleQuantityChange = (boxNumber: string, newValue: number, unit: 'kg' | 'packages', id: number) => {
     setAllocations(prev => prev.map((a, index) => {
@@ -500,6 +529,13 @@ export default function AllocationTableView() {
           onClose={() => setIsDialogOpen(false)}
           onAddTeas={addSelectedTeasToBlend}
         />
+      )}
+
+      {isAllocationDetailsOpen && (
+        <AllocationDetailsDialog
+          isOpen={isAllocationDetailsOpen}
+          onClose={() => setIsAllocationDetailsOpen(false)}
+          lotId={allocationDetailsId} />
       )}
     </div>
   </>

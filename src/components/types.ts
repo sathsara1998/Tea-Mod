@@ -198,3 +198,21 @@ export interface AddAllocationObject {
   quantity_packages: number;
   quantity_kgs: number;
 }
+
+export interface StockLot {
+  id: number;
+  box_number: string;
+  blend_standard_id: number;
+  standard: string;
+  package_count: number;
+  net_weight: number;
+  free_packages: number;
+  free_quantity: number;
+  garden_mark: string;
+  grade: string;
+  sample_allowance: string;
+  purchased_price: number;
+  break: string;
+  invoice_no: string;
+  blend_line_type: string;
+}

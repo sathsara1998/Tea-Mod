@@ -193,6 +193,22 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Get lot info by id
+    const getLotInfoById = useCallback(async (id: number) => {
+        const config: CustomConfig = {
+            url: `/api/auctionData/lotsById?id=${id}`,
+            errorMessage: "An error occurred while fetching details.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -204,6 +220,7 @@ export const useApiMethods = () => {
         getAllAuctionData,
         getBlendById,
         addAllocationtoBlend,
-        updateAllocations
+        updateAllocations,
+        getLotInfoById
     }
 }
