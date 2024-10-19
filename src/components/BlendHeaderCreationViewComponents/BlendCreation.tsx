@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, ArrowRight } from "lucide-react"
 import { SelectedSalesOrders } from './SelectedSalesOrders';
 
-import { SalesOrder, SelectedBlend, ConfirmedSaleOrder } from '../BlendHeaderCreationView';
+import { SalesOrder, SelectedBlend, ConfirmedSaleOrder } from '@/components/types';
 
 type BlendCreationProps = {
   confirmedSaleOrders: ConfirmedSaleOrder[];

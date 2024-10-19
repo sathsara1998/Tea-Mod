@@ -1,8 +1,34 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { Tea , BlendAllocation } from '@/components/types'
+import { Tea , TeaAllocation } from '@/components/types'
 import { AxiosRequestConfig } from "axios"
 import axios from "axios"
+
+interface BlendAllocation {
+    id: string
+    name: string
+    blendNo: string
+    allocations: { 
+      teaId: string
+      quantity: number
+      packages: number
+    }[]
+    totalQuantity: number
+    toAllocate: number
+    balance: number
+    status: 'draft' | 'confirmed' | 'cancel'
+    createdAt: Date
+    exportQuantity?: number
+    allocatedQuantity?: number
+    allocatedQuantityDate?: Date
+    customerOrderNo?: string
+    orderLineNumber?: string
+    sampleAllocationDate?: Date
+    requiredDate?: Date
+    packagingType?: 'bulk' | 'packet' | 'tea bag'
+    averagePrice?: number
+    teaCost?: number
+  }
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -110,7 +136,7 @@ export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) 
   }
 };
 
-export const generateTestData = (): Tea[] => {
+export const generateTestData = (): TeaAllocation[] => {
   const teaTypes = ['Black', 'Green', 'Oolong', 'White', 'Pu-erh', 'Yellow', 'Purple']
   const origins = ['China', 'India', 'Sri Lanka', 'Japan', 'Taiwan', 'Kenya', 'Nepal']
   const grades = ['SFTGFOP1', 'FTGFOP1', 'TGFOP1', 'FOP', 'OP', 'BOP', 'FBOP', 'Sencha', 'Gyokuro', 'Matcha']
@@ -129,7 +155,7 @@ export const generateTestData = (): Tea[] => {
     return numberOfPackages * packageWeight
   }
 
-  const teas: Tea[] = []
+  const teas: TeaAllocation[] = []
 
   for (let i = 0; i < 500; i++) {
     const teaType = teaTypes[Math.floor(Math.random() * teaTypes.length)]
@@ -140,14 +166,22 @@ export const generateTestData = (): Tea[] => {
 
     teas.push({
       id: (i + 1).toString(),
-      name: `${origin} ${teaType} Tea`,
-      lotNumber: `${teaType.substring(0, 2).toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`,
-      freeQuantity: generateRealisticQuantity(packageWeight),
-      packageWeight: packageWeight,
-      origin: origin,
-      harvestDate: generateRandomDate(new Date('2023-01-01'), new Date('2023-12-31')),
+      standard: `${origin} ${teaType} Tea`,
+      lot_no: `${teaType.substring(0, 2).toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`,
+      free_qty: generateRealisticQuantity(packageWeight),
+      net_weight: packageWeight,
+      box_number: origin,
       grade: grade,
-      type: type  // New attribute
+      blend_line_type: type,
+      garden_mark: 'mark',
+      bags: 5,
+      allocated_qty: 5,
+      allocated_packages: 4,
+      free_packages: 4,
+      sample_allowance: "",
+      purchased_price: 50,
+      break: "",
+      invoice_no: ""
     })
   }
 
@@ -162,7 +196,7 @@ type ApiclientConfig = {
 
 // For external api calls
 export const apiClient = (configs: ApiclientConfig) => {
-  const token: String = 'f030caaab4b0b324312994565d5f272d5adb05ea';
+  const token = process.env.NEXT_PUBLIC_API_KEY;
   const mainConfigs: AxiosRequestConfig = {
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     headers: {

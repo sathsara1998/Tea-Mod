@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react';
-import { Blend } from '../BlendHeaderCreationView';
 import { Edit, Info, Trash2 } from 'lucide-react';
 import {
     Popover,
@@ -12,10 +11,11 @@ import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
+import { TeaBlend } from '../types';
 
 interface BlendCardProps{
-    data:Blend;
-    onEdit: (blend: Blend) => void;
+    data: TeaBlend;
+    onEdit: (blend: TeaBlend) => void;
     onDelete: (blendId: number) => void;
 }
 
@@ -32,7 +32,7 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                       {data.status}
                     </Badge>
                   </div>
-                  <small>Blend: {data.blendName}</small>
+                  <small>Blend: {data.name}</small>
                   <small>Quantity: {data.quantity.toFixed(3)}</small>
                   <div className="flex justify-between mt-2">
                     <Popover>

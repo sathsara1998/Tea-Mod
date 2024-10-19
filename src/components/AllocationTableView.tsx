@@ -11,12 +11,20 @@ import { Info, Search } from "lucide-react"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator.min.css"
 import { generatePDF, generateTestData } from '@/lib/utils'
-import BlendInformationSection from './BlendInformation'
+import BlendInformationSection, { FormField } from './BlendInformation'
 import BlendList from './BlendList'
 import AvailableTeaDialog from './AvailableTeaDialog'
-import { BlendAllocation } from './types'
 import SelectBlendsDialog from './SelectBlendsDialog'
-import { Blend } from "./BlendHeaderCreationView"
+import { useApiMethods } from '@/hooks/useApiMethods'
+import { useToast } from './ui/use-toast'
+import { 
+  Blend, 
+  BlendInfo, 
+  TeaAllocation, 
+  BlendAllocation, 
+  ManufacturingAllocationTableData, 
+  TeaBlend
+} from './types'
 
 
 interface Tea {
@@ -37,36 +45,6 @@ interface Allocation {
   packages: number
 }
 
-
-
-
-// interface Tea {
-//   id: string
-//   name: string
-//   lotNumber: string
-//   freeQuantity: number
-//   packageWeight: number
-//   origin: string
-//   harvestDate: string
-//   grade: string
-// }
-
-// interface Allocation {
-//   teaId: string
-//   quantity: number
-//   packages: number
-// }
-
-// interface Blend {
-//   name: string
-//   number: string
-//   totalQuantity: number
-//   status: 'draft' | 'confirmed' | 'cancelled'
-// }
-
-
-
-
 export default function AllocationTableView() {
   const [blend, setBlend] = useState<Blend>({
     id: 0,
@@ -76,7 +54,7 @@ export default function AllocationTableView() {
     status: 'draft',
     allocations: []
   })
-  const [allocations, setAllocations] = useState<Allocation[]>([])
+  const [allocations, setAllocations] = useState<ManufacturingAllocationTableData[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isBlendDialogOpen, setIsBlendDialogOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
@@ -84,7 +62,12 @@ export default function AllocationTableView() {
   const [availableTeas, setAvailableTeas] = useState<Tea[]>([])
   const [selectedTeas, setSelectedTeas] = useState<Tea[]>([])
   const [selectedRowCount, setSelectedRowCount] = useState(0)
-  const [selectedBlend, setSelectedBlend] = useState<Blend>();
+  const [selectedBlend, setSelectedBlend] = useState<TeaBlend>();
+  const [isDraftBlend, setIsDraftBlend] = useState(true);
+  const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false);
+
+  const { getBlendById } = useApiMethods();
+  const { toast } = useToast()
   
   const allocationsTableRef = useRef(null)
   const blendsTableRef = useRef(null)
@@ -92,55 +75,38 @@ export default function AllocationTableView() {
   const tabulatorRef = useRef<Tabulator>(null)
 
   useEffect(() => {
-    setAvailableTeas(generateTestData())
-  }, [])
-
-  useEffect(() => {
     if (allocationsTableRef.current) {
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         data: allocations,
         height: "600px",
-        selectableRows: true,
+        selectableRows: isDraftBlend,
         columns: [
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
-          { title: "Tea", field: "teaId", formatter: (cell) => {
-            const tea = availableTeas.find(t => t.id === cell.getValue())
-            return tea ? tea.name : ''
-          }},
-          { title: "Lot Number", field: "teaId", formatter: (cell) => {
-            const tea = availableTeas.find(t => t.id === cell.getValue())
-            return tea ? tea.lotNumber : ''
-          }},
-          { title: "Package Weight (kg)", field: "teaId", formatter: (cell) => {
-            const tea = availableTeas.find(t => t.id === cell.getValue())
-            return tea ? tea.packageWeight : ''
-          }},
-          { title: "Quantity (kg)", field: "quantity", editor: "number", editorParams: {
+          { title: "Tea", field: "lot_name", hozAlign: "center"},
+          { title: "Lot Number", field: "lot_id", hozAlign: "center"},
+          { title: "Allocated Quantity (kg)", field: "allocated_qty", hozAlign: "center"},
+          { title: "Package Weight (kg)", field: "quantity_kgs", hozAlign: "center", editor: "number", editorParams: {
             min: 0,
             step: 0.1,
           }},
-          { title: "Packages", field: "packages", editor: "number", editorParams: {
+          { title: "Allocated Packages", field: "quantity_packages", hozAlign: "center", editor: "number", editorParams: {
             min: 0,
             step: 1,
           }},
-          { title: "Type", field: "type" },
         ],
       })
 
-      tabulatorRef.current.on("rowSelectionChanged", function(data, rows){
+      tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
         setSelectedRowCount(data.length)
       })
 
-      tabulatorRef.current.on("cellEdited", function(cell){
+      tabulatorRef.current.on("cellEdited", function(cell: any){
         const row = cell.getRow()
         const data = row.getData()
-        const tea = availableTeas.find(t => t.id === data.teaId)
-        if (tea) {
-          if (cell.getField() === "quantity") {
-            handleQuantityChange(data.teaId, cell.getValue(), 'kg')
-          } else if (cell.getField() === "packages") {
-            handleQuantityChange(data.teaId, cell.getValue(), 'packages')
-          }
+        if (cell.getField() === "quantity_kgs") {
+          handleQuantityChange(data.lot_name, cell.getValue(), 'kg')
+        } else if (cell.getField() === "packages") {
+          handleQuantityChange(data.lot_name, cell.getValue(), 'packages')
         }
       })
 
@@ -171,7 +137,7 @@ export default function AllocationTableView() {
         selectableRollingSelection: false,
       })
 
-      table.on("rowSelectionChanged", function(data, rows){
+      table.on("rowSelectionChanged", function(data: any, rows: any){
         setSelectedTeas(data)
       })
 
@@ -181,57 +147,57 @@ export default function AllocationTableView() {
     }
   }, [availableTeas, searchTerm])
 
-  const handleQuantityChange = (teaId: string, newValue: number, unit: 'kg' | 'packages') => {
+  const handleQuantityChange = (lotName: string, newValue: number, unit: 'kg' | 'packages') => {
     setAllocations(prev => prev.map(a => {
-      if (a.teaId === teaId) {
-        const tea = availableTeas.find(t => t.id === teaId)
-        if (tea) {
+      if (a.lot_name === lotName) {
           if (unit === 'kg') {
-            return { ...a, quantity: Math.max(0, newValue), packages: Math.ceil(newValue / tea.packageWeight) }
+            // return { ...a, quantity: Math.max(0, newValue), packages: Math.ceil(newValue / tea.packageWeight) }
           } else {
-            return { ...a, quantity: newValue * tea.packageWeight, packages: Math.max(0, newValue) }
+            return { ...a, allocated_qty: newValue * a.quantity_kgs, quantity_packages: Math.max(0, newValue) }
           }
-        }
       }
       return a
     }))
     updateTotalQuantity()
   }
 
-  const addTeaToBlend = (tea: Tea, quantity: number) => {
-    const existingAllocation = allocations.find(a => a.teaId === tea.id)
+  const addTeaToBlend = (tea: TeaAllocation, quantity: number) => {
+    const existingAllocation = allocations.find(a => a.lot_name === tea.box_number)
     if (existingAllocation) {
       setAllocations(prev => prev.map(a => 
-        a.teaId === tea.id 
+        a.lot_name === tea.box_number 
           ? { 
               ...a, 
-              quantity: a.quantity + quantity, 
-              packages: Math.ceil((a.quantity + quantity) / tea.packageWeight),
-              type: tea.type  // Ensure type is updated even for existing allocations
+              quantity: a.allocated_qty + quantity, 
+              packages: Math.ceil((a.allocated_qty + quantity) / tea.net_weight),
+              type: tea.blend_line_type  // Ensure type is updated even for existing allocations
             }
           : a
       ))
     } else {
-      setAllocations(prev => [...prev, { 
-        id: Math.random().toString(36).substr(2, 9), // Generate a unique id
-        teaId: tea.id, 
-        quantity, 
-        packages: Math.ceil(quantity / tea.packageWeight),
-        type: tea.type  // Add type to new allocations
-      }])
+      const newAllocation : ManufacturingAllocationTableData = {
+        id: Math.random(),
+        lot_name: tea.box_number,
+        lot_id: Number(tea.lot_no),
+        allocated_qty: tea.allocated_qty,
+        quantity_kgs: tea.net_weight,
+        quantity_packages: tea.allocated_packages,
+        unit_cost: tea.purchased_price
+      }
+      setAllocations(prev => [...prev, newAllocation])
     }
     updateTotalQuantity()
   }
 
-  const addSelectedTeasToBlend = (selectedTeas: Tea[]) => {
+  const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
     selectedTeas.forEach(tea => {
-      addTeaToBlend(tea, tea.packageWeight)
+      addTeaToBlend(tea, tea.net_weight)
     })
     setIsDialogOpen(false)
   }
 
   const updateTotalQuantity = () => {
-    const total = allocations.reduce((sum, allocation) => sum + allocation.quantity, 0)
+    const total = allocations.reduce((sum, allocation) => sum + allocation.allocated_qty, 0)
     setBlend(prev => ({ ...prev, totalQuantity: total }))
   }
 
@@ -247,8 +213,8 @@ export default function AllocationTableView() {
   const confirmRemoveSelectedTeas = () => {
     if (tabulatorRef.current) {
       const selectedData = tabulatorRef.current.getSelectedData()
-      const selectedIds = selectedData.map(row => row.id)
-      setAllocations(prev => prev.filter(a => !selectedIds.includes(a.id)))
+      const selectedIds = selectedData.map((row: any) => row.id)
+      setAllocations(prev => prev.filter((a: any) => !selectedIds.includes(a.id)))
       tabulatorRef.current.deselectRow()
       setSelectedRowCount(0)
       setIsConfirmDialogOpen(false)
@@ -269,21 +235,21 @@ export default function AllocationTableView() {
   }
 
   const [blendInfo, setBlendInfo] = useState<BlendInfo>({
-    blendNo: 'B202/1270',
-    blendRefNo: 'B202/1270',
-    date: '2024-05-09',
-    blendStandard: 'BSTD000155',
-    propSample: 250,
-    requiredDate: '2024-05-15',
-    packagingType: 'Bulk',
-    status: 'Generated',
-    customer: 'ERTW002',
-    customerName: 'R.TWINING & CO LTD',
-    totalAllocated: 5710.000,
-    averagePrice: 1.265709,
-    averageCostToAllocate: 0.000,
-    balanceToAllocate: 0.000,
-    teaCost: 160.714
+    blendNo: '',
+    blendRefNo: '',
+    date: '',
+    blendStandard: '',
+    propSample: 0,
+    requiredDate: '',
+    packagingType: '',
+    status: '',
+    customer: 0,
+    customerName: '',
+    totalAllocated: 0,
+    averagePrice: 0,
+    averageCostToAllocate: 0,
+    balanceToAllocate: 0,
+    teaCost: 0
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -298,6 +264,8 @@ export default function AllocationTableView() {
       // Add any other necessary fields
     }
 
+    setIsGenerateConfirmOpen(false);
+
     const success = await generatePDF(blendAllocation, availableTeas)
     if (success) {
       console.log("Blend sheet generated successfully")
@@ -308,6 +276,52 @@ export default function AllocationTableView() {
     }
   }, [blendInfo, allocations, availableTeas])
 
+  // Get blend data by blendid
+  const fetchBlendData = useCallback(async (id: string) => {
+    try {
+      const data = await getBlendById(id)
+      const teas: TeaBlend = data[0];
+      const teablendInfo : BlendInfo = {
+        blendNo: teas.name,
+        blendRefNo: "",
+        date: "",
+        blendStandard: teas.product_name,
+        propSample: 0,
+        requiredDate: "",
+        packagingType: "",
+        status: teas.status,
+        customer: teas.customer_id,
+        customerName: teas.customer_name,
+        totalAllocated: teas.allocated_quantity,
+        averagePrice: teas.average_cost,
+        averageCostToAllocate: teas.average_cost,
+        balanceToAllocate: teas.export_quantity,
+        teaCost: teas.average_cost
+      }
+      setBlendInfo(teablendInfo);
+      const tableData = teas.manufacturing_allocations.map(item => {
+        return {
+         ...item,
+         allocated_qty: item.quantity_kgs * item.quantity_packages
+        }
+      })
+      setAllocations(tableData)
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    } finally {
+    }
+  }, [])
+
+  useEffect(() => {
+    if (selectedBlend) {
+      fetchBlendData(selectedBlend.name)
+    }
+  }, [selectedBlend])
+
   return (
   <>
   
@@ -316,11 +330,11 @@ export default function AllocationTableView() {
       <div className="flex gap-4">
         <div>
         <Card className="flex-grow">
-          <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
+          <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
             <CardTitle>Selected Blend</CardTitle>
             <div className="flex gap-2">
               <label className="text-md">
-                {selectedBlend? selectedBlend.blendName : '-'}
+                {selectedBlend? selectedBlend.name : '-'}
               </label>
               <Dialog open={isBlendDialogOpen} onOpenChange={setIsBlendDialogOpen}>
                 <DialogTrigger asChild>
@@ -335,13 +349,21 @@ export default function AllocationTableView() {
             </div>
           </CardHeader>
           <CardContent>
+            <div className="grid grid-cols-3 gap-2">
+              <FormField label="Total Allocated" value={blendInfo.totalAllocated} readOnly />
+              <FormField label="Average Price" value={blendInfo.averagePrice} readOnly />
+              <FormField label="Avg Cost to Allocate" value={blendInfo.averageCostToAllocate} readOnly />
+              <FormField label="Balance to Allocate" value={blendInfo.balanceToAllocate} readOnly />
+              <FormField label="Tea Cost" value={blendInfo.teaCost} readOnly />
+            </div>
             <div ref={blendsTableRef}></div>
           </CardContent>
         </Card>
         <Card className="flex-grow">
           <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
             <CardTitle>Tea Allocations</CardTitle>
-            <div className="flex gap-2">
+            {isDraftBlend && (
+              <div className="flex gap-2">
               <Button onClick={selectAllRows} className="bg-blue-600 text-white">
                 Select All
               </Button>
@@ -360,13 +382,13 @@ export default function AllocationTableView() {
                   <Button className="bg-green-600 text-white">Add Tea</Button>
                 </DialogTrigger>
                 <AvailableTeaDialog
-  isOpen={isDialogOpen}
-  onClose={() => setIsDialogOpen(false)}
-  availableTeas={availableTeas}
-  onAddTeas={addSelectedTeasToBlend}
-/>
+                  isOpen={isDialogOpen}
+                  onClose={() => setIsDialogOpen(false)}
+                  onAddTeas={addSelectedTeasToBlend}
+                />
               </Dialog>
             </div>
+            )}
           </CardHeader>
           <CardContent>
             <div ref={allocationsTableRef}></div>
@@ -376,7 +398,7 @@ export default function AllocationTableView() {
         <BlendInformationSection 
          blendInfo={blendInfo} 
          onBlendInfoChange={handleBlendInfoChange}
-         onGenerateBlendSheet={handleGenerateBlendSheet}
+         onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
         />
       </div>
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
@@ -390,6 +412,24 @@ export default function AllocationTableView() {
               Cancel
             </Button>
             <Button onClick={confirmRemoveSelectedTeas} className="bg-red-600 text-white">
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation for generate button */}
+      <Dialog open={isGenerateConfirmOpen} onOpenChange={setIsGenerateConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Generation</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to generate the blend?</p>
+          <DialogFooter>
+            <Button onClick={() => setIsGenerateConfirmOpen(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleGenerateBlendSheet} className="bg-green-600 text-white">
               Confirm
             </Button>
           </DialogFooter>

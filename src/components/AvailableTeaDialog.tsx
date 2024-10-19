@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -7,6 +7,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator.min.css"
 import { generateTestData } from '@/lib/utils'
+import { TeaAllocation } from './types'
+import { useApiMethods } from '@/hooks/useApiMethods'
+import { useToast } from './ui/use-toast'
 
 interface Tea {
   id: string
@@ -23,27 +26,47 @@ interface Tea {
 interface AvailableTeaDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddTeas: (selectedTeas: Tea[]) => void
+  onAddTeas: (selectedTeas: TeaAllocation[]) => void
 }
 
 const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose, onAddTeas }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('All')
-  const [selectedTeas, setSelectedTeas] = useState<Tea[]>([])
-  const [availableTeas, setAvailableTeas] = useState<Tea[]>([])
+  const [selectedTeas, setSelectedTeas] = useState<TeaAllocation[]>([])
+  const [availableTeas, setAvailableTeas] = useState<TeaAllocation[]>([])
   const availableTeaTableRef = useRef(null)
+  const { getAllAuctionData } = useApiMethods();
+  const { toast } = useToast()
 
-  useEffect(() => {
-    setAvailableTeas(generateTestData())
+  const fetchAllocations = useCallback(async () => {
+    try {
+      const data = await getAllAuctionData()
+      const teas: TeaAllocation[] = data;
+      
+      setAvailableTeas(teas);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    } finally {
+    }
   }, [])
 
-  const teaTypes = useMemo(() => ['All', ...new Set(availableTeas.map(tea => tea.type))], [availableTeas])
+  useEffect(() => {
+    if (isOpen) {
+      fetchAllocations()
+    }
+  }, [isOpen])
+
+  const teaTypes = useMemo(() => ['All', ...new Set(availableTeas.map(tea => tea.blend_line_type))], [availableTeas])
 
   const filteredTeas = useMemo(() => 
     availableTeas.filter(tea => 
-      (tea.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       tea.lotNumber.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (selectedType === 'All' || tea.type === selectedType)
+      (tea.standard.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       tea.lot_no.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (selectedType === 'All' || tea.blend_line_type === selectedType)
     ), [availableTeas, searchTerm, selectedType]
   )
 
@@ -53,13 +76,23 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         data: filteredTeas,
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
-          { title: "Tea", field: "name" },
-          { title: "Lot Number", field: "lotNumber" },
-          { title: "Available (kg)", field: "freeQuantity" },
-          { title: "Package Weight (kg)", field: "packageWeight" },
-          { title: "Type", field: "type" },
+          { title: "Tea", field: "box_number", hozAlign: "center"},
+          { title: "Lot Number", field: "lot_no", hozAlign: "center"},
+          { title: "Garden Mark", field: "garden_mark", hozAlign: "center"},
+          { title: "Grade", field: "grade", hozAlign: "center"},
+          { title: "Package Weight (kg)", field: "net_weight", hozAlign: "center"},
+          { title: "Bags", field: "bags", hozAlign: "center"},
+          { title: "Allocated Quantity", field: "allocated_qty", hozAlign: "center"},
+          { title: "Free Qty", field: "free_qty", hozAlign: "center"},
+          { title: "Allocated Packages", field: "allocated_packages", hozAlign: "center"},
+          { title: "Free Packages", field: "free_packages", hozAlign: "center"},
+          { title: "Standard", field: "standard", hozAlign: "center"},
+          { title: "Sample Allowance", field: "sample_allowance", hozAlign: "center"},
+          { title: "Purchased Price", field: "purchased_price", hozAlign: "center"},
+          { title: "Break", field: "break", hozAlign: "center"},
+          { title: "Invoice No", field: "invoice_no", hozAlign: "center"},
+          { title: "Type", field: "blend_line_type", hozAlign: "center" },
         ],
-        layout: "fitColumns",
         height: "400px",
         selectable: true,
         selectableRollingSelection: false,
@@ -107,7 +140,9 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
             </SelectContent>
           </Select>
         </div>
-        <div ref={availableTeaTableRef} className="flex-grow"></div>
+        <div className="w-[650]">
+          <div ref={availableTeaTableRef} className="flex-grow"></div>
+        </div>
         <div className="mt-4 flex justify-end">
           <Button onClick={handleAddSelectedTeas} className="bg-green-600 text-white">
             Add Selected Teas ({selectedTeas.length})

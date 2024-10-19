@@ -16,19 +16,20 @@ import {
   BlendAllocation, 
   Blend, 
   SelectedBlend, 
-  ConfirmedSaleOrder 
+  ConfirmedSaleOrder, 
+  TeaBlend
 } from './types'
 
 
 export default function BlendAllocator() {
   const [confirmedSaleOrders, setConfirmedSaleOrders] = useState<ConfirmedSaleOrder[]>([])
   const [selectedSalesOrders, setSelectedSalesOrders] = useState<SalesOrder[]>([])
-  const [blends, setBlends] = useState<Blend[]>([])
+  const [blends, setBlends] = useState<TeaBlend[]>([])
   const [selectedBlends, setSelectedBlends] = useState<SelectedBlend[]>([])
   const [isConfirming, setIsConfirming] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [editingBlend, setEditingBlend] = useState<Blend | null>(null)
+  const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
   const { toast } = useToast()
   const { 
     getConfirmedSaleOrders, 
@@ -61,17 +62,8 @@ export default function BlendAllocator() {
     setError(null)
     try {
       const data = await getBlends();
-      // Transform the data to match our Blend type
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
-        id: blend.id,
-        name: blend.name,
-        blendName: blend.blendName,
-        quantity: blend.quantity,
-        status: blend.status,
-        allocations: blend.allocations
-      }));
-      setBlends(transformedBlends)
+      
+      setBlends(data);
     } catch (err: any) {
       setError('Error fetching blends. Please try again.')
       toast({
@@ -216,20 +208,13 @@ export default function BlendAllocator() {
     if (!editingBlend) return
 
     try {
-      await updateBlend(editingBlend.id, {
-        blendName: editingBlend.blendName,
-        status: editingBlend.status,
-        allocations: editingBlend.allocations.map(a => ({
-          lineId: a.sale_order_line_id,
-          quantity: a.quantity
-        }))
-      })
+      await updateBlend(editingBlend.id, editingBlend)
 
       await fetchBlends()
       setEditingBlend(null)
       toast({
         title: "Blend Updated",
-        description: `Updated blend: ${editingBlend.blendName}`,
+        description: `Updated blend: ${editingBlend.name}`,
       })
     } catch (error) {
       console.error('Error updating blend:', error)

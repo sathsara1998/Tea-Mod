@@ -7,22 +7,22 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator.min.css"
 import { generateTestData } from '@/lib/utils'
-import { Blend } from "./BlendHeaderCreationView"
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from './ui/use-toast'
+import { TeaBlend } from './types'
 
 interface AvailableTeaDialogProps {
   isOpen: boolean
   onClose: () => void
-  onSelectBlend: (selectedBlend: Blend) => void
+  onSelectBlend: (selectedBlend: TeaBlend) => void
 }
 
 const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose, onSelectBlend }) => {
   const [searchBlendName, setSearchBlendName] = useState('')
   const [searchQuantity, setSearchQuantity] = useState('')
   const [searchStatus, setSearchStatus] = useState<string>('All')
-  const [selectedBlend, setSelectedBlend] = useState<Blend>();
-  const [availableBlends, setAvailableBlends] = useState<Blend[]>([])
+  const [selectedBlend, setSelectedBlend] = useState<TeaBlend>();
+  const [availableBlends, setAvailableBlends] = useState<TeaBlend[]>([])
   const { getBlends } = useApiMethods();
   const { toast } = useToast()
 
@@ -31,19 +31,7 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   const fetchBlends = useCallback(async () => {
     try {
       const data = await getBlends()
-      // Transform the data to match our Blend type
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
-        id: blend.id,
-        name: blend.name,
-        blendName: blend.blendName,
-        quantity: blend.quantity,
-        status: blend.status,
-        allocations: blend.allocations
-      }));
-      console.log(transformedBlends);
-      
-      setAvailableBlends(transformedBlends)
+      setAvailableBlends(data)
     } catch (err: any) {
       toast({
         title: "Error",
@@ -55,14 +43,16 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   }, [])
 
   useEffect(() => {
-    fetchBlends()
-  }, [fetchBlends])
+    if (isOpen) {
+      fetchBlends()
+    }
+  }, [isOpen])
 
   const statusTypes = useMemo(() => ['All', ...new Set(availableBlends.map(blend => blend.status))], [availableBlends])
 
   const filteredBlends = useMemo(() => 
     availableBlends.filter(blend => 
-      (blend.blendName.toLowerCase().includes(searchBlendName.toLowerCase()) &&
+      (blend.product_name.toLowerCase().includes(searchBlendName.toLowerCase()) &&
        blend.quantity.toString().includes(searchQuantity)) && (searchStatus === 'All' || blend.status == searchStatus)
     ), [searchBlendName, searchQuantity, searchStatus]
   )
@@ -76,7 +66,7 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "ID", field: "id" },
           { title: "Name", field: "name" },
-          { title: "Blend Name", field: "blendName" },
+          { title: "Blend Name", field: "product_name" },
           { title: "Quantity (kg)", field: "quantity" },
           { title: "Status", field: "status" },
         ],
@@ -86,7 +76,7 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         selectableRollingSelection: false,
       })
 
-      table.on("rowSelectionChanged", function(data: Blend[]){
+      table.on("rowSelectionChanged", function(data: TeaBlend[]){
         if (data.length) {
           setSelectedBlend(data[0])
         }

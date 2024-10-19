@@ -99,3 +99,78 @@ export type ConfirmedSaleOrder = {
   name: string;
   customer_name: string;
 }
+
+export interface BlendInfo {
+  blendNo: string;
+  blendRefNo: string;
+  date: string;
+  blendStandard: string;
+  propSample: number;
+  requiredDate: string;
+  packagingType: string;
+  status: string;
+  customer: number;
+  customerName: string;
+  totalAllocated: number;
+  averagePrice: number;
+  averageCostToAllocate: number;
+  balanceToAllocate: number;
+  teaCost: number;
+}
+
+export interface TeaAllocation {
+  id: string;
+  box_number: string;
+  lot_no: string;
+  garden_mark: string;
+  grade: string;  
+  net_weight: number;
+  bags: number;
+  allocated_qty: number;
+  free_qty: number;
+  allocated_packages: number;
+  free_packages: number;
+  standard: string;
+  sample_allowance: string;
+  purchased_price: number;
+  break: string;
+  invoice_no: string;
+  blend_line_type: string;
+}
+
+export interface ManufacturingAllocation {
+  id: number;
+  lot_id: number;
+  lot_name: string;
+  quantity_kgs: number;
+  quantity_packages: number;
+  unit_cost: number;
+}
+
+export interface ManufacturingAllocationTableData {
+  id: number;
+  lot_id: number;
+  lot_name: string;
+  quantity_kgs: number;
+  quantity_packages: number;
+  unit_cost: number;
+  allocated_qty: number;
+}
+
+export interface TeaBlend {
+  id: number;
+  name: string;
+  product_id: number;
+  product_name: string;
+  customer_id: number;
+  customer_name: string;
+  quantity: number;
+  status: string;
+  export_quantity: number;
+  allocated_quantity: number;
+  blended_quantity: number;
+  to_allocate_quantity: number;
+  average_cost: number;
+  allocations: [];
+  manufacturing_allocations: ManufacturingAllocation[];
+}

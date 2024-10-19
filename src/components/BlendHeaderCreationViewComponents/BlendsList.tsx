@@ -6,6 +6,7 @@ import BlendCard from '../BlendHeaderCreationViewComponents/BlendCard'
 import NewBlendDialog from '../BlendHeaderCreationViewComponents/NewBlendDialog'
 import EditBlendDialog from '../BlendHeaderCreationViewComponents/EditBlendDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
+import { TeaBlend } from '../types'
 
 export type Blend = {
   id: number;
@@ -27,13 +28,13 @@ type BlendAllocation = {
 }
 
 type BlendsComponentProps = {
-  blends: Blend[];
+  blends: TeaBlend[];
   fetchBlends: () => Promise<void>;
 }
 
 export default function BlendsComponent({ blends, fetchBlends }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
-  const [editingBlend, setEditingBlend] = useState<Blend | null>(null)
+  const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
   const { toast } = useToast()
   const { createBlend, updateBlend, deleteBlend } = useApiMethods();
 
@@ -62,7 +63,7 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
     }
   }
 
-  const handleEditBlend = (blend: Blend) => {
+  const handleEditBlend = (blend: TeaBlend) => {
     setEditingBlend(blend)
   }
 
@@ -70,20 +71,13 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
     if (!editingBlend) return
 
     try {
-      await updateBlend(editingBlend.id, {
-        blendName: editingBlend.blendName,
-        status: editingBlend.status,
-        allocations: editingBlend.allocations.map(a => ({
-          lineId: a.sale_order_line_id,
-          quantity: a.quantity
-        }))
-      })
+      await updateBlend(editingBlend.id, editingBlend)
 
       await fetchBlends()
       setEditingBlend(null)
       toast({
         title: "Blend Updated",
-        description: `Updated blend: ${editingBlend.blendName}`,
+        description: `Updated blend: ${editingBlend.name}`,
       })
     } catch (error) {
       console.error('Error updating blend:', error)

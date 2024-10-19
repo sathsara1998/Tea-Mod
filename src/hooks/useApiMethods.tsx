@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useApiClient from "./useApiClient";
 import { AxiosRequestConfig } from "axios";
-import { ConfirmedSaleOrder } from "@/components/BlendHeaderCreationView";
+import { ConfirmedSaleOrder } from "@/components/types";
 
 interface CustomConfig extends AxiosRequestConfig {
     url: string;
@@ -124,12 +124,48 @@ export const useApiMethods = () => {
     }, [apiClient]);
 
 
+     // Get all auction data
+     const getAllAuctionData = useCallback(async () => {
+        const config: CustomConfig = {
+            url: "/api/auctionData",
+            errorMessage: "Error fetching data. Please try again.",
+            method: 'get'
+        }
+        try {
+            const response = await apiClient(config);
+            const data : ConfirmedSaleOrder[] = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Get Blend data by id
+    const getBlendById = useCallback(async (id: string) => {
+        const config: CustomConfig = {
+            url: "/api/blend/blendByBlendNo?id=" + id,
+            errorMessage: "Error fetching data. Please try again.",
+            method: 'get'
+        }
+        try {
+            const response = await apiClient(config);
+            const data : ConfirmedSaleOrder[] = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
     return {
         getConfirmedSaleOrders,
         getBlends,
         getTeaBlendSales,
         createBlend,
         updateBlend,
-        deleteBlend
+        deleteBlend,
+        getAllAuctionData,
+        getBlendById
     }
 }

@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Blend } from '../BlendHeaderCreationView';
+import { TeaBlend } from '../types';
 
 interface EditBlendDialogProps {
-  editingBlend: Blend | null;
-  setEditingBlend: (blend: Blend | null) => void;
+  editingBlend: TeaBlend | null;
+  setEditingBlend: (blend: TeaBlend | null) => void;
   handleUpdateBlend: () => void;
 }
 
@@ -29,7 +29,7 @@ const EditBlendDialog: React.FC<EditBlendDialogProps> = ({
     <Dialog open={!!editingBlend} onOpenChange={() => setEditingBlend(null)}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Blend: {editingBlend.blendName}</DialogTitle>
+          <DialogTitle>Edit Blend: {editingBlend.name}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
@@ -40,11 +40,11 @@ const EditBlendDialog: React.FC<EditBlendDialogProps> = ({
             </Label>
             <Input
               id="edit-name"
-              value={editingBlend.blendName}
+              value={editingBlend.name}
               onChange={(e) =>
                 setEditingBlend({
                   ...editingBlend,
-                  blendName: e.target.value,
+                  name: e.target.value,
                 })
               }
               className="col-span-3"

@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
     try {
         const response = await apiClient({
-            url: '/get_blends',
+            url: '/tea_blends',
             method: 'GET',
         });
 
