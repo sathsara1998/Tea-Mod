@@ -32,7 +32,7 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                       {data.status}
                     </Badge>
                   </div>
-                  <small>Blend: {data.name}</small>
+                  <small>Customer: R W Twing</small>
                   <small>Quantity: {data.quantity.toFixed(3)}</small>
                   <div className="flex justify-between mt-2">
                     <Popover>

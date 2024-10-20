@@ -11,6 +11,24 @@ interface CustomConfig extends AxiosRequestConfig {
 export const useApiMethods = () => {
     const apiClient = useApiClient();
 
+        // Get confirmed sale  search component
+        const getSalesContractDetailsByCustomerId = useCallback(async (customerId: number) => {
+            const config: CustomConfig = {
+                url: `/api/salesOrder/get_contract_details/${customerId}`,
+                errorMessage: "Error fetching customer sales details. Please try again.",
+                method: 'get'
+            }
+            try {
+                const response = await apiClient(config);
+                const data : ConfirmedSaleOrder[] = response.data;
+                return data;
+            } catch (error) {
+                throw new Error(config.errorMessage);
+            }
+        }, [apiClient]);
+    
+    
+
     // Get confirmed sale orders
     const getConfirmedSaleOrders = useCallback(async () => {
         const config: CustomConfig = {

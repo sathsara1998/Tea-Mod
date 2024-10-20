@@ -63,6 +63,9 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
     }
   }
 
+  const handleOnBlendCreated = (data) =>{
+    console.log("Blend Created" , data)
+  }
   const handleEditBlend = (blend: TeaBlend) => {
     setEditingBlend(blend)
   }
@@ -116,6 +119,7 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
             newBlendName={newBlendName}
             setNewBlendName={setNewBlendName}
             handleCreateNewBlend={handleCreateNewBlend}
+            onCreateBlend={handleOnBlendCreated}
           />
         </CardTitle>
       </CardHeader>
