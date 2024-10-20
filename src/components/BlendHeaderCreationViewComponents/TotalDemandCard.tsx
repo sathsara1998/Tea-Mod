@@ -2,9 +2,10 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
-interface TotalDemand {
-  blendName: string;
-  totalQuantity: number;
+export interface TotalDemand {
+  product_id: number;
+  product_name: string;
+  total: number;
 }
 
 interface TotalDemandCardProps {
@@ -27,9 +28,9 @@ const TotalDemandCard: React.FC<TotalDemandCardProps> = ({ totalDemand }) => {
             </TableHeader>
             <TableBody>
               {totalDemand.map((demand) => (
-                <TableRow key={demand.blendName}>
-                  <TableCell>{demand.blendName}</TableCell>
-                  <TableCell>{demand.totalQuantity.toFixed(3)}</TableCell>
+                <TableRow key={demand.product_name}>
+                  <TableCell>{demand.product_name}</TableCell>
+                  <TableCell>{demand.total.toFixed(3)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

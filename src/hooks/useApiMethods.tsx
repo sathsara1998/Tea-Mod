@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useApiClient from "./useApiClient";
 import { AxiosRequestConfig } from "axios";
-import { AddAllocationObject, ConfirmedSaleOrder } from "@/components/types";
+import { AddAllocationObject, BlendCreateReq, ConfirmedSaleOrder } from "@/components/types";
 
 interface CustomConfig extends AxiosRequestConfig {
     url: string;
@@ -227,6 +227,55 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Get Custoers
+    const getCustomers = useCallback(async () => {
+        const config: CustomConfig = {
+            url: `/api/customers`,
+            errorMessage: "An error occurred while fetching Customers.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get Customer sales orders
+    const getCustomerOrders = useCallback(async (id: number) => {
+        const config: CustomConfig = {
+            url: `/api/customers/orderLines?id=${id}`,
+            errorMessage: "An error occurred while fetching Orders.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Create Blend
+    const blendCreate = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/createBlend`,
+            errorMessage: "An error occurred while creating blend.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -239,6 +288,9 @@ export const useApiMethods = () => {
         getBlendById,
         addAllocationtoBlend,
         updateAllocations,
-        getLotInfoById
+        getLotInfoById,
+        getCustomers,
+        getCustomerOrders,
+        blendCreate
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,176 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator.min.css"
+import { useApiMethods } from '@/hooks/useApiMethods'
+import { useToast } from '../ui/use-toast'
+import { Customer, CustomerOrder, CustomerOrdersTableData } from '../types'
 
-// Place your JSON data here
-const contractDataArr = [
-  {
-      "id": 15,
-      "name": "S00015",
-      "contract_number": "E/24/007000",
-      "partner_id": 2846,
-      "partner_name": "SAY HELLO (PVT) LTD",
-      "date_order": "2024-10-19 17:17:20",
-      "amount_total": 253.0,
-      "currency_id": "LKR",
-      "state": "sale",
-      "total_tea_cost": 0.0,
-      "order_lines": [
-          {
-              "line_id": 28,
-              "contract_line_no": "000000",
-              "product_id": 108962,
-              "product_name": "( QFS4F ) GREENFI ELDS ORGANIC FAIRTRADE",
-              "product_uom_qty": 200.0,
-              "product_uom": "kg",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": [
-                  {
-                      "product_id": 106255,
-                      "product_name": "FW235/336 AISLABY TYPE BOP",
-                      "quantity": 200.0,
-                      "uom": "kg"
-                  }
-              ]
-          },
-          {
-              "line_id": 29,
-              "contract_line_no": "000000",
-              "product_id": 111170,
-              "product_name": "\"SWALIF BRAND LEMON TEA\"ENV STR&TAG 25X2",
-              "product_uom_qty": 1.0,
-              "product_uom": "Nos",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": []
-          },
-          {
-              "line_id": 30,
-              "contract_line_no": "000000",
-              "product_id": 108332,
-              "product_name": "( S5OF) CAMPION INV 550 (PACKING IN P/S)",
-              "product_uom_qty": 50.0,
-              "product_uom": "kg",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": [
-                  {
-                      "product_id": 94286,
-                      "product_name": "SACK KRAFT PAPER SHEET 45\" X 56\" (70GSM)",
-                      "quantity": 0.0,
-                      "uom": "Nos"
-                  }
-              ]
-          },
-          {
-              "line_id": 31,
-              "contract_line_no": "00002750",
-              "product_id": 116827,
-              "product_name": "( S5B) LAXAPANA INV 310R (PACKING IN PS",
-              "product_uom_qty": 1.0,
-              "product_uom": "kg",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": [
-                  {
-                      "product_id": 104422,
-                      "product_name": "STD BSGS5B",
-                      "quantity": 4.5,
-                      "uom": "kg"
-                  }
-              ]
-          },
-          {
-              "line_id": 32,
-              "contract_line_no": "00002751",
-              "product_id": 108332,
-              "product_name": "( S5OF) CAMPION INV 550 (PACKING IN P/S)",
-              "product_uom_qty": 1.0,
-              "product_uom": "kg",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": [
-                  {
-                      "product_id": 94286,
-                      "product_name": "SACK KRAFT PAPER SHEET 45\" X 56\" (70GSM)",
-                      "quantity": 0.0,
-                      "uom": "Nos"
-                  }
-              ]
-          }
-      ]
-  },
-  {
-      "id": 14,
-      "name": "S00014",
-      "contract_number": "E/24/006999",
-      "partner_id": 2846,
-      "partner_name": "SAY HELLO (PVT) LTD",
-      "date_order": "2024-10-19 17:10:16",
-      "amount_total": 251.0,
-      "currency_id": "LKR",
-      "state": "sale",
-      "total_tea_cost": 0.0,
-      "order_lines": [
-          {
-              "line_id": 25,
-              "contract_line_no": "000000",
-              "product_id": 108962,
-              "product_name": "( QFS4F ) GREENFI ELDS ORGANIC FAIRTRADE",
-              "product_uom_qty": 200.0,
-              "product_uom": "kg",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": [
-                  {
-                      "product_id": 106255,
-                      "product_name": "FW235/336 AISLABY TYPE BOP",
-                      "quantity": 200.0,
-                      "uom": "kg"
-                  }
-              ]
-          },
-          {
-              "line_id": 26,
-              "contract_line_no": "000000",
-              "product_id": 111170,
-              "product_name": "\"SWALIF BRAND LEMON TEA\"ENV STR&TAG 25X2",
-              "product_uom_qty": 1.0,
-              "product_uom": "Nos",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": []
-          },
-          {
-              "line_id": 27,
-              "contract_line_no": "000000",
-              "product_id": 108332,
-              "product_name": "( S5OF) CAMPION INV 550 (PACKING IN P/S)",
-              "product_uom_qty": 50.0,
-              "product_uom": "kg",
-              "tea_blend_quantity": 0.0,
-              "allocated_blend_quantity": 0.0,
-              "tea_cost": 0.0,
-              "tea_blend_details": [
-                  {
-                      "product_id": 94286,
-                      "product_name": "SACK KRAFT PAPER SHEET 45\" X 56\" (70GSM)",
-                      "quantity": 0.0,
-                      "uom": "Nos"
-                  }
-              ]
-          }
-      ]
-  }
-]
 interface OrderLine {
   line_id: number
   contract_line_no: string
@@ -201,32 +35,28 @@ interface OrderLine {
   }[]
 }
 
-interface ContractData {
-  id: number
-  name: string
-  contract_number: string
-  partner_id: number
-  partner_name: string
-  date_order: string
-  amount_total: number
-  currency_id: string
-  state: string
-  total_tea_cost: number
-  order_lines: OrderLine[]
+export interface CustomerFullBlends {
+  partner_id: number,
+  products: CustomerOrdersTableData[]
 }
 
 interface ModernBlendDialogProps {
-  contractData?: ContractData[]
-  onCreateBlend: (blendData: OrderLine[]) => void
+  customers: Customer[]
+  onCreateBlend: (blendData: CustomerFullBlends) => void
 }
 
-export default function ModernBlendDialog({ contractData = [], onCreateBlend }: ModernBlendDialogProps) {
+export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBlendDialogProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
-  const [customerOrderLines, setCustomerOrderLines] = useState<OrderLine[]>([])
+  const [customerOrderLines, setCustomerOrderLines] = useState<CustomerOrder[]>([])
+  const [customerOrders, setCustomerOrders] = useState<CustomerOrdersTableData[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  contractData = contractDataArr
+  const [selectedOrderLines, setSelectedOrderLines] = useState<CustomerOrdersTableData[]>([])
+
   const allocationsTableRef = useRef<HTMLDivElement>(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
+
+  const { getCustomerOrders } = useApiMethods();
+  const { toast } = useToast()
 
   useEffect(() => {
     if (isOpen && allocationsTableRef.current && customerOrderLines.length > 0) {
@@ -235,33 +65,27 @@ export default function ModernBlendDialog({ contractData = [], onCreateBlend }: 
       }
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
-        data: customerOrderLines,
+        data: customerOrders,
         height: "400px",
         layout: "fitColumns",
         placeholder: "No Order Lines Available",
         selectableRows: true,
-
+        groupBy:"product_name",
         columns: [
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
           { title: "Line No", field: "contract_number", hozAlign: "left" },
-
           { title: "Line No", field: "contract_line_no", hozAlign: "left" },
-          { title: "Product", field: "product_name", hozAlign: "left" },
+          { title: "Product", field: "product_internal_ref", hozAlign: "left" },
           { title: "Quantity", field: "product_uom_qty", hozAlign: "right" },
           { title: "UOM", field: "product_uom", hozAlign: "center" },
-          { title: "Allocated Blend Qty", field: "allocated_blend_quantity", hozAlign: "right" },
-          { title: "Blending Qty", field: "allocated_blend_quantity", hozAlign: "right" },
-
-          { 
-            title: "Tea Blend Details", 
-            field: "tea_blend_details", 
-            hozAlign: "left",
-            formatter: (cell) => {
-              const details = cell.getValue() as {product_name: string, quantity: number, uom: string}[]
-              return details.map(d => `${d.product_name}: ${d.quantity} ${d.uom}`).join(', ')
-            }
-          },
+          { title: "Allocated Blend Qty", field: "product_name", hozAlign: "right" },
+          { title: "Blending Qty", field: "product_blend_internal_ref", hozAlign: "right" },
+          { title: "Tea Blend Details", field: "blend_details", hozAlign: "left" },
         ],
+      })
+
+      tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
+        setSelectedOrderLines(data);
       })
     }
 
@@ -271,27 +95,65 @@ export default function ModernBlendDialog({ contractData = [], onCreateBlend }: 
         tabulatorRef.current = null
       }
     }
-  }, [isOpen, customerOrderLines])
+  }, [customerOrders])
+
+  useEffect(() => {
+    let customerData : CustomerOrdersTableData[] = [];
+
+    customerOrderLines.forEach(line => {
+      line.order_lines.forEach(item => {
+        console.log("line", item);
+        
+        customerData.push({
+          contract_number: line.contract_number,
+          contract_line_no: item.contract_line_no,
+          product_internal_ref: item.product_internal_ref,
+          product_uom_qty: item.product_uom_qty,
+          product_uom: item.product_uom,
+          product_name: item.tea_blend_details.length ? item.tea_blend_details[0].product_name : "",
+          product_blend_internal_ref: item.tea_blend_details.length ? item.tea_blend_details[0].product_internal_ref: "",
+          blend_details: item.tea_blend_details.length ? item.tea_blend_details[0].product_name : "",
+          tea_weight: item.tea_blend_details.length ? item.tea_blend_details[0].tea_weight : 0,
+          allocated_blend_quantity: item.allocated_blend_quantity,
+          product_id: item.tea_blend_details.length ? item.tea_blend_details[0].product_id : 0,
+          release_number: 1,
+          standard: "",
+          blending_qty: item.tea_blend_details.length ? item.tea_blend_details[0].tea_weight - item.allocated_blend_quantity : 0,
+          line_id: item.line_id
+        })
+      })
+    })
+    setCustomerOrders(customerData);
+  }, [customerOrderLines])
 
   const handleCustomerChange = (customerId: string) => {
-    setSelectedCustomer(customerId)
-    const customerContracts = contractData.filter(contract => contract.partner_id.toString() === customerId)
-    const allOrderLines = customerContracts.flatMap(contract => contract.order_lines)
-    setCustomerOrderLines(allOrderLines)
+    setSelectedCustomer(customerId);
+    fetchCustomerOrders(Number(customerId))
   }
 
-  const handleCreateBlend = () => {
-    if (customerOrderLines.length > 0) {
-      onCreateBlend(customerOrderLines)
-      setIsOpen(false)
+  const fetchCustomerOrders = async (cusId: number) => {
+    try {
+      const orders = await getCustomerOrders(cusId)
+      setCustomerOrderLines(orders)
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
     }
   }
 
-  if (!contractData || contractData.length === 0) {
-    return <div>No contract data available</div>
+  const handleCreateBlend = () => {
+    if (selectedOrderLines.length > 0) {
+      const passObj: CustomerFullBlends = {
+        partner_id: Number(selectedCustomer),
+        products: selectedOrderLines
+      }
+      onCreateBlend(passObj)
+      setIsOpen(false)
+    }
   }
-
-  const uniqueCustomers = Array.from(new Set(contractData.map(contract => contract.partner_id)))
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -301,8 +163,8 @@ export default function ModernBlendDialog({ contractData = [], onCreateBlend }: 
         </Button>
       </DialogTrigger>
 
-      <DialogContent 
-        className="max-w-6xl max-h-[90vh] overflow-y-auto" 
+      <DialogContent
+        className="max-w-6xl max-h-[90vh] overflow-y-auto"
         onInteractOutside={(e) => {
           e.preventDefault()
         }}
@@ -319,14 +181,15 @@ export default function ModernBlendDialog({ contractData = [], onCreateBlend }: 
                 <SelectValue placeholder="Select customer" />
               </SelectTrigger>
               <SelectContent>
-                {uniqueCustomers.map((customerId) => {
-                  const customer = contractData.find(c => c.partner_id === customerId)
-                  return (
-                    <SelectItem key={customerId} value={customerId.toString()}>
-                      {customer ? customer.partner_name : `Customer ${customerId}`}
+                {customers && customers.length > 0 ? (
+                  customers.map(customer => (
+                    <SelectItem key={customer.id} value={customer.id.toString()}>
+                      {customer.name ? customer.name : `Customer ${customer.id}`}
                     </SelectItem>
-                  )
-                })}
+                  ))
+                ) : (
+                  <div>No customers available</div> // Fallback in case customers is empty or undefined
+                )}
               </SelectContent>
             </Select>
           </div>

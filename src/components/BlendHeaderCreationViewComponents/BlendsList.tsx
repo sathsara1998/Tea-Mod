@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import BlendCard from '../BlendHeaderCreationViewComponents/BlendCard'
-import NewBlendDialog from '../BlendHeaderCreationViewComponents/NewBlendDialog'
+import NewBlendDialog, { CustomerFullBlends } from '../BlendHeaderCreationViewComponents/NewBlendDialog'
 import EditBlendDialog from '../BlendHeaderCreationViewComponents/EditBlendDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
-import { TeaBlend } from '../types'
+import { Customer, TeaBlend } from '../types'
 
 export type Blend = {
   id: number;
@@ -30,42 +30,38 @@ type BlendAllocation = {
 type BlendsComponentProps = {
   blends: TeaBlend[];
   fetchBlends: () => Promise<void>;
+  onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void;
 }
 
-export default function BlendsComponent({ blends, fetchBlends }: BlendsComponentProps) {
+export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
+  const [customers, setCustomers] = useState<Customer[]>([])
   const { toast } = useToast()
-  const { createBlend, updateBlend, deleteBlend } = useApiMethods();
+  const { 
+    createBlend, 
+    updateBlend, 
+    deleteBlend,
+    getCustomers
+  } = useApiMethods();
 
-  const handleCreateNewBlend = async () => {
-    if (newBlendName.trim() === '') return
+  const handleCreateNewBlend = async (customerOrders: CustomerFullBlends) => {
+    onNewBlendDataAdd(customerOrders);
+  }
 
+  const fetchCustomers = useCallback(async () => {
     try {
-      await createBlend({
-        blendName: newBlendName,
-        allocations: []
-      })
-
-      await fetchBlends()
-      setNewBlendName('')
-      toast({
-        title: "New Blend Created",
-        description: `Created new blend: ${newBlendName}`,
-      })
-    } catch (error) {
-      console.error('Error creating new blend:', error)
+      const customers = await getCustomers()
+      setCustomers(customers)
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: "Failed to create new blend. Please try again.",
+        description: err.message,
         variant: "destructive",
       })
     }
-  }
+  }, [])
 
-  const handleOnBlendCreated = (data) =>{
-    console.log("Blend Created" , data)
-  }
   const handleEditBlend = (blend: TeaBlend) => {
     setEditingBlend(blend)
   }
@@ -110,16 +106,18 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
     }
   }
 
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           Blends
           <NewBlendDialog
-            newBlendName={newBlendName}
-            setNewBlendName={setNewBlendName}
-            handleCreateNewBlend={handleCreateNewBlend}
-            onCreateBlend={handleOnBlendCreated}
+            onCreateBlend={handleCreateNewBlend}
+            customers={customers}
           />
         </CardTitle>
       </CardHeader>

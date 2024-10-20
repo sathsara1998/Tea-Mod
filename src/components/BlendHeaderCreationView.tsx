@@ -1,24 +1,23 @@
 "use client"
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import EditBlendDialog from './BlendHeaderCreationViewComponents/EditBlendDialog';
-import TotalDemandCard from './BlendHeaderCreationViewComponents/TotalDemandCard';
+import TotalDemandCard, { TotalDemand } from './BlendHeaderCreationViewComponents/TotalDemandCard';
 import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
 import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
 import { useApiMethods } from '@/hooks/useApiMethods'
-import { 
-  TeaBlendDetail, 
-  OrderLine, 
-  SalesOrder, 
-  BlendAllocation, 
-  Blend, 
+import {
+  SalesOrder,
   SelectedBlend, 
   ConfirmedSaleOrder, 
-  TeaBlend
+  TeaBlend,
+  CustomerOrdersTableData,
+  BlendCreateReq
 } from './types'
+import { CustomerFullBlends } from './BlendHeaderCreationViewComponents/NewBlendDialog'
 
 
 export default function BlendAllocator() {
@@ -30,14 +29,19 @@ export default function BlendAllocator() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
+  const [selectedAllocations, setSelectedAllocations] = useState<CustomerOrdersTableData[]>([])
+  const [groupedDemands, setGroupedDemands] = useState<TotalDemand[]>([])
   const { toast } = useToast()
   const { 
     getConfirmedSaleOrders, 
     getBlends, 
     getTeaBlendSales, 
     createBlend,
-    updateBlend
+    updateBlend,
+    blendCreate
   } = useApiMethods();
+
+  const selectedPartnerId = useRef(0)
 
   const fetchConfirmedSaleOrders = useCallback(async () => {
     setIsLoading(true)
@@ -167,36 +171,45 @@ export default function BlendAllocator() {
   }
 
   const handleConfirm = async () => {
-    if (selectedSalesOrders.length === 0) return
-
     setIsConfirming(true)
+    let mainObj = {
+      partner_id: selectedPartnerId.current,
+      products: []
+    }
 
-    try {
-      const totalDemand = calculateTotalDemand()
-      for (const demand of totalDemand) {
-        const allocations = selectedSalesOrders.flatMap(order =>
-          order.order_lines.map(line => ({
-            lineId: line.line_id,
-            quantity: selectedBlends.find(b => b.blendName === demand.blendName)?.quantities[line.line_id] || 0
-          })).filter(a => a.quantity > 0)
-        )
-
-        await createBlend({
-          blendName: demand.blendName,
-          allocations: allocations
+    groupedDemands.forEach(dem => {
+      let obj = {
+        product_id: dem.product_id,
+        quantity: dem.total,
+        allocations: []
+      }
+      let allocations : any = []
+      const allData = selectedAllocations.filter(item => item.product_id == dem.product_id)
+      if (allData.length > 0) {
+        allocations = allData.map(item => {
+          return {
+            sale_order_line_id: item.line_id,
+            quantity: item.blending_qty
+          }
         })
       }
+      obj.allocations = allocations;
 
-      await fetchBlends()
+      mainObj.products.push(obj);
+    })
+
+    try {
+      await blendCreate(mainObj)
       toast({
-        title: "Blends Created",
-        description: `Created ${totalDemand.length} new blend(s).`,
+        title: "Blend Created",
+        description: `Created blend successfully`,
+        variant: "default",
       })
-    } catch (error) {
-      console.error('Error creating blends:', error)
+      resetData()
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to create blends. Please try again.",
+        description: "Failed to create blend. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -224,6 +237,45 @@ export default function BlendAllocator() {
         variant: "destructive",
       })
     }
+  }
+
+  function groupByProductNameAndSum(): TotalDemand[] {
+    const grouped = selectedAllocations.reduce((acc: Record<string, { total: number, product_id: number }>, order) => {
+      // If the product_name already exists, add the tea_weight to the total
+      if (acc[order.product_name]) {
+        acc[order.product_name].total += order.blending_qty;
+      } else {
+        // Otherwise, initialize it with the current tea_weight and product_id
+        acc[order.product_name] = {
+          total: order.blending_qty,
+          product_id: order.product_id // Add product_id here
+        };
+      }
+      return acc;
+    }, {});
+  
+    // Convert the grouped object to an array of { product_id, product_name, total }
+    return Object.entries(grouped).map(([product_name, { total, product_id }]) => ({
+      product_name,
+      product_id,
+      total,
+    }));
+  }
+
+  useEffect(() => {
+    if (selectedAllocations.length > 0) {
+      setGroupedDemands(groupByProductNameAndSum());
+    }
+  }, [selectedAllocations])
+
+  const onNewBlendDataAdd = (data: CustomerFullBlends) => {
+    setSelectedAllocations(data.products);
+    selectedPartnerId.current = data.partner_id;
+  }
+
+  const resetData = () => {
+    setSelectedAllocations([]);
+    selectedPartnerId.current = 0;
   }
 
   if (isLoading) {
@@ -254,28 +306,22 @@ export default function BlendAllocator() {
     <div className="container w-full p-4 flex flex-row ml-0 mr-0">
       {/* Left Side - Blends */}
       <div className="w-full md:w-1/3 mb-4 md:mb-0 md:mr-4 ml-0">
-        <BlendsList blends={blends} fetchBlends={fetchBlends} />
+        <BlendsList blends={blends} fetchBlends={fetchBlends} onNewBlendDataAdd={onNewBlendDataAdd} />
       </div>
 
       {/* Middle - Blend Creation */}
       <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
         <BlendCreation
-          confirmedSaleOrders={confirmedSaleOrders}
-          selectedSalesOrders={selectedSalesOrders}
           selectedBlends={selectedBlends}
           isConfirming={isConfirming}
-          handleSalesOrderSelect={handleSalesOrderSelect}
-          handleRemoveSalesOrder={handleRemoveSalesOrder}
-          handleBlendSelect={handleBlendSelect}
-          handleBlendQuantityChange={handleBlendQuantityChange}
-          handleAllocateFullQuantity={handleAllocateFullQuantity}
           handleConfirm={handleConfirm}
+          blendItems={selectedAllocations}
         />
       </div>
 
       {/* Right Side - Total Demand */}
       <div className="w-full md:w-1/4">
-        <TotalDemandCard totalDemand={calculateTotalDemand()} />
+        <TotalDemandCard totalDemand={groupedDemands} />
       </div>
 
       {/* Edit Blend Dialog */}

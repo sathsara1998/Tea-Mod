@@ -1,125 +1,46 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, ArrowRight } from "lucide-react"
+import { TabulatorFull as Tabulator } from 'tabulator-tables'
 
-import { SelectedBlend, ConfirmedSaleOrder } from '@/components/types';
+import { SelectedBlend, ConfirmedSaleOrder, CustomerOrdersTableData } from '@/components/types';
 
-interface BlendItem {
-  id: number
-  contract_number: string
-  contract_line_no: number
-  releaseNo: number
-  item: string
-  qtyOrdered: number
-  uom: string
-  itemDescription: string
-  blendStandard: string
-  teaWeightKg: number
-  blendingQtyKg: number
-  blendedQtyKg: number
+interface AllocationsData {
+  contract_number: string;
+  contract_line_no: string;
+  product_internal_ref: string;
+  product_uom_qty: number;
+  product_uom: string;
+  product_name: string;
+  product_blend_internal_ref: string;
+  blend_details: string;
+  tea_weight: number;
+  allocated_blend_quantity: number;
+  release_number: number;
+  blending_qty: number;
+  standard: string;
 }
 
-// Dummy data for BlendItems
-const dummyBlendItems: BlendItem[] = [
-  {
-    id: 1,
-    contract_number: "CO001",
-    contract_line_no: 1,
-    releaseNo: 1,
-    item: "TEA001",
-    qtyOrdered: 1000,
-    uom: "KG",
-    itemDescription: "Earl Grey Tea",
-    blendStandard: "EG-STD-01",
-    teaWeightKg: 950,
-    blendingQtyKg: 1000,
-    blendedQtyKg: 0
-  },
-  {
-    id: 2,
-    contract_number: "CO001",
-    contract_line_no: 2,
-    releaseNo: 1,
-    item: "TEA002",
-    qtyOrdered: 500,
-    uom: "KG",
-    itemDescription: "English Breakfast Tea",
-    blendStandard: "EB-STD-01",
-    teaWeightKg: 480,
-    blendingQtyKg: 500,
-    blendedQtyKg: 0
-  },
-  {
-    id: 7,
-    contract_number: "CO002",
-    contract_line_no: 1,
-    releaseNo: 1,
-    item: "TEA003",
-    qtyOrdered: 750,
-    uom: "KG",
-    itemDescription: "Green Tea",
-    blendStandard: "GT-STD-01",
-    teaWeightKg: 725,
-    blendingQtyKg: 750,
-    blendedQtyKg: 0
-  },
-  {
-    id: 4,
-    contract_number: "CO002",
-    contract_line_no: 1,
-    releaseNo: 1,
-    item: "TEA003",
-    qtyOrdered: 750,
-    uom: "KG",
-    itemDescription: "Green Tea",
-    blendStandard: "GT-STD-01",
-    teaWeightKg: 725,
-    blendingQtyKg: 750,
-    blendedQtyKg: 0
-  },
-  {
-    id: 5,
-    contract_number: "CO002",
-    contract_line_no: 1,
-    releaseNo: 1,
-    item: "TEA003",
-    qtyOrdered: 750,
-    uom: "KG",
-    itemDescription: "Green Tea",
-    blendStandard: "GT-STD-01",
-    teaWeightKg: 725,
-    blendingQtyKg: 750,
-    blendedQtyKg: 0
-  }
-];
-
 type BlendCreationProps = {
-  confirmedSaleOrders: ConfirmedSaleOrder[];
-  blendItems: BlendItem[];
+  blendItems: CustomerOrdersTableData[];
   selectedBlends: SelectedBlend[];
   isConfirming: boolean;
-  handleBlendSelect: (blendName: string, itemId: number, checked: boolean) => void;
-  handleBlendQuantityChange: (blendName: string, itemId: number, quantity: number) => void;
-  handleAllocateFullQuantity: (blendName: string, itemId: number, fullQuantity: number) => void;
   handleConfirm: () => void;
 };
 
 const BlendCreation: React.FC<BlendCreationProps> = ({
-  confirmedSaleOrders,
   blendItems,
   selectedBlends,
   isConfirming,
-  handleBlendSelect,
-  handleBlendQuantityChange,
-  handleAllocateFullQuantity,
   handleConfirm,
 }) => {
-  // Use dummy data if blendItems is not provided
-  const itemsToRender = blendItems && blendItems.length > 0 ? blendItems : dummyBlendItems;
+  const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
+
+  const allocationDataRef = useRef<HTMLDivElement>(null)
 
   const getQuantityColor = (allocated: number, total: number) => {
     if (allocated === total) return 'bg-green-200'
@@ -127,13 +48,52 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
     return 'bg-blue-200'
   }
 
+  useEffect(() => {
+    if (allocationDataRef.current) {
+      const table = new Tabulator(allocationDataRef.current, {
+        data: blendItems,
+        selectableRows:1,
+        columns: [
+          { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
+          { title: "Line No", field: "contract_line_no", hozAlign: "left" },
+          { title: "Line No", field: "contract_number", hozAlign: "left" },
+          { title: "Release No", field: "release_number", hozAlign: "left" },
+          { title: "Item", field: "product_internal_ref", hozAlign: "left" },
+          { title: "Quantity", field: "product_uom_qty", hozAlign: "right" },
+          { title: "UOM", field: "product_uom", hozAlign: "center" },
+          { title: "Item description", field: "product_name", hozAlign: "center" },
+          { title: "Standard", field: "standard", hozAlign: "center" },
+          { title: "Tea weight", field: "tea_weight", hozAlign: "right" },
+          { title: "Blending Qty", field: "blending_qty", hozAlign: "right", editor: "number", editorParams: (cell) => {
+            const teaWeight = cell.getRow().getData().tea_weight;
+            return {
+              min: 0,
+              max: teaWeight,
+              step: 1,
+            };
+          }},
+          { title: "Blended Qty", field: "allocated_blend_quantity", hozAlign: "left" },
+        ],
+        height: "400px",
+        selectable: true,
+        selectableRollingSelection: false,
+      })
+
+      return () => {
+        table.destroy()
+      }
+    }
+  }, [blendItems])
+
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Create Blend</CardTitle>
       </CardHeader>
       <CardContent>
-        {itemsToRender.length > 0 ? (
+        <div ref={allocationDataRef} className="flex-grow"></div>
+        {/* {blendItems.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -154,7 +114,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {itemsToRender.map((item) => (
+              {blendItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.contract_number}</TableCell>
                   <TableCell>{item.contract_line_no}</TableCell>
@@ -202,12 +162,12 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           </Table>
         ) : (
           <p>No blend items available.</p>
-        )}
+        )} */}
 
         <Button 
           onClick={handleConfirm} 
           className="mt-4" 
-          disabled={isConfirming || !selectedBlends || selectedBlends.length === 0}
+          disabled={isConfirming || !blendItems || blendItems.length === 0}
         >
           {isConfirming ? (
             <>

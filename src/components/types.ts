@@ -216,3 +216,78 @@ export interface StockLot {
   invoice_no: string;
   blend_line_type: string;
 }
+
+export interface Customer {
+  id: number;
+  name: string;
+}
+
+export interface CustomerOrder {
+  id: number;
+  name: string;
+  contract_number: string;
+  partner_id: number;
+  partner_name: string;
+  date_order: string;
+  amount_total: number;
+  currency_id: string;
+  state: string;
+  total_tea_cost: number;
+  order_lines: ContractLine[];
+}
+
+export interface ContractLine {
+  line_id: number;
+  contract_line_no: string;
+  product_id: number;
+  product_internal_ref: string;
+  product_name: string;
+  product_uom_qty: number;
+  product_uom: string;
+  tea_blend_quantity: number;
+  allocated_blend_quantity: number;
+  tea_cost: number;
+  tea_blend_details: OrderBlendDetail[];
+}
+
+export interface OrderBlendDetail {
+  product_id: number;
+  product_name: string;
+  product_internal_ref: string;
+  tea_weight: number;
+  uom: string;
+}
+
+export interface CustomerOrdersTableData {
+  contract_number: string;
+  contract_line_no: string;
+  product_internal_ref: string;
+  product_uom_qty: number;
+  product_uom: string;
+  product_name: string;
+  product_blend_internal_ref: string;
+  blend_details: string;
+  tea_weight: number;
+  allocated_blend_quantity: number;
+  product_id: number,
+  release_number: number;
+  blending_qty: number;
+  standard: string;
+  line_id: number;
+}
+
+export interface BlendCreateReq {
+  partner_id: number;
+  products: [
+    {
+      product_id: number;
+      quantity: number;
+      allocations: [
+        {
+          sale_order_line_id: number;
+          quantity: number;
+        }
+      ]
+    }
+  ]
+}
