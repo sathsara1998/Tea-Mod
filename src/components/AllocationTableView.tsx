@@ -72,14 +72,17 @@ export default function AllocationTableView() {
   const tabulatorRef = useRef<Tabulator | null>(null)
   const updatedRows = useRef<number[]>([]);
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([]);
+  const isInitialAllocations = useRef(true)
 
   useEffect(() => {
     if (allocationsTableRef.current) {
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         data: allocations,
         height: "500px",
-        selectableRows: isDraftBlend,
+        selectable: isDraftBlend,
+        selectableRollingSelection: false,
         columns: [
+          { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
           {
             title: "View Details",
@@ -114,9 +117,9 @@ export default function AllocationTableView() {
         rowFormatter: (row) => {
           const rowData = row.getData();
           if (rowData.weight_diff > 0) {
-            row.getElement().style.backgroundColor = "green";
+            row.getElement().style.backgroundColor = "#8aedb8";
           } else if (rowData.weight_diff < 0) {
-            row.getElement().style.backgroundColor = "red";
+            row.getElement().style.backgroundColor = "#eda18a";
           }
         }
       })
@@ -201,38 +204,7 @@ export default function AllocationTableView() {
       }
       return a
     }))
-    updateTotalQuantity()
   }
-
-  const addTeaToBlend = (tea: TeaAllocation, quantity: number) => {
-    const existingAllocation = allocations.find(a => a.box_number === tea.box_number)
-    if (existingAllocation) {
-      setAllocations(prev => prev.map(a => 
-        a.box_number === tea.box_number 
-          ? { 
-              ...a, 
-              quantity: a.allocated_qty + quantity, 
-              packages: Math.ceil((a.allocated_qty + quantity) / tea.net_weight),
-              type: tea.blend_line_type  // Ensure type is updated even for existing allocations
-            }
-          : a
-      ))
-    } else {
-      const newAllocation : ManufacturingAllocationTableData = {
-        id: Math.random(),
-        box_number: tea.box_number,
-        lot_id: Number(tea.lot_no),
-        allocated_qty: tea.allocated_qty,
-        quantity_kgs: tea.net_weight,
-        quantity_packages: tea.allocated_packages,
-        unit_cost: tea.purchased_price,
-        net_weight: 0
-      }
-      setAllocations(prev => [...prev, newAllocation])
-    }
-    updateTotalQuantity()
-  }
-
   
   const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
     if (selectedBlend) {
@@ -241,8 +213,13 @@ export default function AllocationTableView() {
   }
 
   const updateTotalQuantity = () => {
-    const total = allocations.reduce((sum, allocation) => sum + allocation.allocated_qty, 0)
-    setBlend(prev => ({ ...prev, totalQuantity: total }))
+    const total = allocations.reduce((sum, allocation) => sum + allocation.quantity_kgs, 0);
+    const totalCost = allocations.reduce((sum, allocation) => sum + allocation.total_cost, 0);
+    const avgPrice = total > 0 ? parseFloat((totalCost / total).toFixed(2)) : 0; // Convert to number
+  
+    setBlendInfo(prev => {
+      return { ...prev, totalAllocated: total, averagePrice: avgPrice };
+    });
   }
 
   const handleRemoveSelectedTeas = () => {
@@ -262,7 +239,6 @@ export default function AllocationTableView() {
       tabulatorRef.current.deselectRow()
       setSelectedRowCount(0)
       setIsConfirmDialogOpen(false)
-      updateTotalQuantity()
     }
   }
 
@@ -293,7 +269,8 @@ export default function AllocationTableView() {
     averagePrice: 0,
     averageCostToAllocate: 0,
     balanceToAllocate: 0,
-    teaCost: 0
+    teaCost: 0,
+    export_quantity: 0
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -320,6 +297,15 @@ export default function AllocationTableView() {
     }
   }, [blendInfo, allocations, availableTeas])
 
+
+  useEffect(() => {
+    if (isInitialAllocations.current == true) {
+      isInitialAllocations.current = false;
+    } else {
+      updateTotalQuantity();
+    }
+  }, [allocations])
+
   // Get blend data by blendid
   const fetchBlendData = useCallback(async (id: string) => {
     try {
@@ -341,6 +327,7 @@ export default function AllocationTableView() {
         averageCostToAllocate: teas.average_cost,
         balanceToAllocate: teas.export_quantity,
         teaCost: teas.average_cost,
+        export_quantity: teas.export_quantity
       }
       setBlendInfo(teablendInfo);
       const tableData = teas.manufacturing_allocations.map(item => {
@@ -524,6 +511,7 @@ export default function AllocationTableView() {
 
       {selectedBlend && (
         <AvailableTeaDialog
+          selectedIds={allocations.map(item => item.box_number)}
           blendId={selectedBlend.id}
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}

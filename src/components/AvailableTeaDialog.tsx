@@ -27,10 +27,11 @@ interface AvailableTeaDialogProps {
   blendId: number
   isOpen: boolean
   onClose: () => void
-  onAddTeas: (selectedTeas: TeaAllocation[]) => void
+  onAddTeas: (selectedTeas: TeaAllocation[]) => void,
+  selectedIds: string[]
 }
 
-const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId, onClose, onAddTeas }) => {
+const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId, onClose, onAddTeas, selectedIds }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('All')
   const [selectedTeas, setSelectedTeas] = useState<TeaAllocation[]>([])
@@ -125,12 +126,22 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
         ],
         height: "400px",
         selectable: true,
-        selectableRollingSelection: false,
+        selectableRollingSelection: false
       })
 
-      table.on("rowSelectionChanged", function(data, rows){
-        setSelectedTeas(data)
-      })
+      table.on("rowSelectionChanged", function (selectedData, rows) {
+        // Filter out the rows with disabled IDs
+        rows.forEach((row) => {
+          const rowData = row.getData();
+          if (selectedIds.includes(rowData.box_number)) {
+            row.deselect(); // Automatically deselect rows with disabled ids
+          }
+        });
+  
+        // Set the selected teas excluding the disabled ones
+        const validSelections = selectedData.filter(item => !selectedIds.includes(item.box_number));
+        setSelectedTeas(validSelections);
+      });
 
       return () => {
         table.destroy()
