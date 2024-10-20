@@ -60,10 +60,9 @@ export default function AllocationTableView() {
   const [selectedBlend, setSelectedBlend] = useState<TeaBlend>();
   const [isDraftBlend, setIsDraftBlend] = useState(true);
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false);
-  const [isAllocationDetailsOpen, setIsAllocationDetailsOpen] = useState(false);
-  const [allocationDetailsId, setAllocationDetailsId] = useState<number>(0);
+  const [blendDetails, setBlendDetails] = useState<StockLot>();
 
-  const { getBlendById, updateAllocations } = useApiMethods();
+  const { getBlendById, updateAllocations, getLotInfoById } = useApiMethods();
   const { toast } = useToast()
   
   const allocationsTableRef = useRef(null)
@@ -177,8 +176,7 @@ export default function AllocationTableView() {
   }, [availableTeas, searchTerm])
 
   const handleViewDetails = (id: number) => {
-    setAllocationDetailsId(id);
-    setIsAllocationDetailsOpen(true);
+    fetchLotInfo(id)
   }
 
   const handleQuantityChange = (boxNumber: string, newValue: number, unit: 'kg' | 'packages', id: number) => {
@@ -241,6 +239,19 @@ export default function AllocationTableView() {
       setIsConfirmDialogOpen(false)
     }
   }
+
+  const fetchLotInfo = async (lotId: number) => {
+      try {
+          const data = await getLotInfoById(lotId);
+          setBlendDetails(data);
+      } catch (err: any) {
+          toast({
+              title: "Error",
+              description: err.message,
+              variant: "destructive",
+          });
+      }
+  };
 
   const selectAllRows = () => {
     if (tabulatorRef.current) {
@@ -429,14 +440,6 @@ export default function AllocationTableView() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-2">
-              <FormField label="Total Allocated" value={blendInfo.totalAllocated} readOnly />
-              <FormField label="Average Price" value={blendInfo.averagePrice} readOnly />
-              <FormField label="Avg Cost to Allocate" value={blendInfo.averageCostToAllocate} readOnly />
-              <FormField label="Balance to Allocate" value={blendInfo.balanceToAllocate} readOnly />
-              <FormField label="Tea Cost" value={blendInfo.teaCost} readOnly />
-              {blendInfo.export_quantity != undefined && <FormField label="Export Quantity" value={blendInfo.export_quantity?.toString()} readOnly />}
-            </div>
             <div ref={blendsTableRef}></div>
           </CardContent>
         </Card>
@@ -469,6 +472,7 @@ export default function AllocationTableView() {
         </div>
         <BlendInformationSection 
          blendInfo={blendInfo} 
+         lotDetails={blendDetails}
          onBlendInfoChange={handleBlendInfoChange}
          onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
          onSaveTableData={() => saveTableData()}
@@ -517,13 +521,6 @@ export default function AllocationTableView() {
           onClose={() => setIsDialogOpen(false)}
           onAddTeas={addSelectedTeasToBlend}
         />
-      )}
-
-      {isAllocationDetailsOpen && (
-        <AllocationDetailsDialog
-          isOpen={isAllocationDetailsOpen}
-          onClose={() => setIsAllocationDetailsOpen(false)}
-          lotId={allocationDetailsId} />
       )}
     </div>
   </>
