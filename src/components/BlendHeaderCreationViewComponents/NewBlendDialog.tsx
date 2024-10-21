@@ -119,7 +119,8 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
           release_number: 1,
           standard: "",
           blending_qty: item.tea_blend_details.length ? item.tea_blend_details[0].tea_weight - item.allocated_blend_quantity : 0,
-          line_id: item.line_id
+          line_id: item.line_id,
+          id: item.line_id
         })
       })
     })
@@ -155,8 +156,13 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
     }
   }
 
+  const closePopup = (val: boolean) => {
+    setSelectedCustomer(null);
+    setIsOpen(val);
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={closePopup}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
           New Blend

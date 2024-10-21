@@ -276,6 +276,63 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Get blend info
+    const updateSalesOrder = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/updateSalesAllocations`,
+            errorMessage: "An error occurred while updating blend data.",
+            method: 'put',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Delete Manufacture Allocations
+    const deleteManufactureAllocs = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/deleteManufacallocations`,
+            errorMessage: "An error occurred while deleting allocations",
+            method: 'post',
+            data: {
+                allocation_ids: data
+            }
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Delete Manufacture Allocations
+    const deleteSalesAllocs = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/deleteSalesallocations`,
+            errorMessage: "An error occurred while deleting allocations",
+            method: 'post',
+            data: {
+                allocation_ids: data
+            }
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -291,6 +348,9 @@ export const useApiMethods = () => {
         getLotInfoById,
         getCustomers,
         getCustomerOrders,
-        blendCreate
+        blendCreate,
+        updateSalesOrder,
+        deleteManufactureAllocs,
+        deleteSalesAllocs
     }
 }

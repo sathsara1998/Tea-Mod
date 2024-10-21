@@ -62,7 +62,12 @@ export default function AllocationTableView() {
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false);
   const [blendDetails, setBlendDetails] = useState<StockLot>();
 
-  const { getBlendById, updateAllocations, getLotInfoById } = useApiMethods();
+  const { 
+    getBlendById, 
+    updateAllocations, 
+    getLotInfoById,
+    deleteManufactureAllocs
+  } = useApiMethods();
   const { toast } = useToast()
   
   const allocationsTableRef = useRef(null)
@@ -72,6 +77,7 @@ export default function AllocationTableView() {
   const updatedRows = useRef<number[]>([]);
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([]);
   const isInitialAllocations = useRef(true)
+  const selectedIdsRef = useRef<number[]>([]);
 
   useEffect(() => {
     if (allocationsTableRef.current) {
@@ -124,6 +130,7 @@ export default function AllocationTableView() {
       })
 
       tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
+        selectedIdsRef.current = [...selectedIdsRef.current, data.id]
         setSelectedRowCount(data.length)
       })
 
@@ -229,14 +236,30 @@ export default function AllocationTableView() {
     }
   }
 
-  const confirmRemoveSelectedTeas = () => {
+  const confirmRemoveSelectedTeas = async () => {
     if (tabulatorRef.current) {
       const selectedData = tabulatorRef.current.getSelectedData()
       const selectedIds = selectedData.map((row: any) => row.id)
-      setAllocations(prev => prev.filter((a: any) => !selectedIds.includes(a.id)))
-      tabulatorRef.current.deselectRow()
-      setSelectedRowCount(0)
-      setIsConfirmDialogOpen(false)
+      
+      try {
+        await deleteManufactureAllocs(selectedIds);
+        toast({
+          title: "Success",
+          description: "Selected allocations have been removed",
+          variant: "default",
+        });
+        if (selectedBlend) {
+          fetchBlendData(selectedBlend.name)
+        }
+      } catch (err: any) {
+        toast({
+            title: "Error",
+            description: err.message,
+            variant: "destructive",
+        });
+      } finally {
+        setIsConfirmDialogOpen(false)
+      }
     }
   }
 

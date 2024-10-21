@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, ArrowRight } from "lucide-react"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-
+import { useApiMethods } from '@/hooks/useApiMethods'
+import { useToast } from '../ui/use-toast';
 import { SelectedBlend, ConfirmedSaleOrder, CustomerOrdersTableData } from '@/components/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogFooter } from "@/components/ui/dialog"
 
 interface AllocationsData {
   contract_number: string;
@@ -30,6 +32,8 @@ type BlendCreationProps = {
   selectedBlends: SelectedBlend[];
   isConfirming: boolean;
   handleConfirm: () => void;
+  isEdit: boolean;
+  deleted: (arr: number[]) => void;
 };
 
 const BlendCreation: React.FC<BlendCreationProps> = ({
@@ -37,10 +41,18 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   selectedBlends,
   isConfirming,
   handleConfirm,
+  isEdit,
+  deleted
 }) => {
   const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+  const [selectedRowCount, setSelectedRowCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const { deleteSalesAllocs } = useApiMethods();
+  const { toast } = useToast()
 
   const allocationDataRef = useRef<HTMLDivElement>(null)
+  const tabulatorRef = useRef<Tabulator | null>(null)
 
   const getQuantityColor = (allocated: number, total: number) => {
     if (allocated === total) return 'bg-green-200'
@@ -50,10 +62,10 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
 
   useEffect(() => {
     if (allocationDataRef.current) {
-      const table = new Tabulator(allocationDataRef.current, {
+      tabulatorRef.current = new Tabulator(allocationDataRef.current, {
         data: blendItems,
-        selectableRows:1,
         columns: [
+          { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
           { title: "Line No", field: "contract_line_no", hozAlign: "left" },
           { title: "Line No", field: "contract_number", hozAlign: "left" },
@@ -64,14 +76,16 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           { title: "Item description", field: "product_name", hozAlign: "center" },
           { title: "Standard", field: "standard", hozAlign: "center" },
           { title: "Tea weight", field: "tea_weight", hozAlign: "right" },
-          { title: "Blending Qty", field: "blending_qty", hozAlign: "right", editor: "number", editorParams: (cell) => {
-            const teaWeight = cell.getRow().getData().tea_weight;
-            return {
-              min: 0,
-              max: teaWeight,
-              step: 1,
-            };
-          }},
+          {
+            title: "Blending Qty", field: "blending_qty", hozAlign: "right", editor: "number", editorParams: (cell) => {
+              const teaWeight = cell.getRow().getData().tea_weight;
+              return {
+                min: 0,
+                max: teaWeight,
+                step: 1,
+              };
+            }
+          },
           { title: "Blended Qty", field: "allocated_blend_quantity", hozAlign: "left" },
         ],
         height: "400px",
@@ -79,107 +93,102 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         selectableRollingSelection: false,
       })
 
+      tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
+        setSelectedRowCount(data.length)
+      })
+
       return () => {
-        table.destroy()
+        if (tabulatorRef.current) {
+          tabulatorRef.current.destroy()
+        }
       }
     }
   }, [blendItems])
 
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create Blend</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div ref={allocationDataRef} className="flex-grow"></div>
-        {/* {blendItems.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>CO Number</TableHead>
-                <TableHead>Line No</TableHead>
-                <TableHead>Release No</TableHead>
-                <TableHead>Item</TableHead>
-                <TableHead>Qty Ordered</TableHead>
-                <TableHead>UM</TableHead>
-                <TableHead>Item Description</TableHead>
-                <TableHead>Blend Standard</TableHead>
-                <TableHead>Tea Weight (kg)</TableHead>
-                <TableHead>Blending Qty (kg)</TableHead>
-                <TableHead>Blended Qty (kg)</TableHead>
-                <TableHead>Select</TableHead>
-                <TableHead>Allocate</TableHead>
-                <TableHead>Auto Allocate</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {blendItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.contract_number}</TableCell>
-                  <TableCell>{item.contract_line_no}</TableCell>
-                  <TableCell>{item.releaseNo}</TableCell>
-                  <TableCell>{item.item}</TableCell>
-                  <TableCell>{item.qtyOrdered}</TableCell>
-                  <TableCell>{item.uom}</TableCell>
-                  <TableCell>{item.itemDescription}</TableCell>
-                  <TableCell>{item.blendStandard}</TableCell>
-                  <TableCell>{item.teaWeightKg}</TableCell>
-                  <TableCell>{item.blendingQtyKg}</TableCell>
-                  <TableCell>{item.blendedQtyKg}</TableCell>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedBlends.some(b => b.blendName === item.blendStandard && b.quantities.hasOwnProperty(item.id))}
-                      onCheckedChange={(checked) => handleBlendSelect(item.blendStandard, item.id, checked === true)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={selectedBlends.find(b => b.blendName === item.blendStandard)?.quantities[item.id] || 0}
-                      onChange={(e) => handleBlendQuantityChange(item.blendStandard, item.id, Number(e.target.value))}
-                      max={item.blendingQtyKg}
-                      className={`w-20 ${getQuantityColor(
-                        selectedBlends.find(b => b.blendName === item.blendStandard)?.quantities[item.id] || 0,
-                        item.blendingQtyKg
-                      )}`}
-                      disabled={!selectedBlends.some(b => b.blendName === item.blendStandard && b.quantities.hasOwnProperty(item.id))}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleAllocateFullQuantity(item.blendStandard, item.id, item.blendingQtyKg)}
-                      disabled={!selectedBlends.some(b => b.blendName === item.blendStandard && b.quantities.hasOwnProperty(item.id))}
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <p>No blend items available.</p>
-        )} */}
+  const confirmRemove = async () => {
+    if (tabulatorRef.current && !loading) {
+      setLoading(true)
+      const selectedData = tabulatorRef.current.getSelectedData()
+      const selectedIds = selectedData.map((row: any) => row.id)
 
-        <Button 
-          onClick={handleConfirm} 
-          className="mt-4" 
-          disabled={isConfirming || !blendItems || blendItems.length === 0}
-        >
-          {isConfirming ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Confirming
-            </>
-          ) : (
-            'Confirm and Generate Blends'
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+      try {
+        await deleteSalesAllocs(selectedIds)
+        toast({
+          title: "Success",
+          description: "Selected allocations have been removed",
+          variant: "default",
+        });
+        tabulatorRef.current.deselectRow()
+        deleted(selectedIds);
+        setSelectedRowCount(0)
+        setIsDeleteConfirmOpen(false)
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false)
+      }
+    }
+  }
+
+
+  return (
+    <div>
+      <Card>
+        <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
+          <CardTitle>{isEdit ? 'Edit Blend' : 'Create Blend'}</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              className="bg-red-600 text-white"
+              disabled={selectedRowCount === 0}
+            >
+              Remove ({selectedRowCount})
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div ref={allocationDataRef} className="flex-grow"></div>
+
+          <Button
+            onClick={handleConfirm}
+            className="mt-4"
+            disabled={isConfirming || !blendItems || blendItems.length === 0}
+          >
+            {isConfirming ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Confirming
+              </>
+            ) : (
+              isEdit ? 'Confirm and Edit blends' : 'Confirm and Generate Blends'
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Removal</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to remove the selected allocations from the blend?</p>
+          <DialogFooter>
+            <Button onClick={() => setIsDeleteConfirmOpen(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={confirmRemove} className="bg-red-600 text-white">
+              {loading ? 'Confirming': 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+    </div>
   );
 };
 

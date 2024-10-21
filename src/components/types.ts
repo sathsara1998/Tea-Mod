@@ -167,10 +167,15 @@ interface Allocation {
   id: number;
   sale_order_id: number;
   sale_order_name: string;
+  contract_number: string;
+  product_internal_ref: string;
+  allocated_blend_quantity: number;
+  tea_cost: number;
   sale_order_line_id: number;
   product_id: number;
   product_name: string;
   quantity: number;
+  contract_no: string;
 }
 
 export interface TeaBlend {
@@ -259,6 +264,7 @@ export interface OrderBlendDetail {
 }
 
 export interface CustomerOrdersTableData {
+  id: number;
   contract_number: string;
   contract_line_no: string;
   product_internal_ref: string;

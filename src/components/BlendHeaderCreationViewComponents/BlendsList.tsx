@@ -31,9 +31,10 @@ type BlendsComponentProps = {
   blends: TeaBlend[];
   fetchBlends: () => Promise<void>;
   onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void;
+  onEditPress: (blend: TeaBlend) => void;
 }
 
-export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd }: BlendsComponentProps) {
+export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd, onEditPress }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -63,7 +64,7 @@ export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd
   }, [])
 
   const handleEditBlend = (blend: TeaBlend) => {
-    setEditingBlend(blend)
+    onEditPress(blend);
   }
 
   const handleUpdateBlend = async () => {
@@ -133,13 +134,13 @@ export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd
           ))}
         </ScrollArea>
       </CardContent>
-      {editingBlend && (
+      {/* {editingBlend && (
         <EditBlendDialog
           editingBlend={editingBlend}
           setEditingBlend={setEditingBlend}
           handleUpdateBlend={handleUpdateBlend}
         />
-      )}
+      )} */}
     </Card>
   )
 }

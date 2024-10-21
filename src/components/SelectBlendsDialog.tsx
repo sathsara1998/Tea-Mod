@@ -96,8 +96,19 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
     }
   }
 
+  const resetFields = () => {
+    setSearchBlendName('')
+    setSearchQuantity('')
+    setSearchStatus('All')
+  }
+
+  const closeDialog = () => {
+    resetFields()
+    onClose()
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={closeDialog}>
       <DialogContent className="bg-white p-4 rounded shadow-lg max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Available Blends</DialogTitle>
