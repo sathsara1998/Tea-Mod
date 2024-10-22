@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Search } from "lucide-react"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
@@ -23,12 +24,15 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   const [searchStatus, setSearchStatus] = useState<string>('All')
   const [selectedBlend, setSelectedBlend] = useState<TeaBlend>();
   const [availableBlends, setAvailableBlends] = useState<TeaBlend[]>([])
+  const [filteredBlends, setFilteredBlends] = useState<TeaBlend[]>([])
+  const [isLoading, setIsLoading] = useState(true);
   const { getBlends } = useApiMethods();
   const { toast } = useToast()
 
   const availableBlendTableRef = useRef(null)
 
   const fetchBlends = useCallback(async () => {
+    setIsLoading(true)
     try {
       const data = await getBlends()
       setAvailableBlends(data)
@@ -38,6 +42,8 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         description: err.message,
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
@@ -49,12 +55,15 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
 
   const statusTypes = useMemo(() => ['All', ...Array.from(new Set(availableBlends.map(blend => blend.status)))], [availableBlends]);
 
-  const filteredBlends = useMemo(() => 
-    availableBlends.filter(blend => 
+  useEffect(() => {
+    console.log(availableBlends);
+    
+    const filtered = availableBlends.filter(blend => 
       (blend.product_name.toLowerCase().includes(searchBlendName.toLowerCase()) &&
        blend.quantity.toString().includes(searchQuantity)) && (searchStatus === 'All' || blend.status == searchStatus)
-    ), [searchBlendName, searchQuantity, searchStatus]
-  )
+    )
+    setFilteredBlends(filtered)
+  }, [searchBlendName, searchQuantity, searchStatus])
 
   useEffect(() => {
     if (availableBlendTableRef.current) {
@@ -141,7 +150,12 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
             </SelectContent>
           </Select>
         </div>
-        <div ref={availableBlendTableRef} className="flex-grow"></div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-[200px]">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : <div ref={availableBlendTableRef} className="flex-grow"></div>}
+        
         <div className="mt-4 flex justify-end">
           <Button onClick={handleAddSelectedTeas} className="bg-green-600 text-white">
             Select Blend

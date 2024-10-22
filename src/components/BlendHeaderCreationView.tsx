@@ -47,7 +47,8 @@ export default function BlendAllocator() {
     updateBlend,
     blendCreate,
     updateSalesOrder,
-    getCustomers
+    getCustomers,
+    getBlendByBlendNo
   } = useApiMethods();
 
   const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
@@ -346,9 +347,27 @@ export default function BlendAllocator() {
     setSelectedAllocations([]);
     setGroupedDemands([]);
     setSelectedPartnerId(0)
+    fetchBlends();
   }
 
   const onEditPressed = (blend: TeaBlend) => {
+    getBlendData(blend.name);
+  }
+
+  const getBlendData = async (name: string) => {
+    try {
+      const data = await getBlendByBlendNo(name);
+      setEditingData(data[0]);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const setEditingData = (blend: TeaBlend) => {
     setIsEditBlend(true);
     const allocations : CustomerOrdersTableData[] = []
     blend.allocations.forEach(alloc => {

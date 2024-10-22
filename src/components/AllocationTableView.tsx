@@ -249,6 +249,7 @@ export default function AllocationTableView() {
           variant: "default",
         });
         if (selectedBlend) {
+          setSelectedRowCount(0)
           fetchBlendData(selectedBlend.name)
         }
       } catch (err: any) {

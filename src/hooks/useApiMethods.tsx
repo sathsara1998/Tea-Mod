@@ -352,6 +352,22 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Get blend by blend number
+    const getBlendByBlendNo = useCallback(async (id: string) => {
+        const config: CustomConfig = {
+            url: "/api/blend/getBlendByBlendNo?id=" + id,
+            errorMessage: "An error occurred while Adding Allocations.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -371,6 +387,7 @@ export const useApiMethods = () => {
         updateSalesOrder,
         deleteManufactureAllocs,
         deleteSalesAllocs,
-        addSalesAllocationtoBlend
+        addSalesAllocationtoBlend,
+        getBlendByBlendNo
     }
 }

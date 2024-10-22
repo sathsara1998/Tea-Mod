@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search } from "lucide-react"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
+import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
 import "tabulator-tables/dist/css/tabulator.min.css"
 import { generateTestData } from '@/lib/utils'
 import { AddAllocationObject, TeaAllocation } from './types'
@@ -36,11 +37,14 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
   const [selectedType, setSelectedType] = useState<string>('All')
   const [selectedTeas, setSelectedTeas] = useState<TeaAllocation[]>([])
   const [availableTeas, setAvailableTeas] = useState<TeaAllocation[]>([])
+  const [filteredTeas, setFilteredTeas] = useState<TeaAllocation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const availableTeaTableRef = useRef(null)
   const { getAllAuctionData, addAllocationtoBlend } = useApiMethods();
   const { toast } = useToast()
 
   const fetchAllocations = useCallback(async () => {
+    setIsLoading(true)
     try {
       const data = await getAllAuctionData()
       const teas: TeaAllocation[] = data;
@@ -52,6 +56,8 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
         description: err.message,
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
@@ -93,13 +99,14 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
 
   const teaTypes = useMemo(() => ['All', ...Array.from(new Set(availableTeas.map(tea => tea.blend_line_type)))], [availableTeas]);
 
-  const filteredTeas = useMemo(() => 
-    availableTeas.filter(tea => 
+  useEffect(() => {
+    const filtered = availableTeas.filter(tea => 
       (tea.standard.toLowerCase().includes(searchTerm.toLowerCase()) ||
        tea.box_number.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (selectedType === 'All' || tea.blend_line_type === selectedType)
-    ), [availableTeas, searchTerm, selectedType]
-  )
+    )
+    setFilteredTeas(filtered);
+  }, [availableTeas, searchTerm, selectedType])
 
   useEffect(() => {
     if (availableTeaTableRef.current) {
@@ -180,7 +187,11 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
           </Select>
         </div>
         <div className="w-[650]">
-          <div ref={availableTeaTableRef} className="flex-grow"></div>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[200px]">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : <div ref={availableTeaTableRef} className="flex-grow"></div>}
         </div>
         <div className="mt-4 flex justify-end">
           <Button onClick={handleAddSelectedTeas} className="bg-green-600 text-white">
