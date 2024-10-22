@@ -176,6 +176,7 @@ interface Allocation {
   product_name: string;
   quantity: number;
   contract_no: string;
+  tea_weight?: number;
 }
 
 export interface TeaBlend {

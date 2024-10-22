@@ -365,7 +365,7 @@ export default function BlendAllocator() {
         allocated_blend_quantity: alloc.allocated_blend_quantity,
         product_id: alloc.product_id,
         release_number: 1,
-        blending_qty: 0,
+        blending_qty: alloc.tea_weight ? alloc.tea_weight - alloc.allocated_blend_quantity : 0,
         standard: "",
         line_id: 0,
         id: alloc.id
@@ -379,7 +379,7 @@ export default function BlendAllocator() {
     setEditingBlendId(blend.id)
     setSelectedPartnerId(blend.customer_id)
     setSelectedAllocations(allocations);
-    initialSalesOrders.current = [...allocations];
+    initialSalesOrders.current = JSON.parse(JSON.stringify(allocations));
   }
 
   const allocationsDeleted = (ids: number[]) => {
