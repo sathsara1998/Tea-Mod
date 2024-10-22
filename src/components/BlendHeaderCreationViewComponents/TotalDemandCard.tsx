@@ -30,7 +30,7 @@ const TotalDemandCard: React.FC<TotalDemandCardProps> = ({ totalDemand }) => {
               {totalDemand.map((demand) => (
                 <TableRow key={demand.product_name}>
                   <TableCell>{demand.product_name}</TableCell>
-                  <TableCell>{demand.total.toFixed(3)}</TableCell>
+                  <TableCell>{demand.total}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

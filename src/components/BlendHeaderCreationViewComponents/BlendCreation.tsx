@@ -10,6 +10,7 @@ import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from '../ui/use-toast';
 import { SelectedBlend, ConfirmedSaleOrder, CustomerOrdersTableData } from '@/components/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogFooter } from "@/components/ui/dialog"
+import NewBlendDialog, { CustomerFullBlends } from './NewBlendDialog';
 
 interface AllocationsData {
   contract_number: string;
@@ -34,6 +35,8 @@ type BlendCreationProps = {
   handleConfirm: () => void;
   isEdit: boolean;
   deleted: (arr: number[]) => void;
+  customerId: number;
+  blendId: number;
 };
 
 const BlendCreation: React.FC<BlendCreationProps> = ({
@@ -42,12 +45,16 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   isConfirming,
   handleConfirm,
   isEdit,
-  deleted
+  deleted,
+  customerId,
+  blendId
 }) => {
   const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [selectedRowCount, setSelectedRowCount] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [isAddDialog, setIsAddDialog] = useState(false);
+  const [tableItems, setTableItems] = useState<CustomerOrdersTableData[]>([]);
   const { deleteSalesAllocs } = useApiMethods();
   const { toast } = useToast()
 
@@ -63,7 +70,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   useEffect(() => {
     if (allocationDataRef.current) {
       tabulatorRef.current = new Tabulator(allocationDataRef.current, {
-        data: blendItems,
+        data: tableItems,
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
@@ -103,8 +110,11 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         }
       }
     }
-  }, [blendItems])
+  }, [tableItems])
 
+  useEffect(() => {
+    setTableItems(blendItems);
+  }, [blendItems])
 
   const confirmRemove = async () => {
     if (tabulatorRef.current && !loading) {
@@ -135,6 +145,9 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
     }
   }
 
+  const handleNewAllocations = (data: CustomerFullBlends) => {
+    setTableItems([...tableItems, ...data.products])
+  }
 
   return (
     <div>
@@ -142,6 +155,22 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
           <CardTitle>{isEdit ? 'Edit Blend' : 'Create Blend'}</CardTitle>
           <div className="flex gap-2">
+          <Dialog open={isAddDialog} onOpenChange={setIsAddDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-600 text-white" onClick={() => setIsAddDialog(true)}>
+              Add Allocations
+              </Button>
+            </DialogTrigger>
+            <NewBlendDialog
+              isEdit={true}
+              isOpen={isAddDialog}
+              setIsOpen={setIsAddDialog}
+              onCreateBlend={handleNewAllocations}
+              customerId={customerId}
+              blendId={blendId}
+              currentBlendIds={tableItems.map(item => item.id)}
+            />
+          </Dialog>
             <Button
               onClick={() => setIsDeleteConfirmOpen(true)}
               className="bg-red-600 text-white"
@@ -157,7 +186,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           <Button
             onClick={handleConfirm}
             className="mt-4"
-            disabled={isConfirming || !blendItems || blendItems.length === 0}
+            disabled={isConfirming || !tableItems || tableItems.length === 0}
           >
             {isConfirming ? (
               <>
