@@ -15,9 +15,11 @@ import {
   ConfirmedSaleOrder, 
   TeaBlend,
   CustomerOrdersTableData,
-  BlendCreateReq
+  BlendCreateReq,
+  Customer
 } from './types'
 import { CustomerFullBlends } from './BlendHeaderCreationViewComponents/NewBlendDialog'
+import CustomerSelection from './BlendHeaderCreationViewComponents/CustomerSelection'
 
 
 export default function BlendAllocator() {
@@ -32,6 +34,10 @@ export default function BlendAllocator() {
   const [selectedAllocations, setSelectedAllocations] = useState<CustomerOrdersTableData[]>([])
   const [groupedDemands, setGroupedDemands] = useState<TotalDemand[]>([])
   const [isEditBlend, setIsEditBlend] = useState(false)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [selectedPartnerId, setSelectedPartnerId] = useState(0);
+  const [editingBlendCustomer, setEditingBlendCustomer] = useState<Customer>();
+  const [editingBlendId, setEditingBlendId] = useState(0);
   const { toast } = useToast()
   const { 
     getConfirmedSaleOrders, 
@@ -40,10 +46,10 @@ export default function BlendAllocator() {
     createBlend,
     updateBlend,
     blendCreate,
-    updateSalesOrder
+    updateSalesOrder,
+    getCustomers
   } = useApiMethods();
 
-  const selectedPartnerId = useRef(0)
   const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
 
   const fetchConfirmedSaleOrders = useCallback(async () => {
@@ -80,10 +86,24 @@ export default function BlendAllocator() {
     }
   }, [])
 
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const customers = await getCustomers()
+      setCustomers(customers)
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    }
+  }, [])
+
   useEffect(() => {
     fetchConfirmedSaleOrders()
     fetchBlends()
-  }, [fetchConfirmedSaleOrders, fetchBlends])
+    fetchCustomers()
+  }, [fetchConfirmedSaleOrders, fetchBlends, fetchCustomers])
 
   const fetchSalesOrderDetails = async (saleOrderNumber: string) => {
     setError(null)
@@ -221,7 +241,7 @@ export default function BlendAllocator() {
         }[]
       }[]
     } = {
-      partner_id: selectedPartnerId.current,
+      partner_id: selectedPartnerId,
       products: []
     };
 
@@ -291,11 +311,11 @@ export default function BlendAllocator() {
     const grouped = selectedAllocations.reduce((acc: Record<string, { total: number, product_id: number }>, order) => {
       // If the product_name already exists, add the tea_weight to the total
       if (acc[order.product_name]) {
-        acc[order.product_name].total += order.blending_qty;
+        acc[order.product_name].total += 1;
       } else {
         // Otherwise, initialize it with the current tea_weight and product_id
         acc[order.product_name] = {
-          total: order.blending_qty,
+          total: 1,
           product_id: order.product_id // Add product_id here
         };
       }
@@ -319,13 +339,13 @@ export default function BlendAllocator() {
   const onNewBlendDataAdd = (data: CustomerFullBlends) => {
     setIsEditBlend(false);
     setSelectedAllocations(data.products);
-    selectedPartnerId.current = data.partner_id;
+    setSelectedPartnerId(data.partner_id);
   }
 
   const resetData = () => {
     setSelectedAllocations([]);
     setGroupedDemands([]);
-    selectedPartnerId.current = 0;
+    setSelectedPartnerId(0)
   }
 
   const onEditPressed = (blend: TeaBlend) => {
@@ -352,12 +372,23 @@ export default function BlendAllocator() {
       }
       allocations.push(tableData);
     })
+    setEditingBlendCustomer({
+      id: blend.customer_id,
+      name: blend.customer_name
+    })
+    setEditingBlendId(blend.id)
+    setSelectedPartnerId(blend.customer_id)
     setSelectedAllocations(allocations);
     initialSalesOrders.current = [...allocations];
   }
 
   const allocationsDeleted = (ids: number[]) => {
     setSelectedAllocations(prev => prev.filter((a: any) => !ids.includes(a.id)))
+  }
+
+
+  const customerSelected = (id: number) => {
+    setSelectedPartnerId(id);
   }
 
   if (isLoading) {
@@ -389,6 +420,7 @@ export default function BlendAllocator() {
       {/* Left Side - Blends */}
       <div className="w-full md:w-1/3 mb-4 md:mb-0 md:mr-4 ml-0">
         <BlendsList 
+          customerId={selectedPartnerId}
           blends={blends} 
           fetchBlends={fetchBlends} 
           onNewBlendDataAdd={onNewBlendDataAdd} 
@@ -398,6 +430,12 @@ export default function BlendAllocator() {
 
       {/* Middle - Blend Creation */}
       <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
+
+        <CustomerSelection
+          customers={customers} 
+          selectedCustomer={editingBlendCustomer}
+          customerSelected={customerSelected} />
+
         <BlendCreation
           isEdit={isEditBlend}
           selectedBlends={selectedBlends}
@@ -405,6 +443,8 @@ export default function BlendAllocator() {
           handleConfirm={handleConfirm}
           blendItems={selectedAllocations}
           deleted={allocationsDeleted}
+          customerId={selectedPartnerId}
+          blendId={editingBlendId}
         />
       </div>
 

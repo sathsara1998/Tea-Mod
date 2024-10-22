@@ -7,6 +7,15 @@ import NewBlendDialog, { CustomerFullBlends } from '../BlendHeaderCreationViewCo
 import EditBlendDialog from '../BlendHeaderCreationViewComponents/EditBlendDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { Customer, TeaBlend } from '../types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Button } from '@/components/ui/button'
 
 export type Blend = {
   id: number;
@@ -28,16 +37,18 @@ type BlendAllocation = {
 }
 
 type BlendsComponentProps = {
+  customerId: number;
   blends: TeaBlend[];
   fetchBlends: () => Promise<void>;
   onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void;
   onEditPress: (blend: TeaBlend) => void;
 }
 
-export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd, onEditPress }: BlendsComponentProps) {
+export default function BlendsComponent({ customerId, blends, fetchBlends, onNewBlendDataAdd, onEditPress }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [isNewOpen, setIsNewOpen] = useState(false);
   const { toast } = useToast()
   const { 
     createBlend, 
@@ -116,10 +127,20 @@ export default function BlendsComponent({ blends, fetchBlends, onNewBlendDataAdd
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           Blends
-          <NewBlendDialog
-            onCreateBlend={handleCreateNewBlend}
-            customers={customers}
-          />
+          <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" onClick={() => setIsNewOpen(true)}>
+                New Blend
+              </Button>
+            </DialogTrigger>
+            <NewBlendDialog
+              isEdit={false}
+              isOpen={isNewOpen}
+              setIsOpen={setIsNewOpen}
+              onCreateBlend={handleCreateNewBlend}
+              customerId={customerId}
+            />
+          </Dialog>
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -204,6 +204,12 @@ export interface AddAllocationObject {
   quantity_kgs: number;
 }
 
+export interface AddSalesAllocation {
+  blend_id: number;
+  sale_order_line_id: number;
+  quantity: number;
+}
+
 export interface StockLot {
   id: number;
   box_number: string;

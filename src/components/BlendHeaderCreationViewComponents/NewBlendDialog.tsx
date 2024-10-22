@@ -15,24 +15,10 @@ import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator.min.css"
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from '../ui/use-toast'
-import { Customer, CustomerOrder, CustomerOrdersTableData } from '../types'
+import { AddSalesAllocation, Customer, CustomerOrder, CustomerOrdersTableData } from '../types'
 
-interface OrderLine {
-  line_id: number
-  contract_line_no: string
-  product_id: number
-  product_name: string
-  product_uom_qty: number
-  product_uom: string
-  tea_blend_quantity: number
-  allocated_blend_quantity: number
-  tea_cost: number
-  tea_blend_details: {
-    product_id: number
-    product_name: string
-    quantity: number
-    uom: string
-  }[]
+export interface EditProp {
+  products: AddSalesAllocation[];
 }
 
 export interface CustomerFullBlends {
@@ -41,21 +27,25 @@ export interface CustomerFullBlends {
 }
 
 interface ModernBlendDialogProps {
-  customers: Customer[]
-  onCreateBlend: (blendData: CustomerFullBlends) => void
+  customerId: number
+  onCreateBlend: (blendData: CustomerFullBlends) => void,
+  isOpen: boolean,
+  setIsOpen: (open: boolean) => void,
+  isEdit: boolean;
+  blendId?: number;
+  currentBlendIds?: number[]
 }
 
-export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBlendDialogProps) {
+export default function ModernBlendDialog({ customerId, onCreateBlend, isOpen, setIsOpen, isEdit, blendId, currentBlendIds }: ModernBlendDialogProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
   const [customerOrderLines, setCustomerOrderLines] = useState<CustomerOrder[]>([])
   const [customerOrders, setCustomerOrders] = useState<CustomerOrdersTableData[]>([])
-  const [isOpen, setIsOpen] = useState(false)
   const [selectedOrderLines, setSelectedOrderLines] = useState<CustomerOrdersTableData[]>([])
 
   const allocationsTableRef = useRef<HTMLDivElement>(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
 
-  const { getCustomerOrders } = useApiMethods();
+  const { getCustomerOrders, addSalesAllocationtoBlend } = useApiMethods();
   const { toast } = useToast()
 
   useEffect(() => {
@@ -70,7 +60,7 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
         layout: "fitColumns",
         placeholder: "No Order Lines Available",
         selectableRows: true,
-        groupBy:"product_name",
+        groupBy: "product_name",
         columns: [
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
           { title: "Line No", field: "contract_number", hozAlign: "left" },
@@ -84,9 +74,25 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
         ],
       })
 
-      tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
-        setSelectedOrderLines(data);
-      })
+      tabulatorRef.current.on("rowSelectionChanged", function (selectedData, rows) {
+        if (isEdit) {
+          // Filter out the rows with disabled IDs
+          rows.forEach((row) => {
+            const rowData = row.getData();
+            if (currentBlendIds && currentBlendIds.includes(rowData.id)) {
+              row.deselect(); // Automatically deselect rows with disabled ids
+            }
+          });
+    
+          // Set the selected teas excluding the disabled ones
+          if (currentBlendIds) {
+            const validSelections = selectedData.filter(item => !currentBlendIds.includes(item.id));
+            setSelectedOrderLines(validSelections);
+          }
+        } else {
+          setSelectedOrderLines(selectedData);
+        }
+      });
     }
 
     return () => {
@@ -98,12 +104,10 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
   }, [customerOrders])
 
   useEffect(() => {
-    let customerData : CustomerOrdersTableData[] = [];
+    let customerData: CustomerOrdersTableData[] = [];
 
     customerOrderLines.forEach(line => {
       line.order_lines.forEach(item => {
-        console.log("line", item);
-        
         customerData.push({
           contract_number: line.contract_number,
           contract_line_no: item.contract_line_no,
@@ -111,7 +115,7 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
           product_uom_qty: item.product_uom_qty,
           product_uom: item.product_uom,
           product_name: item.tea_blend_details.length ? item.tea_blend_details[0].product_name : "",
-          product_blend_internal_ref: item.tea_blend_details.length ? item.tea_blend_details[0].product_internal_ref: "",
+          product_blend_internal_ref: item.tea_blend_details.length ? item.tea_blend_details[0].product_internal_ref : "",
           blend_details: item.tea_blend_details.length ? item.tea_blend_details[0].product_name : "",
           tea_weight: item.tea_blend_details.length ? item.tea_blend_details[0].tea_weight : 0,
           allocated_blend_quantity: item.allocated_blend_quantity,
@@ -126,11 +130,6 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
     })
     setCustomerOrders(customerData);
   }, [customerOrderLines])
-
-  const handleCustomerChange = (customerId: string) => {
-    setSelectedCustomer(customerId);
-    fetchCustomerOrders(Number(customerId))
-  }
 
   const fetchCustomerOrders = async (cusId: number) => {
     try {
@@ -147,13 +146,47 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
 
   const handleCreateBlend = () => {
     if (selectedOrderLines.length > 0) {
-      const passObj: CustomerFullBlends = {
-        partner_id: Number(selectedCustomer),
-        products: selectedOrderLines
+      if (isEdit) {
+        editBlend()
+      } else {
+        createBlend()
       }
-      onCreateBlend(passObj)
-      setIsOpen(false)
     }
+  }
+
+  const editBlend = async () => {
+    const products: AddSalesAllocation[] = selectedOrderLines.map(line => {
+      return {
+        blend_id: blendId ? blendId : 0,
+        sale_order_line_id: line.id,
+        quantity: line.allocated_blend_quantity
+      }
+    })
+
+    try {
+      await addSalesAllocationtoBlend(products)
+      toast({
+        title: "Success",
+        description: "Blend created successfully",
+        variant: "default",
+      })
+      createBlend()
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const createBlend = () => {
+    const passObj: CustomerFullBlends = {
+      partner_id: Number(selectedCustomer),
+      products: selectedOrderLines
+    }
+    onCreateBlend(passObj)
+    setIsOpen(false)
   }
 
   const closePopup = (val: boolean) => {
@@ -161,60 +194,36 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
     setIsOpen(val);
   }
 
+  useEffect(() => {
+    if (isOpen) {
+      fetchCustomerOrders(customerId);
+    }
+  }, [isOpen])
+
   return (
-    <Dialog open={isOpen} onOpenChange={closePopup}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
-          New Blend
-        </Button>
-      </DialogTrigger>
+    <DialogContent
+      className="max-w-6xl max-h-[90vh] overflow-y-auto"
+      onInteractOutside={(e) => {
+        e.preventDefault()
+      }}
+    >
+      <DialogHeader>
+        <DialogTitle>Create New Blend</DialogTitle>
+      </DialogHeader>
 
-      <DialogContent
-        className="max-w-6xl max-h-[90vh] overflow-y-auto"
-        onInteractOutside={(e) => {
-          e.preventDefault()
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle>Create New Blend</DialogTitle>
-        </DialogHeader>
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer Order Lines</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div ref={allocationsTableRef} className="w-full h-[400px]" aria-label="Customer Order Lines Table"></div>
+        </CardContent>
+      </Card>
 
-        <div className="grid grid-cols-1 gap-4 mb-4">
-          <div>
-            <Label htmlFor="customer">Customer</Label>
-            <Select onValueChange={handleCustomerChange} value={selectedCustomer || undefined}>
-              <SelectTrigger id="customer">
-                <SelectValue placeholder="Select customer" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers && customers.length > 0 ? (
-                  customers.map(customer => (
-                    <SelectItem key={customer.id} value={customer.id.toString()}>
-                      {customer.name ? customer.name : `Customer ${customer.id}`}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div>No customers available</div> // Fallback in case customers is empty or undefined
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Customer Order Lines</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div ref={allocationsTableRef} className="w-full h-[400px]" aria-label="Customer Order Lines Table"></div>
-          </CardContent>
-        </Card>
-
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreateBlend} disabled={customerOrderLines.length === 0}>Create Blend</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <DialogFooter className="mt-4">
+        <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+        <Button onClick={handleCreateBlend} disabled={customerOrderLines.length === 0}>{isEdit ? 'Add': 'Create Blend'}</Button>
+      </DialogFooter>
+    </DialogContent>
   )
 }

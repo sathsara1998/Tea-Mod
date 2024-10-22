@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useApiClient from "./useApiClient";
 import { AxiosRequestConfig } from "axios";
-import { AddAllocationObject, BlendCreateReq, ConfirmedSaleOrder } from "@/components/types";
+import { AddAllocationObject, AddSalesAllocation, BlendCreateReq, ConfirmedSaleOrder } from "@/components/types";
 
 interface CustomConfig extends AxiosRequestConfig {
     url: string;
@@ -333,6 +333,25 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Add sales allocation to blend
+    const addSalesAllocationtoBlend = useCallback(async (data: AddSalesAllocation[]) => {
+        const config: CustomConfig = {
+            url: "/api/blend/addSalesAllocations",
+            errorMessage: "An error occurred while Adding Allocations.",
+            method: 'post',
+            data: {
+                allocations: data
+            }
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -351,6 +370,7 @@ export const useApiMethods = () => {
         blendCreate,
         updateSalesOrder,
         deleteManufactureAllocs,
-        deleteSalesAllocs
+        deleteSalesAllocs,
+        addSalesAllocationtoBlend
     }
 }
