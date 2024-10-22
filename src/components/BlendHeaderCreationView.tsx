@@ -210,13 +210,23 @@ export default function BlendAllocator() {
   }
 
   const createNewBlend = async () => {
-    let mainObj = {
+    let mainObj: {
+      partner_id: number;
+      products: {
+        product_id: number;
+        quantity: number;
+        allocations: {
+          sale_order_line_id: number;
+          quantity: number;
+        }[]
+      }[]
+    } = {
       partner_id: selectedPartnerId.current,
       products: []
-    }
+    };
 
     groupedDemands.forEach(dem => {
-      let obj = {
+      let obj : any = {
         product_id: dem.product_id,
         quantity: dem.total,
         allocations: []
