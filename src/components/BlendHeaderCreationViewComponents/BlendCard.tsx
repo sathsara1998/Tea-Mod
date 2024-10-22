@@ -27,12 +27,12 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                   className="p-2 mb-2 rounded bg-secondary flex flex-col"
                 >
                   <div className="flex justify-between items-center">
-                    <span>{data.name}</span>
+                    <span>{data.name} | {data.product_name} </span>
                     <Badge variant={data.status === 'confirmed' ? 'default' : 'secondary'}>
                       {data.status}
                     </Badge>
                   </div>
-                  <small>Customer: R W Twing</small>
+                  <small>Customer: {data.customer_name}</small>
                   <small>Quantity: {data.quantity.toFixed(3)}</small>
                   <div className="flex justify-between mt-2">
                     <Popover>

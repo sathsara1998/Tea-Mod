@@ -70,17 +70,17 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
         layout: "fitColumns",
         placeholder: "No Order Lines Available",
         selectableRows: true,
-        groupBy:"product_name",
+        groupBy:"product_blend_internal_ref",
         columns: [
-          { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
-          { title: "Line No", field: "contract_number", hozAlign: "left" },
+          { title: "#", formatter: "rownum", width: 40, hozAlign: "center" },
+          { title: "Contract No", field: "contract_number", hozAlign: "left" },
           { title: "Line No", field: "contract_line_no", hozAlign: "left" },
-          { title: "Product", field: "product_internal_ref", hozAlign: "left" },
-          { title: "Quantity", field: "product_uom_qty", hozAlign: "right" },
+          { title: "FG Description", field: "product_internal_ref", hozAlign: "left" },
+          { title: "FG Quantity", field: "product_uom_qty", hozAlign: "right" },
           { title: "UOM", field: "product_uom", hozAlign: "center" },
-          { title: "Allocated Blend Qty", field: "product_name", hozAlign: "right" },
-          { title: "Blending Qty", field: "product_blend_internal_ref", hozAlign: "right" },
-          { title: "Tea Blend Details", field: "blend_details", hozAlign: "left" },
+          { title: "Blend Description", field: "blend_details", hozAlign: "left" },
+          { title: "Blend Quantity", field: "tea_weight", hozAlign: "right" },
+          { title: "Allocated Blend Qty", field: "allocated_blend_quantity", hozAlign: "left" },
         ],
       })
 
@@ -98,7 +98,7 @@ export default function ModernBlendDialog({ customers, onCreateBlend }: ModernBl
   }, [customerOrders])
 
   useEffect(() => {
-    let customerData : CustomerOrdersTableData[] = [];
+    const customerData : CustomerOrdersTableData[] = [];
 
     customerOrderLines.forEach(line => {
       line.order_lines.forEach(item => {

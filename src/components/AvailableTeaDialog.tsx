@@ -105,29 +105,24 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
     if (availableTeaTableRef.current) {
       const table = new Tabulator(availableTeaTableRef.current, {
         data: filteredTeas,
+        placeholder:"Loading ...",
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
-          { title: "Tea", field: "box_number", hozAlign: "center"},
-          { title: "Lot Number", field: "lot_no", hozAlign: "center"},
-          { title: "Garden Mark", field: "garden_mark", hozAlign: "center"},
-          { title: "Grade", field: "grade", hozAlign: "center"},
-          { title: "Package Weight (kg)", field: "net_weight", hozAlign: "center"},
-          { title: "Bags", field: "bags", hozAlign: "center"},
-          { title: "Allocated Quantity", field: "allocated_qty", hozAlign: "center"},
-          { title: "Free Qty", field: "free_qty", hozAlign: "center"},
-          { title: "Allocated Packages", field: "allocated_packages", hozAlign: "center"},
-          { title: "Free Packages", field: "free_packages", hozAlign: "center"},
-          { title: "Standard", field: "standard", hozAlign: "center"},
-          { title: "Sample Allowance", field: "sample_allowance", hozAlign: "center"},
-          { title: "Purchased Price", field: "purchased_price", hozAlign: "center"},
-          { title: "Break", field: "break", hozAlign: "center"},
-          { title: "Invoice No", field: "invoice_no", hozAlign: "center"},
-          { title: "Type", field: "blend_line_type", hozAlign: "center" },
+          { title: "Tea Standard", field: "standard", hozAlign: "left" , headerFilter:true, headerFilterPlaceholder:"Find a STD..."},
+          { title: "Box Number", field: "box_number", hozAlign: "left" , headerFilter:true, headerFilterPlaceholder:"Find a BOX Number..."},
+          { title: "Garden Mark", field: "garden_mark", hozAlign: "left"},
+          { title: "Invoice No", field: "invoice_no", hozAlign: "left"},
+          { title: "Package Weight (kg)", field: "net_weight", hozAlign: "left"},
+          { title: "Available Qty", field: "free_quantity", hozAlign: "left"},
+          { title: "Available Packages", field: "free_packages", hozAlign: "left"},
+          { title: "Purchased Price", field: "purchased_price", hozAlign: "left"},
         ],
         height: "400px",
         selectable: true,
-        selectableRollingSelection: false
+        selectableRollingSelection: false,
+      
       })
+      
 
       table.on("rowSelectionChanged", function (selectedData, rows) {
         // Filter out the rows with disabled IDs
@@ -135,6 +130,8 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
           const rowData = row.getData();
           if (selectedIds.includes(rowData.box_number)) {
             row.deselect(); // Automatically deselect rows with disabled ids
+            row.getElement().style.backgroundColor = "#f5f5f5";
+            row.getElement().style.color = "#999";
           }
         });
   
@@ -157,7 +154,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white p-4 rounded shadow-lg max-w-4xl max-h-[80vh] flex flex-col">
+      <DialogContent className="bg-white p-4 rounded shadow-lg max-w-6xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Available Teas</DialogTitle>
         </DialogHeader>

@@ -70,12 +70,6 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           { title: "Line No", field: "contract_line_no", hozAlign: "left" },
           { title: "Line No", field: "contract_number", hozAlign: "left" },
           { title: "Release No", field: "release_number", hozAlign: "left" },
-          { title: "Item", field: "product_internal_ref", hozAlign: "left" },
-          { title: "Quantity", field: "product_uom_qty", hozAlign: "right" },
-          { title: "UOM", field: "product_uom", hozAlign: "center" },
-          { title: "Item description", field: "product_name", hozAlign: "center" },
-          { title: "Standard", field: "standard", hozAlign: "center" },
-          { title: "Tea weight", field: "tea_weight", hozAlign: "right" },
           {
             title: "Blending Qty", field: "blending_qty", hozAlign: "right", editor: "number", editorParams: (cell) => {
               const teaWeight = cell.getRow().getData().tea_weight;
@@ -86,7 +80,13 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               };
             }
           },
-          { title: "Blended Qty", field: "allocated_blend_quantity", hozAlign: "left" },
+          { title: "Allocated Qty", field: "allocated_blend_quantity", hozAlign: "left" },
+          { title: "Item", field: "product_internal_ref", hozAlign: "left" },
+          { title: "Quantity", field: "product_uom_qty", hozAlign: "right" },
+          { title: "UOM", field: "product_uom", hozAlign: "center" },
+          { title: "Blend Standard", field: "product_name", hozAlign: "center" },
+          { title: "Tea weight", field: "tea_weight", hozAlign: "right" },
+        
         ],
         height: "400px",
         selectable: true,

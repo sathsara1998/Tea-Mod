@@ -61,11 +61,11 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
       const table = new Tabulator(availableBlendTableRef.current, {
         data: filteredBlends,
         selectableRows:1,
+        groupBy:"product_name",
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
-          { title: "ID", field: "id" },
-          { title: "Name", field: "name" },
-          { title: "Blend Name", field: "product_name" },
+          { title: "Customer", field: "customer_name", hozAlign: "left" , headerFilter:true, headerFilterPlaceholder:"Find a Customer..."},
+          { title: "Blend No", field: "name" },
           { title: "Quantity (kg)", field: "quantity" },
           { title: "Status", field: "status" },
         ],
