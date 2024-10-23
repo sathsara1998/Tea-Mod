@@ -48,7 +48,8 @@ export default function BlendAllocator() {
     blendCreate,
     updateSalesOrder,
     getCustomers,
-    getBlendByBlendNo
+    getBlendByBlendNo,
+    getBlendByCustomer
   } = useApiMethods();
 
   const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
@@ -68,17 +69,13 @@ export default function BlendAllocator() {
     }
   }, [])
 
-  const fetchBlends = useCallback(async (load: boolean = true) => {
-    if (load) {
-      setIsLoading(true)
-    }
+  const fetchBlends = async (load: boolean = true) => {
     setError(null)
     try {
-      const data = await getBlends();
+      const data = await getBlendByCustomer(selectedPartnerId);
       
       setBlends(data);
     } catch (err: any) {
-      setError('Error fetching blends. Please try again.')
       toast({
         title: "Error",
         description: err.message,
@@ -87,7 +84,7 @@ export default function BlendAllocator() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }
 
   const fetchCustomers = useCallback(async () => {
     try {
@@ -104,9 +101,8 @@ export default function BlendAllocator() {
 
   useEffect(() => {
     fetchConfirmedSaleOrders()
-    fetchBlends()
     fetchCustomers()
-  }, [fetchConfirmedSaleOrders, fetchBlends, fetchCustomers])
+  }, [fetchConfirmedSaleOrders, fetchCustomers])
 
   const fetchSalesOrderDetails = async (saleOrderNumber: string) => {
     setError(null)
@@ -203,11 +199,13 @@ export default function BlendAllocator() {
     let sendData : any = [];
 
     selectedAllocations.forEach((item, index) => {
-      if (initialSalesOrders.current[index].blending_qty != item.blending_qty) {
-        sendData.push({
-          id: item.id,
-          quantity: item.blending_qty
-        })
+      if (initialSalesOrders.current.length > index) {
+        if (initialSalesOrders.current[index].blending_qty != item.blending_qty) {
+          sendData.push({
+            id: item.id,
+            quantity: item.blending_qty
+          })
+        }
       }
     })
 
@@ -415,8 +413,13 @@ export default function BlendAllocator() {
 
   const customerSelected = (id: number) => {
     setSelectedPartnerId(id);
-    resetBlendData()
   }
+
+  useEffect(() => {
+    if (selectedPartnerId) {
+      resetBlendData()
+    }
+  }, [selectedPartnerId])
 
   if (isLoading) {
     return (
@@ -469,6 +472,7 @@ export default function BlendAllocator() {
           isConfirming={isConfirming}
           handleConfirm={handleConfirm}
           blendItems={selectedAllocations}
+          allocationsChanged={setSelectedAllocations}
           deleted={allocationsDeleted}
           customerId={selectedPartnerId}
           blendId={editingBlendId}

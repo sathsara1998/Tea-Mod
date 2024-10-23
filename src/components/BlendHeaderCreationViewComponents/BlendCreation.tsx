@@ -37,6 +37,7 @@ type BlendCreationProps = {
   deleted: (arr: number[]) => void;
   customerId: number;
   blendId: number;
+  allocationsChanged: (orders: CustomerOrdersTableData[]) => void;
 };
 
 const BlendCreation: React.FC<BlendCreationProps> = ({
@@ -47,7 +48,8 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   isEdit,
   deleted,
   customerId,
-  blendId
+  blendId,
+  allocationsChanged
 }) => {
   const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
@@ -146,7 +148,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   }
 
   const handleNewAllocations = (data: CustomerFullBlends) => {
-    setTableItems([...tableItems, ...data.products])
+    allocationsChanged([...tableItems, ...data.products])
   }
 
   return (

@@ -118,6 +118,18 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
     }
   }
 
+  const addNewBlend = () => {
+    if (customerId) {
+      setIsNewOpen(true)
+    } else {
+      toast({
+        title: "Error",
+        description: "Please select a customer",
+        variant: "destructive",
+      })
+    }
+  }
+
   useEffect(() => {
     fetchCustomers()
   }, [fetchCustomers])
@@ -127,20 +139,9 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           Blends
-          <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" onClick={() => setIsNewOpen(true)}>
-                New Blend
-              </Button>
-            </DialogTrigger>
-            <NewBlendDialog
-              isEdit={false}
-              isOpen={isNewOpen}
-              setIsOpen={setIsNewOpen}
-              onCreateBlend={handleCreateNewBlend}
-              customerId={customerId}
-            />
-          </Dialog>
+          <Button variant="outline" size="sm" onClick={() => addNewBlend()}>
+            New Blend
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -162,6 +163,15 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
           handleUpdateBlend={handleUpdateBlend}
         />
       )} */}
+      <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
+        <NewBlendDialog
+          isEdit={false}
+          isOpen={isNewOpen}
+          setIsOpen={setIsNewOpen}
+          onCreateBlend={handleCreateNewBlend}
+          customerId={customerId}
+        />
+          </Dialog>
     </Card>
   )
 }

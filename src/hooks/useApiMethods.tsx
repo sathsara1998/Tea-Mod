@@ -368,6 +368,22 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Get blends by customer id
+    const getBlendByCustomer = useCallback(async (id: number) => {
+        const config: CustomConfig = {
+            url: "/api/blend/getBlendsbyCustomer?id=" + id,
+            errorMessage: "An error occurred while Fetching Blends.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error: any) {
+            throw new Error(error.response.data.error);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -388,6 +404,7 @@ export const useApiMethods = () => {
         deleteManufactureAllocs,
         deleteSalesAllocs,
         addSalesAllocationtoBlend,
-        getBlendByBlendNo
+        getBlendByBlendNo,
+        getBlendByCustomer
     }
 }

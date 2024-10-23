@@ -8,12 +8,12 @@ export async function GET(req: Request) {
 
     try {
         const response = await apiClient({
-            url: `/tea_blends?blend_number=${id}`,
+            url: `/tea_blends?customer_id=${id}`,
             method: 'GET',
         });
 
         return NextResponse.json(response.data);
-    } catch (err) {
-        return NextResponse.json({ error: 'An error occurred while fetching blends.' }, { status: 500 });
+    } catch (err: any) {
+        return NextResponse.json({ error: err.response.data.error || 'An error occurred while fetching blends.' }, { status: 500 });
     }
 }
