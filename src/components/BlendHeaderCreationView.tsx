@@ -412,29 +412,29 @@ export default function BlendAllocator() {
     }
   }, [selectedPartnerId])
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen">
+  //       <Loader2 className="h-8 w-8 animate-spin" />
+  //     </div>
+  //   )
+  // }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-        <Button onClick={fetchConfirmedSaleOrders} variant="outline">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Retry
-        </Button>
-      </div>
-    )
-  }
+  // if (error) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center h-screen">
+  //       <Alert variant="destructive" className="mb-4">
+  //         <AlertTriangle className="h-4 w-4" />
+  //         <AlertTitle>Error</AlertTitle>
+  //         <AlertDescription>{error}</AlertDescription>
+  //       </Alert>
+  //       <Button onClick={fetchConfirmedSaleOrders} variant="outline">
+  //         <RefreshCw className="mr-2 h-4 w-4" />
+  //         Retry
+  //       </Button>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="container w-full p-4 flex flex-row ml-0 mr-0">
@@ -471,9 +471,11 @@ export default function BlendAllocator() {
       </div>
 
       {/* Right Side - Total Demand */}
-      <div className="w-full md:w-1/4">
-        <TotalDemandCard totalDemand={groupedDemands} />
-      </div>
+      {!isEditBlend && (
+        <div className="w-full md:w-1/4">
+          <TotalDemandCard totalDemand={groupedDemands} />
+        </div>
+      )}
 
       {/* Edit Blend Dialog */}
       {editingBlend && (

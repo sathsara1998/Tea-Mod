@@ -72,7 +72,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   useEffect(() => {
     if (allocationDataRef.current) {
       tabulatorRef.current = new Tabulator(allocationDataRef.current, {
-        data: tableItems,
+        data: blendItems,
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
@@ -118,10 +118,10 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         }
       }
     }
-  }, [tableItems])
+  }, [blendItems])
 
   useEffect(() => {
-    setTableItems(blendItems);
+    // setTableItems(blendItems);
   }, [blendItems])
 
   const confirmRemove = async () => {
@@ -154,7 +154,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   }
 
   const handleNewAllocations = (data: CustomerFullBlends) => {
-    allocationsChanged([...tableItems, ...data.products])
+    allocationsChanged([...blendItems, ...data.products])
   }
 
   return (
@@ -176,7 +176,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               onCreateBlend={handleNewAllocations}
               customerId={customerId}
               blendId={blendId}
-              currentBlendIds={tableItems.map(item => item.id)}
+              currentBlendIds={blendItems.map(item => item.id)}
             />
           </Dialog>
             <Button
@@ -194,7 +194,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           <Button
             onClick={handleConfirm}
             className="mt-4"
-            disabled={isConfirming || !tableItems || tableItems.length === 0}
+            disabled={isConfirming || !blendItems || blendItems.length === 0}
           >
             {isConfirming ? (
               <>

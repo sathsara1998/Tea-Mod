@@ -38,7 +38,7 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" size="sm">
-                          <Info className="h-4 w-4 mr-2" />
+                          <Info className="h-4 w-4 mr-2 flex-1" />
                           View Allocations
                         </Button>
                       </PopoverTrigger>
@@ -66,11 +66,11 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                         </ScrollArea>
                       </PopoverContent>
                     </Popover>
-                    <Button variant="outline" size="sm" onClick={() => onEdit(data)}>
+                    <Button variant="outline" size="sm" onClick={() => onEdit(data)} className='flex-1'>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => onDelete(data.id)}>
+                    <Button variant="outline" size="sm" onClick={() => onDelete(data.id)} className='flex-1'>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>

@@ -135,7 +135,7 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
   }, [fetchCustomers])
 
   return (
-    <Card>
+    <Card className='w-[400px]'>
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           Blends
