@@ -162,7 +162,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               </Button>
             </DialogTrigger>
             <NewBlendDialog
-              isEdit={true}
+              isEdit={isEdit}
               isOpen={isAddDialog}
               setIsOpen={setIsAddDialog}
               onCreateBlend={handleNewAllocations}

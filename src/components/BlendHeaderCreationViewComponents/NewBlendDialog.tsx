@@ -75,7 +75,7 @@ export default function ModernBlendDialog({ customerId, onCreateBlend, isOpen, s
       })
 
       tabulatorRef.current.on("rowSelectionChanged", function (selectedData, rows) {
-        if (isEdit) {
+        if (isEdit || currentBlendIds?.length) {
           // Filter out the rows with disabled IDs
           rows.forEach((row) => {
             const rowData = row.getData();
