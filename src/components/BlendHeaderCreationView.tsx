@@ -68,8 +68,10 @@ export default function BlendAllocator() {
     }
   }, [])
 
-  const fetchBlends = useCallback(async () => {
-    setIsLoading(true)
+  const fetchBlends = useCallback(async (load: boolean = true) => {
+    if (load) {
+      setIsLoading(true)
+    }
     setError(null)
     try {
       const data = await getBlends();
@@ -340,7 +342,6 @@ export default function BlendAllocator() {
   const onNewBlendDataAdd = (data: CustomerFullBlends) => {
     setIsEditBlend(false);
     setSelectedAllocations(data.products);
-    setSelectedPartnerId(data.partner_id);
   }
 
   const resetData = () => {
@@ -348,6 +349,12 @@ export default function BlendAllocator() {
     setGroupedDemands([]);
     setSelectedPartnerId(0)
     fetchBlends();
+  }
+
+  const resetBlendData = () => {
+    setSelectedAllocations([]);
+    setGroupedDemands([]);
+    fetchBlends(false);
   }
 
   const onEditPressed = (blend: TeaBlend) => {
@@ -408,6 +415,7 @@ export default function BlendAllocator() {
 
   const customerSelected = (id: number) => {
     setSelectedPartnerId(id);
+    resetBlendData()
   }
 
   if (isLoading) {
