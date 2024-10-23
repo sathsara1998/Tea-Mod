@@ -87,6 +87,12 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
                 max: teaWeight,
                 step: 1,
               };
+            },
+            formatter: (cell) => {
+              const value = cell.getValue();
+              const element = cell.getElement();
+              element.style.backgroundColor = "#f2de79";
+              return value;
             }
           },
           { title: "Allocated Qty", field: "allocated_blend_quantity", hozAlign: "left" },
