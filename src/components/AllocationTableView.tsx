@@ -444,7 +444,7 @@ export default function AllocationTableView() {
       <h1 className="text-2xl font-semibold mb-4">Tea Blend Allocation</h1>
       <div className="flex gap-4">
         <div>
-        <Card className="flex-grow">
+        <Card className="flex-grow mb-5">
           <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
             <CardTitle>Selected Blend</CardTitle>
             <div className="flex gap-2">
