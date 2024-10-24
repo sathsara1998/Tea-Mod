@@ -371,12 +371,12 @@ export default function BlendAllocator() {
         contract_number: alloc.contract_number,
         contract_line_no: alloc.contract_no,
         product_internal_ref: alloc.product_internal_ref,
-        product_uom_qty: 0,
-        product_uom: "",
+        product_uom_qty: alloc.product_uom_qty,
+        product_uom: alloc.product_uom,
         product_name: alloc.product_name,
         product_blend_internal_ref: alloc.product_internal_ref,
         blend_details: "",
-        tea_weight: 0,
+        tea_weight: alloc.tea_weight,
         allocated_blend_quantity: alloc.allocated_blend_quantity,
         product_id: alloc.product_id,
         release_number: 1,
@@ -450,7 +450,7 @@ export default function BlendAllocator() {
       </div>
 
       {/* Middle - Blend Creation */}
-      <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
+      <div className="w-full md:w-3/4 mb-4 md:mb-0 md:mr-4">
 
         <CustomerSelection
           customers={customers} 
@@ -471,20 +471,20 @@ export default function BlendAllocator() {
       </div>
 
       {/* Right Side - Total Demand */}
-      {!isEditBlend && (
+      {/* {!isEditBlend && (
         <div className="w-full md:w-1/4">
           <TotalDemandCard totalDemand={groupedDemands} />
         </div>
-      )}
+      )} */}
 
       {/* Edit Blend Dialog */}
-      {editingBlend && (
+      {/* {editingBlend && (
         <EditBlendDialog
         editingBlend={editingBlend}
         setEditingBlend={setEditingBlend}
         handleUpdateBlend={handleUpdateBlend}
       />
-      )}
+      )} */}
     </div>
   )
 }

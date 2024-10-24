@@ -6,7 +6,7 @@ import { Search } from "lucide-react"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
-import "tabulator-tables/dist/css/tabulator.min.css"
+import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
 import { generateTestData } from '@/lib/utils'
 import { AddAllocationObject, TeaAllocation } from './types'
 import { useApiMethods } from '@/hooks/useApiMethods'

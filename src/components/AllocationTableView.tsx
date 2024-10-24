@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label"
 import { Info, Search } from "lucide-react"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import "tabulator-tables/dist/css/tabulator.min.css"
+import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
 import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection, { FormField } from './BlendInformation'
 import BlendList from './BlendList'
@@ -109,10 +109,10 @@ export default function AllocationTableView() {
             }
           },
           { title: "Box Number", field: "box_number", hozAlign: "center"},
-          { title: "Quantity", field: "quantity_kgs", hozAlign: "center"},
-          { title: "Allocated Quantity (kg)", field: "quantity_kgs", hozAlign: "center"},
+          // { title: "Quantity", field: "quantity_kgs", hozAlign: "center" ,  topCalc:"sum"},
+          { title: "Allocated Quantity (kg)", field: "quantity_kgs", topCalc:"sum", hozAlign: "center"},
           { title: "Package Weight (kg)", field: "net_weight", hozAlign: "center"},
-          { title: "Allocated Packages", field: "quantity_packages", hozAlign: "center", editor: "number", editorParams: {
+          { title: "Allocated Packages", field: "quantity_packages", topCalc:"sum" , hozAlign: "center", editor: "number", editorParams: {
             min: 0,
             step: 1,
           }},
@@ -127,7 +127,7 @@ export default function AllocationTableView() {
             row.getElement().style.backgroundColor = "#eda18a";
           }
         }
-      })
+   })
 
       tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
         selectedIdsRef.current = [...selectedIdsRef.current, data.id]
@@ -144,6 +144,12 @@ export default function AllocationTableView() {
           handleQuantityChange(data.box_number, cell.getValue(), 'packages', data.id)
         }
       })
+
+      tabulatorRef.current.on("rowClick", function(e, row){
+        //e - the click event object
+        //row - row component
+        console.log(row)
+    });
 
       return () => {
         if (tabulatorRef.current) {
@@ -175,6 +181,15 @@ export default function AllocationTableView() {
       table.on("rowSelectionChanged", function(data: any, rows: any){
         setSelectedTeas(data)
       })
+
+      table.on("rowClick", function(e, row){
+        //e - the click event object
+        //row - row component
+
+        console.log(e)
+        console.log(row)
+
+    });
 
       return () => {
         table.destroy()
@@ -360,7 +375,7 @@ export default function AllocationTableView() {
         totalAllocated: teas.allocated_quantity,
         averagePrice: teas.average_cost,
         averageCostToAllocate: teas.average_cost,
-        balanceToAllocate: teas.export_quantity,
+        balanceToAllocate: teas.to_allocate_quantity,
         teaCost: teas.average_cost,
         export_quantity: teas.export_quantity
       }

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import "tabulator-tables/dist/css/tabulator.min.css"
+import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from '../ui/use-toast'
 import { AddSalesAllocation, Customer, CustomerOrder, CustomerOrdersTableData } from '../types'

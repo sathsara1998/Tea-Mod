@@ -36,7 +36,7 @@ interface BlendInformationSectionProps {
           <TabsContent value="details"> */}
             <div className="grid grid-cols-3 gap-2">
               <LabelField label="Blend No." value={blendInfo.blendNo} />
-              <LabelField label="Blend Ref No." value={blendInfo.blendRefNo} />
+              {/* <LabelField label="Blend Ref No." value={blendInfo.blendRefNo} /> */}
               <LabelField label="Date" value={blendInfo.date} />
               <LabelField label="Blend Standard" value={blendInfo.blendStandard} />
               <LabelField label="Prop Sample (gms)" value={blendInfo.propSample} />

@@ -115,6 +115,7 @@ export interface BlendInfo {
   averagePrice: number;
   averageCostToAllocate: number;
   balanceToAllocate: number;
+  to_allocate_quantity?:number
   teaCost: number;
   allocations?: Array<ManufacturingAllocationTableData>;
   export_quantity?: number;
@@ -172,11 +173,13 @@ interface Allocation {
   allocated_blend_quantity: number;
   tea_cost: number;
   sale_order_line_id: number;
+  product_uom:string;
+  product_uom_qty:number;
   product_id: number;
   product_name: string;
   quantity: number;
   contract_no: string;
-  tea_weight?: number;
+  tea_weight: number|0;
 }
 
 export interface TeaBlend {

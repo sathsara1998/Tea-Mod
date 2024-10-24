@@ -76,12 +76,19 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
-          { title: "Line No", field: "contract_line_no", hozAlign: "left" },
-          { title: "Line No", field: "contract_number", hozAlign: "left" },
-          { title: "Release No", field: "release_number", hozAlign: "left" },
+          { title: "Contract", field: "contract_number", hozAlign: "left" },
+          { title: "Line", field: "contract_line_no", hozAlign: "left" },
+          { title: "Item", field: "product_internal_ref", hozAlign: "left" },
+          { title: "Qty Orderd", field: "product_uom_qty", hozAlign: "left" },
+          { title: "UOM", field: "product_uom", hozAlign: "center" },
+          { title: "Item Desc.", field: "product_name", hozAlign: "center" },
+          { title: "Blend Standard", field: "product_name", hozAlign: "center" },
+          { title: "Tea weight (Kg)", field: "tea_weight", frozen:true ,hozAlign: "right" },
+
+          // { title: "Release No", field: "release_number", hozAlign: "left" },
           {
-            title: "Blending Qty", field: "blending_qty", hozAlign: "right", editor: "number", editorParams: (cell) => {
-              const teaWeight = cell.getRow().getData().tea_weight;
+            title: "Blending Qty (Kg)", field: "blending_qty", hozAlign: "right", frozen:true ,editor: "number", editorParams: (cell) => {
+              const teaWeight = cell.getRow().getData().tea_weight - cell.getRow().getData().allocated_blend_quantity;
               return {
                 min: 0,
                 max: teaWeight,
@@ -95,12 +102,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               return value;
             }
           },
-          { title: "Allocated Qty", field: "allocated_blend_quantity", hozAlign: "left" },
-          { title: "Item", field: "product_internal_ref", hozAlign: "left" },
-          { title: "Quantity", field: "product_uom_qty", hozAlign: "right" },
-          { title: "UOM", field: "product_uom", hozAlign: "center" },
-          { title: "Blend Standard", field: "product_name", hozAlign: "center" },
-          { title: "Tea weight", field: "tea_weight", hozAlign: "right" },
+          { title: "Blended Quantity (Kg)", field: "allocated_blend_quantity", hozAlign: "right" , frozen:true },
         
         ],
         height: "400px",

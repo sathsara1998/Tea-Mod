@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search } from "lucide-react"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import "tabulator-tables/dist/css/tabulator.min.css"
+import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
 import { generateTestData } from '@/lib/utils'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from './ui/use-toast'
@@ -74,7 +74,7 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "Customer", field: "customer_name", hozAlign: "left" , headerFilter:true, headerFilterPlaceholder:"Find a Customer..."},
-          { title: "Blend No", field: "name" },
+          { title: "Blend No", field: "name", headerFilter:true, headerFilterPlaceholder:"Find a Blend Number..." },
           { title: "Quantity (kg)", field: "quantity" },
           { title: "Status", field: "status" },
         ],
