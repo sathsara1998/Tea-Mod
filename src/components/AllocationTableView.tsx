@@ -27,6 +27,7 @@ import {
   StockLot
 } from './types'
 import AllocationDetailsDialog from './AllocationDetailsDialog'
+import { useRouter, usePathname, useSearchParams  } from 'next/navigation';
 
 interface Allocation {
   teaId: string
@@ -69,6 +70,9 @@ export default function AllocationTableView() {
     deleteManufactureAllocs
   } = useApiMethods();
   const { toast } = useToast()
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   
   const allocationsTableRef = useRef(null)
   const blendsTableRef = useRef(null)
@@ -342,10 +346,16 @@ export default function AllocationTableView() {
   }, [allocations])
 
   // Get blend data by blendid
-  const fetchBlendData = useCallback(async (id: string) => {
+  const fetchBlendData = useCallback(async (id: string, isEdit: boolean = false) => {
     try {
       const data = await getBlendById(id)
       const teas: TeaBlend = data[0];
+
+      if (isEdit) {
+        setSelectedBlend(teas);
+        return;
+      }
+      
       const teablendInfo : BlendInfo = {
         blendNo: teas.name,
         blendRefNo: "",
@@ -431,15 +441,29 @@ export default function AllocationTableView() {
     }
   }
 
+  const customerChanged = (blend: TeaBlend) => {
+    if (blend) {
+      router.replace(`${pathname}?id=${blend.name}`);
+      setSelectedBlend(blend)
+    }
+  }
+
   useEffect(() => {
     if (selectedBlend) {
       fetchBlendData(selectedBlend.name)
     }
   }, [selectedBlend])
 
+  // Get the id if it exists
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      fetchBlendData(id, true);
+    }
+  }, [searchParams]);
+
   return (
   <>
-  
     <div className="p-4 mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Tea Blend Allocation</h1>
       <div className="flex gap-4">
@@ -458,7 +482,7 @@ export default function AllocationTableView() {
                 <SelectBlendsDialog
                   isOpen={isBlendDialogOpen}
                   onClose={() => setIsBlendDialogOpen(false)}
-                  onSelectBlend={setSelectedBlend}
+                  onSelectBlend={customerChanged}
                 />
               </Dialog>
             </div>
