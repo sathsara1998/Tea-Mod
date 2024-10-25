@@ -3,7 +3,7 @@ import AllocationView from '@/components/AllocationView'
 import ThemeToggle from '@/components/ThemeToggle'
 import { BlendAllocation, Tea } from '@/components/types'
 import { generateTeas } from '@/lib/utils'
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 
 const Page: React.FC = () => {
 
@@ -14,6 +14,7 @@ const Page: React.FC = () => {
   const [blendNumberSequence, setBlendNumberSequence] = useState(1000001)
     return (
         <>
+        <Suspense fallback={<div>Loading...</div>}>
          <AllocationView
           availableTeas={availableTeas}
           setAvailableTeas={setAvailableTeas}
@@ -25,7 +26,7 @@ const Page: React.FC = () => {
           setBlendNumberSequence={setBlendNumberSequence}
         />   
                 <ThemeToggle />
-
+        </Suspense>
         </>
     )
 }

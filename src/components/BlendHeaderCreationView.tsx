@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import { Button } from "@/components/ui/button"
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
@@ -20,6 +20,7 @@ import {
 } from './types'
 import { CustomerFullBlends } from './BlendHeaderCreationViewComponents/NewBlendDialog'
 import CustomerSelection from './BlendHeaderCreationViewComponents/CustomerSelection'
+import { useRouter, usePathname, useSearchParams  } from 'next/navigation';
 
 
 export default function BlendAllocator() {
@@ -51,6 +52,9 @@ export default function BlendAllocator() {
     getBlendByBlendNo,
     getBlendByCustomer
   } = useApiMethods();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
 
@@ -338,6 +342,7 @@ export default function BlendAllocator() {
   }, [selectedAllocations])
 
   const onNewBlendDataAdd = (data: CustomerFullBlends) => {
+    router.replace(pathname)
     setIsEditBlend(false);
     setSelectedAllocations(data.products);
   }
@@ -347,6 +352,7 @@ export default function BlendAllocator() {
   }
 
   const onEditPressed = (blend: TeaBlend) => {
+    router.replace(`${pathname}?id=${blend.name}`);
     getBlendData(blend.name);
   }
 
@@ -362,6 +368,14 @@ export default function BlendAllocator() {
       })
     }
   }
+
+  // Get the id if it exists
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      getBlendData(id);
+    }
+  }, [searchParams]);
 
   const setEditingData = (blend: TeaBlend) => {
     setIsEditBlend(true);
