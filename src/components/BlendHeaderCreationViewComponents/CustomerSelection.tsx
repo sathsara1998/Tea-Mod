@@ -44,7 +44,7 @@ function CustomerSelection({ customers, customerSelected, selectedCustomer }: Cu
         <div className="mb-5">
             <Card>
                 <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
-                    <CardTitle>Customer</CardTitle>
+                    <CardTitle>Blend Header Creation</CardTitle>
                     <div className="flex gap-2">
                         <label className="text-md">
                             {selectCustomer ? selectCustomer.name : '-'}

@@ -25,6 +25,7 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
         <div
                   key={data.id}
                   className="p-2 mb-2 rounded bg-secondary flex flex-col"
+                  onClick={() => onEdit(data)}
                 >
                   <div className="flex justify-between items-center">
                     <span>{data.name} | {data.product_name} </span>
@@ -39,7 +40,7 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                       <PopoverTrigger asChild>
                         <Button variant="outline" size="sm">
                           <Info className="h-4 w-4 mr-2 flex-1" />
-                          View Allocations
+                          View Order Lines
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
@@ -66,13 +67,15 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                         </ScrollArea>
                       </PopoverContent>
                     </Popover>
-                    <Button variant="outline" size="sm" onClick={() => onEdit(data)} className='flex-1'>
+                    {/* <Button variant="outline" size="sm" onClick={() => onEdit(data)} className='flex-1'>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
-                    </Button>
+                    </Button> */}
                     <Button variant="outline" size="sm" onClick={() => onDelete(data.id)} className='flex-1'>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      {/* <Trash2 className="h-4 w-4 mr-2" /> */}
+                      <Edit className="h-4 w-4 mr-2" />
+                      View Allocations
+
                     </Button>
                   </div>
                 </div>
