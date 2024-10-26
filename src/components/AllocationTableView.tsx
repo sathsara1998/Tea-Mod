@@ -463,14 +463,15 @@ export default function AllocationTableView() {
   <>
     <div className="p-4 mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Tea Blend Allocation</h1>
-      <div className="flex gap-4">
+      <div className="grid grid-cols-6 gap-4">
         {/* Show the allocations */}
+        <div className="col-span-1">
           {selectedBlend && <Card className="mb-5 max-h-[80vh]">
             <CardHeader className="top-0 z-10 flex flex-row">
               <CardTitle>Allocations</CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-60">
+              <ScrollArea className="h-[80vh]">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -492,9 +493,9 @@ export default function AllocationTableView() {
               </ScrollArea>
             </CardContent>
           </Card>}
-
-        <div>
-        <Card className="flex-grow mb-5">
+        </div>
+        <div className="col-span-3">
+        <Card className="mb-5">
           <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
             <CardTitle>Selected Blend</CardTitle>
             <div className="flex gap-2">
@@ -517,7 +518,7 @@ export default function AllocationTableView() {
             <div ref={blendsTableRef}></div>
           </CardContent>
         </Card>
-        <Card className="flex-grow">
+        <Card>
           <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
             <CardTitle>Tea Allocations</CardTitle>
             {isDraftBlend && (
@@ -539,18 +540,20 @@ export default function AllocationTableView() {
             </div>
             )}
           </CardHeader>
-          <CardContent className='w-[750px]'>
+          <CardContent className='w-100'>
             <div ref={allocationsTableRef}></div>
           </CardContent>
         </Card>
         </div>
-        <BlendInformationSection 
-         blendInfo={blendInfo} 
-         lotDetails={blendDetails}
-         onBlendInfoChange={handleBlendInfoChange}
-         onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
-         onSaveTableData={() => saveTableData()}
-        />
+        <div className="col-span-2">
+          <BlendInformationSection 
+          blendInfo={blendInfo} 
+          lotDetails={blendDetails}
+          onBlendInfoChange={handleBlendInfoChange}
+          onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
+          onSaveTableData={() => saveTableData()}
+          />
+        </div>
       </div>
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <DialogContent>

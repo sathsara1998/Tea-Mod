@@ -57,11 +57,13 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
 
   useEffect(() => {
     const filtered = availableBlends.filter(blend => 
-      (blend.product_name.toLowerCase().includes(searchBlendName.toLowerCase()) &&
-       blend.quantity.toString().includes(searchQuantity)) && (searchStatus === 'All' || blend.status == searchStatus)
+      (blend.customer_name.toLowerCase().includes(searchBlendName.toLowerCase())) ||
+      (blend.name.toLowerCase().includes(searchBlendName.toLowerCase())) ||
+      (blend.quantity.toString().includes(searchBlendName.toLowerCase()))
+      && (searchStatus === 'All' || blend.status == searchStatus)
     )
     setFilteredBlends(filtered)
-  }, [availableBlends, searchBlendName, searchQuantity, searchStatus])
+  }, [availableBlends, searchBlendName, searchStatus])
 
   useEffect(() => {
     if (availableBlendTableRef.current) {
@@ -123,16 +125,9 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
         <div className="flex items-center space-x-2 mb-4">
           <Search className="w-4 h-4 text-gray-500" />
           <Input
-            placeholder="Search name"
+            placeholder="Search ..."
             value={searchBlendName}
             onChange={(e) => setSearchBlendName(e.target.value)}
-            className="border border-gray-300"
-          />
-          <Input
-            placeholder="Search quantity"
-            value={searchQuantity}
-            type='number'
-            onChange={(e) => setSearchQuantity(e.target.value)}
             className="border border-gray-300"
           />
           <Select value={searchStatus} onValueChange={setSearchStatus}>

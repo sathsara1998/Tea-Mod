@@ -45,8 +45,8 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                   <div className="flex justify-between mt-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Info className="h-4 w-4 mr-2 flex-1" />
+                        <Button variant="outline" size="sm" className="flex-1">
+                          <Info className="h-4 w-4 mr-2" />
                           View Order Lines
                         </Button>
                       </PopoverTrigger>

@@ -466,9 +466,9 @@ export default function BlendAllocator() {
   // }
 
   return (
-    <div className="container w-full p-4 flex flex-row ml-0 mr-0">
+    <div className="grid grid-cols-4 gap-4">
       {/* Left Side - Blends */}
-      <div className="w-full md:w-1/3 mb-4 md:mb-0 md:mr-4 ml-0">
+      <div className="col-span-1">
         <BlendsList 
           customerId={selectedPartnerId}
           blends={blends} 
@@ -480,7 +480,7 @@ export default function BlendAllocator() {
       </div>
 
       {/* Middle - Blend Creation */}
-      <div className="w-full md:w-3/4 mb-4 md:mb-0 md:mr-4">
+      <div className="col-span-3">
 
         <CustomerSelection
           customers={customers} 
