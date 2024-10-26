@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
 import { Info, Search } from "lucide-react"
+import { ScrollArea } from './ui/scroll-area'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
 import { generatePDF, generateTestData } from '@/lib/utils'
@@ -93,25 +95,6 @@ export default function AllocationTableView() {
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
-          {
-            title: "View Details",
-            field: "view",
-            hozAlign: "center",
-            formatter: (cell) => {
-              const cellValue = cell.getValue();
-              return `
-                <span style="display: flex; alight-items: center; justify-content: center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-black hover:text-gray-700">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12c0 0 3-9 9-9s9 9 9 9-3 9-9 9-9-9-9-9z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" />
-                  </svg>
-                </span>`;
-            },
-            cellClick: (e, cell) => {
-              const rowData = cell.getRow().getData();
-              handleViewDetails(rowData.lot_id);
-            }
-          },
           { title: "Box Number", field: "box_number", hozAlign: "center"},
           // { title: "Quantity", field: "quantity_kgs", hozAlign: "center" ,  topCalc:"sum"},
           { title: "Allocated Quantity (kg)", field: "quantity_kgs", topCalc:"sum", hozAlign: "center"},
@@ -150,9 +133,8 @@ export default function AllocationTableView() {
       })
 
       tabulatorRef.current.on("rowClick", function(e, row){
-        //e - the click event object
-        //row - row component
-        console.log(row)
+        const rowData = row.getData();
+        handleViewDetails(rowData.lot_id);
     });
 
       return () => {
@@ -482,6 +464,35 @@ export default function AllocationTableView() {
     <div className="p-4 mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Tea Blend Allocation</h1>
       <div className="flex gap-4">
+        {/* Show the allocations */}
+          {selectedBlend && <Card className="mb-5 max-h-[80vh]">
+            <CardHeader className="top-0 z-10 flex flex-row">
+              <CardTitle>Allocations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-60">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Quantity</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedBlend.allocations.map((allocation, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{allocation.sale_order_name}</TableCell>
+                        <TableCell>{allocation.product_name}</TableCell>
+                        <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>}
+
         <div>
         <Card className="flex-grow mb-5">
           <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">

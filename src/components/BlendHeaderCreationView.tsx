@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import EditBlendDialog from './BlendHeaderCreationViewComponents/EditBlendDialog';
 import TotalDemandCard, { TotalDemand } from './BlendHeaderCreationViewComponents/TotalDemandCard';
-import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
+import BlendCreation, { BlendShowType } from './BlendHeaderCreationViewComponents/BlendCreation';
 import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import {
@@ -40,6 +40,12 @@ export default function BlendAllocator() {
   const [editingBlendCustomer, setEditingBlendCustomer] = useState<Customer>();
   const [editingBlendId, setEditingBlendId] = useState(0);
   const [blendLoading, setBlendsLoading] = useState(false);
+  const [editingBlendInfo, setEditingBlendInfo] = useState<BlendShowType>({
+    name: '',
+    productName: '',
+    customerName: '',
+    quantity: 0
+  })
   const { toast } = useToast()
   const { 
     getConfirmedSaleOrders, 
@@ -408,6 +414,12 @@ export default function BlendAllocator() {
       id: blend.customer_id,
       name: blend.customer_name
     })
+    setEditingBlendInfo({
+      name: blend.name,
+      productName: blend.product_name,
+      customerName: blend.customer_name,
+      quantity: blend.quantity
+    })
     setEditingBlendId(blend.id)
     setSelectedPartnerId(blend.customer_id)
     setSelectedAllocations(allocations);
@@ -485,6 +497,7 @@ export default function BlendAllocator() {
           deleted={allocationsDeleted}
           customerId={selectedPartnerId}
           blendId={editingBlendId}
+          editiingInfo={editingBlendInfo}
         />
       </div>
 

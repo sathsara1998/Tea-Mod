@@ -57,7 +57,6 @@ export default function ModernBlendDialog({ customerId, onCreateBlend, isOpen, s
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         data: customerOrders,
         height: "400px",
-        layout: "fitColumns",
         placeholder: "No Order Lines Available",
         selectableRows: true,
         groupBy: "product_name",
@@ -76,21 +75,53 @@ export default function ModernBlendDialog({ customerId, onCreateBlend, isOpen, s
 
       tabulatorRef.current.on("rowSelectionChanged", function (selectedData, rows) {
         if (isEdit || currentBlendIds?.length) {
+          let disableIds = currentBlendIds?.length ? currentBlendIds : [];
+          let productId: number = 0;
+          if (selectedData.length > 0) {
+            productId = selectedData[0].product_id;
+          }
           // Filter out the rows with disabled IDs
           rows.forEach((row) => {
             const rowData = row.getData();
             if (currentBlendIds && currentBlendIds.includes(rowData.id)) {
               row.deselect(); // Automatically deselect rows with disabled ids
+            } else if (productId != 0 && productId != rowData.product_id) {
+              row.deselect();
+              disableIds.push(rowData.id);
+              toast({
+                title: "Error",
+                description: "Cannot add from different products",
+                variant: "destructive",
+              })
             }
           });
     
           // Set the selected teas excluding the disabled ones
-          if (currentBlendIds) {
-            const validSelections = selectedData.filter(item => !currentBlendIds.includes(item.id));
-            setSelectedOrderLines(validSelections);
-          }
+          const validSelections = selectedData.filter(item => !disableIds.includes(item.id));
+          setSelectedOrderLines(validSelections);
         } else {
-          setSelectedOrderLines(selectedData);
+          let disableIds: any = [];
+          let productId: number = 0;
+          
+          if (selectedData.length > 0) {
+            productId = selectedData[0].product_id;
+          }
+          console.log(productId);
+          
+          rows.forEach((row) => {
+            const rowData = row.getData();
+            if (productId != 0 && productId != rowData.product_id) {
+              row.deselect();
+              disableIds.push(rowData.id);
+              toast({
+                title: "Error",
+                description: "Cannot add from different products",
+                variant: "destructive",
+              })
+            }
+          });
+          const validSelections = selectedData.filter(item => !disableIds.includes(item.id));
+          setSelectedOrderLines(validSelections);
         }
       });
     }
@@ -202,7 +233,7 @@ export default function ModernBlendDialog({ customerId, onCreateBlend, isOpen, s
 
   return (
     <DialogContent
-      className="max-w-6xl max-h-[90vh] overflow-y-auto"
+      className="max-w-[60vw] max-h-[90vh] overflow-y-auto"
       onInteractOutside={(e) => {
         e.preventDefault()
       }}
@@ -216,7 +247,9 @@ export default function ModernBlendDialog({ customerId, onCreateBlend, isOpen, s
           <CardTitle>Customer Order Lines</CardTitle>
         </CardHeader>
         <CardContent>
-          <div ref={allocationsTableRef} className="w-full h-[400px]" aria-label="Customer Order Lines Table"></div>
+          <div className="w-[55vw]">
+            <div ref={allocationsTableRef} className="h-[400px]" aria-label="Customer Order Lines Table"></div>
+          </div>
         </CardContent>
       </Card>
 

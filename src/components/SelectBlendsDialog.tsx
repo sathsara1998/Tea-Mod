@@ -56,14 +56,12 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   const statusTypes = useMemo(() => ['All', ...Array.from(new Set(availableBlends.map(blend => blend.status)))], [availableBlends]);
 
   useEffect(() => {
-    console.log(availableBlends);
-    
     const filtered = availableBlends.filter(blend => 
       (blend.product_name.toLowerCase().includes(searchBlendName.toLowerCase()) &&
        blend.quantity.toString().includes(searchQuantity)) && (searchStatus === 'All' || blend.status == searchStatus)
     )
     setFilteredBlends(filtered)
-  }, [searchBlendName, searchQuantity, searchStatus])
+  }, [availableBlends, searchBlendName, searchQuantity, searchStatus])
 
   useEffect(() => {
     if (availableBlendTableRef.current) {
@@ -151,10 +149,12 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
           </Select>
         </div>
         {isLoading ? (
-          <div className="flex items-center justify-center h-[200px]">
+          <div className="flex items-center justify-center h-[400px]">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
-        ) : <div ref={availableBlendTableRef} className="flex-grow"></div>}
+        ) : <div className='h-[400px]'>
+          <div ref={availableBlendTableRef} className="flex-grow"></div>
+        </div>}
         
         <div className="mt-4 flex justify-end">
           <Button onClick={handleAddSelectedTeas} className="bg-green-600 text-white">

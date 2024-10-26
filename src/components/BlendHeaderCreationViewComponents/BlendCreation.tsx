@@ -38,7 +38,15 @@ type BlendCreationProps = {
   customerId: number;
   blendId: number;
   allocationsChanged: (orders: CustomerOrdersTableData[]) => void;
+  editiingInfo: BlendShowType
 };
+
+export interface BlendShowType {
+  name: string;
+  customerName: string;
+  quantity: number;
+  productName: string;
+}
 
 const BlendCreation: React.FC<BlendCreationProps> = ({
   blendItems,
@@ -49,7 +57,8 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   deleted,
   customerId,
   blendId,
-  allocationsChanged
+  allocationsChanged,
+  editiingInfo
 }) => {
   const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
@@ -164,23 +173,28 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       <Card>
         <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
           <CardTitle>{isEdit ? 'Edit Blend' : 'Create Blend'}</CardTitle>
+          {isEdit && <div>
+            <div><label className="text-md">{editiingInfo.name} | {editiingInfo.productName}</label></div>
+            <div><label className="text-md">Customer: {editiingInfo.customerName ? editiingInfo.customerName: ''}</label></div>
+            <div><label className="text-md">Quantity: {editiingInfo.quantity ? editiingInfo.quantity: 0}</label></div>
+          </div>}
           <div className="flex gap-2">
-          <Dialog open={isAddDialog} onOpenChange={setIsAddDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-green-600 text-white" onClick={() => setIsAddDialog(true)}>
-              Add Allocations
-              </Button>
-            </DialogTrigger>
-            <NewBlendDialog
-              isEdit={isEdit}
-              isOpen={isAddDialog}
-              setIsOpen={setIsAddDialog}
-              onCreateBlend={handleNewAllocations}
-              customerId={customerId}
-              blendId={blendId}
-              currentBlendIds={blendItems.map(item => item.id)}
-            />
-          </Dialog>
+            <Dialog open={isAddDialog} onOpenChange={setIsAddDialog}>
+              <DialogTrigger asChild>
+                <Button className="bg-green-600 text-white" onClick={() => setIsAddDialog(true)}>
+                Add Allocations
+                </Button>
+              </DialogTrigger>
+              <NewBlendDialog
+                isEdit={isEdit}
+                isOpen={isAddDialog}
+                setIsOpen={setIsAddDialog}
+                onCreateBlend={handleNewAllocations}
+                customerId={customerId}
+                blendId={blendId}
+                currentBlendIds={blendItems.map(item => item.id)}
+              />
+            </Dialog>
             <Button
               onClick={() => setIsDeleteConfirmOpen(true)}
               className="bg-red-600 text-white"
