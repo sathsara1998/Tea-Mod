@@ -39,6 +39,7 @@ export default function BlendAllocator() {
   const [selectedPartnerId, setSelectedPartnerId] = useState(0);
   const [editingBlendCustomer, setEditingBlendCustomer] = useState<Customer>();
   const [editingBlendId, setEditingBlendId] = useState(0);
+  const [blendLoading, setBlendsLoading] = useState(false);
   const { toast } = useToast()
   const { 
     getConfirmedSaleOrders, 
@@ -75,6 +76,7 @@ export default function BlendAllocator() {
 
   const fetchBlends = async () => {
     setError(null)
+    setBlendsLoading(true);
     try {
       const data = await getBlendByCustomer(selectedPartnerId);
       
@@ -85,8 +87,9 @@ export default function BlendAllocator() {
         description: err.message,
         variant: "destructive",
       })
+      setBlends([]);
     } finally {
-      setIsLoading(false)
+      setBlendsLoading(false)
     }
   }
 
@@ -460,6 +463,7 @@ export default function BlendAllocator() {
           fetchBlends={fetchBlends} 
           onNewBlendDataAdd={onNewBlendDataAdd} 
           onEditPress={onEditPressed}
+          loading={blendLoading}
         />
       </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { Edit, Info, Trash2 } from 'lucide-react';
 import {
     Popover,
@@ -12,6 +12,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { TeaBlend } from '../types';
+import { useRouter } from 'next/navigation';
 
 interface BlendCardProps{
     data: TeaBlend;
@@ -20,11 +21,17 @@ interface BlendCardProps{
 }
 
 const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
+  const router = useRouter();
+
+  const gotoAllocations = (e: MouseEvent, name: string) => {
+    e.stopPropagation();
+    router.push(`/allocate?id=${name}`);
+  }
 
     return (
         <div
                   key={data.id}
-                  className="p-2 mb-2 rounded bg-secondary flex flex-col"
+                  className="p-2 mb-2 rounded bg-secondary flex flex-col cursor-pointer hover:bg-secondary-hover hover:shadow-md transition-all duration-200"
                   onClick={() => onEdit(data)}
                 >
                   <div className="flex justify-between items-center">
@@ -71,7 +78,7 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button> */}
-                    <Button variant="outline" size="sm" onClick={() => onDelete(data.id)} className='flex-1'>
+                    <Button variant="outline" size="sm" onClick={(e) => gotoAllocations(e, data.name)} className='flex-1'>
                       {/* <Trash2 className="h-4 w-4 mr-2" /> */}
                       <Edit className="h-4 w-4 mr-2" />
                       View Allocations

@@ -16,6 +16,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 export type Blend = {
   id: number;
@@ -42,9 +43,10 @@ type BlendsComponentProps = {
   fetchBlends: () => Promise<void>;
   onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void;
   onEditPress: (blend: TeaBlend) => void;
+  loading: boolean;
 }
 
-export default function BlendsComponent({ customerId, blends, fetchBlends, onNewBlendDataAdd, onEditPress }: BlendsComponentProps) {
+export default function BlendsComponent({ customerId, blends, fetchBlends, onNewBlendDataAdd, onEditPress, loading }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -145,7 +147,11 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[calc(100vh-200px)]">
+        {loading && <div className="h-[calc(100vh-200px)] flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>}
+
+        {!loading && <ScrollArea className="h-[calc(100vh-200px)]">
           {blends.map((blend) => (
             <BlendCard
               key={blend.id}
@@ -154,7 +160,7 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
               onDelete={handleDeleteBlend}
             />
           ))}
-        </ScrollArea>
+        </ScrollArea>}
       </CardContent>
       {/* {editingBlend && (
         <EditBlendDialog
