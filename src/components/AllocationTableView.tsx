@@ -369,10 +369,18 @@ export default function AllocationTableView() {
   const confirmRemoveSelectedTeas = async () => {
     if (tabulatorRef.current) {
       const selectedData = tabulatorRef.current.getSelectedData()
-      const selectedIds = selectedData.map((row: any) => row.id)
+      const params = selectedData.map(item => {
+        return {
+          blend_id: selectedBlend?.id,
+          lot_id: item.lot_id,
+          allocation_type: "package_count",
+          value: 0,
+          per_package_quantity: item.net_weight
+        }
+      })
       
       try {
-        await deleteManufactureAllocs(selectedIds);
+        await deleteManufactureAllocs(params);
         toast({
           title: "Success",
           description: "Selected allocations have been removed",
@@ -733,7 +741,7 @@ export default function AllocationTableView() {
 
       {selectedBlend && (
         <AvailableTeaDialog
-          selectedIds={allocations.map(item => item.box_number)}
+          selectedIds={allocations.map(item => { return { weight: item.net_weight, boxNo: item.box_number } })}
           blendId={selectedBlend.id}
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}

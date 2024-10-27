@@ -300,9 +300,7 @@ export const useApiMethods = () => {
             url: `/api/blend/deleteManufacallocations`,
             errorMessage: "An error occurred while deleting allocations",
             method: 'post',
-            data: {
-                allocation_ids: data
-            }
+            data: data
         }
         try {
             const response = await apiClient(config);

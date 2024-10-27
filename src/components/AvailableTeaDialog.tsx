@@ -24,12 +24,17 @@ interface Tea {
   type: string
 }
 
+export interface SelectedObj {
+  weight: number;
+  boxNo: string;
+}
+
 interface AvailableTeaDialogProps {
   blendId: number
   isOpen: boolean
   onClose: () => void
   onAddTeas: (selectedTeas: TeaAllocation[]) => void,
-  selectedIds: string[]
+  selectedIds: SelectedObj[]
 }
 
 const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId, onClose, onAddTeas, selectedIds }) => {
@@ -40,7 +45,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
   const [filteredTeas, setFilteredTeas] = useState<TeaAllocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const availableTeaTableRef = useRef(null)
-  const { getAllAuctionData, addAllocationtoBlend } = useApiMethods();
+  const { getAllAuctionData, addAllocationtoBlend, editPackageAllocation } = useApiMethods();
   const { toast } = useToast()
 
   const fetchAllocations = useCallback(async () => {
@@ -64,17 +69,15 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
   const addAllocations = async () => {
     try {
       if (blendId) {
-        console.log("in add", selectedTeas);
-        
-        const allocations : AddAllocationObject[] = selectedTeas.map(item => {
+        const allocations : any = selectedTeas.map(item => {
           return {
             blend_id: blendId,
             lot_id: Number(item.id),
-            quantity_packages: 1,
-            quantity_kgs: item.net_weight
+            allocation_type: "package_count",
+            value: 1,
+            per_package_quantity: item.net_weight
           }
         })
-        console.log("alloc", allocations);
         
         await addAllocationtoBlend(allocations)
         
@@ -144,7 +147,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
         });
   
         // Set the selected teas excluding the disabled ones
-        const validSelections = selectedData.filter(item => !selectedIds.includes(item.box_number));
+        const validSelections = selectedData.filter(item => !selectedIds.some(id => id.weight == item.net_weight && id.boxNo == item.box_number));
         setSelectedTeas(validSelections);
       });
 

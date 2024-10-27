@@ -9,9 +9,7 @@ export async function POST(req: Request) {
         const response = await apiClient({
             url: '/tea_blends/add_manufacturing_allocations',
             method: 'POST',
-            data: {
-                allocations: data
-            }
+            data: data
         });
 
         return NextResponse.json(response.data);
