@@ -113,6 +113,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
       const table = new Tabulator(availableTeaTableRef.current, {
         data: filteredTeas,
         placeholder:"Loading ...",
+        groupBy:"box_number",
         columns: [
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "Tea Standard", field: "standard", hozAlign: "left" , headerFilter:true, headerFilterPlaceholder:"Find a STD..."},

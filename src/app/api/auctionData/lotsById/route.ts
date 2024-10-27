@@ -10,7 +10,7 @@ export async function GET(req: Request) {
 
     try {
         const response = await apiClient({
-            url: `/stock_lots/${id}`,
+            url: `/tea/lot/packages/${id}`,
             method: 'GET',
         });
 
