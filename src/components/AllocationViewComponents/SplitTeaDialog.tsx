@@ -11,6 +11,7 @@ import { generateTestData } from '@/lib/utils'
 import { AddAllocationObject, TeaAllocation } from '../types'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from '../ui/use-toast'
+import { SelectedObj } from '../AvailableTeaDialog'
 
 interface SplitObj {
   id: string;
@@ -44,7 +45,7 @@ interface AvailableTeaDialogProps {
 const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('All')
-  const [updatingRow, setUpdatingRow] = useState('')
+  const [updatingRow, setUpdatingRow] = useState<SelectedObj>()
   const [availableTeas, setAvailableTeas] = useState<TeaAllocation[]>([])
   const [filteredTeas, setFilteredTeas] = useState<SplitObj[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,7 +150,7 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
         const data = row.getData()
 
         if (cell.getField() === "dest_weight") {
-          handleNetWeightChange(data.id, cell)
+          handleDestWeightChange(data.id, cell)
         } else if (cell.getField() === "source_count") {
           handleSourcecountChange(data.id, cell)
         } else if (cell.getField() === "dest_count") {
@@ -157,19 +158,36 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
         }
       })
 
+      table.on("cellEditing", function(cell) {
+        const rowData = cell.getRow().getData();
+        const field = cell.getField();
+        
+        if (updatingRow && !isEqualPAckage(rowData.box_number, rowData.net_weight)) {
+          toast({
+            title: "Error",
+            description: "Please save the previous split",
+            variant: "destructive",
+          })
+          cell.cancelEdit();
+        }
+      });
+
       return () => {
         table.destroy()
       }
     }
   }, [filteredTeas])
 
-  const handleNetWeightChange = (id: string, cell: any) => {
+  const handleDestWeightChange = (id: string, cell: any) => {
     const data = cell.getRow().getData();
     const enteredVal = cell.getValue();
 
-    if (updatingRow == '') {
-      setUpdatingRow(id);
-    } else if (updatingRow != id) {
+    if (!updatingRow) {
+      setUpdatingRow({
+        weight: data.net_weight,
+        boxNo: data.box_number,
+      });
+    } else if (!isEqualPAckage(data.box_number, data.net_weight)) {
       toast({
         title: "Error",
         description: "Please save the previous split",
@@ -178,23 +196,43 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
       return;
     }
 
-
-    const updatedNet = (enteredVal * data.source_count) / data.dest_count; 
-    setFilteredTeas(prev => prev.map(tea => {
-      if (tea.id == id) {
-        return {...tea, net_weight: updatedNet, source_count: enteredVal }
-      }
-      return tea
-    }))
+    if (data.source_count) {
+      const destCount = (data.net_weight * data.source_count) / enteredVal;
+      
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, dest_count: destCount, dest_weight: enteredVal }
+        }
+        return tea
+      }))
+    } else if (data.dest_count) {
+      const sourceCount = (enteredVal * data.dest_count) / data.net_weight;
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, source_count: sourceCount, dest_weight: enteredVal }
+        }
+        return tea
+      }))
+    } else {
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, dest_weight: enteredVal }
+        }
+        return tea
+      }))
+    }
   }
 
   const handleSourcecountChange = (id: string, cell: any) => {
     const data = cell.getRow().getData();
     const enteredVal = cell.getValue();
 
-    if (updatingRow == '') {
-      setUpdatingRow(id);
-    } else if (updatingRow != id) {
+    if (!updatingRow) {
+      setUpdatingRow({
+        weight: data.net_weight,
+        boxNo: data.box_number,
+      });
+    } else if (!isEqualPAckage(data.box_number, data.net_weight)) {
       toast({
         title: "Error",
         description: "Please save the previous split",
@@ -203,22 +241,42 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
       return;
     }
 
-    const updatedNet = (data.net_weight * enteredVal) / data.dest_count; 
-    setFilteredTeas(prev => prev.map(tea => {
-      if (tea.id == id) {
-        return {...tea, net_weight: updatedNet, source_count: enteredVal }
-      }
-      return tea
-    }))
+    if (data.dest_weight) {
+      const destCount = (data.net_weight * enteredVal) / data.dest_weight;
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, dest_count: destCount, source_count: enteredVal }
+        }
+        return tea
+      }))
+    } else if (data.dest_count) {
+      const destWeight = (enteredVal * data.net_weight) / data.dest_count;
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, dest_weight: destWeight, source_count: enteredVal }
+        }
+        return tea
+      }))
+    } else {
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, source_count: enteredVal }
+        }
+        return tea
+      }))
+    }
   }
 
   const handleDestCountChange = (id: string, cell: any) => {
     const data = cell.getRow().getData();
     const enteredVal = cell.getValue();
 
-    if (updatingRow == '') {
-      setUpdatingRow(id);
-    } else if (updatingRow != id) {
+    if (!updatingRow) {
+      setUpdatingRow({
+        weight: data.net_weight,
+        boxNo: data.box_number,
+      });
+    } else if (!isEqualPAckage(data.box_number, data.net_weight)) {
       toast({
         title: "Error",
         description: "Please save the previous split",
@@ -227,23 +285,53 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
       return;
     }
 
-    const updatedNet = (data.net_weight * data.free_packages) / enteredVal; 
-    setFilteredTeas(prev => prev.map(tea => {
-      if (tea.id == id) {
-        return {...tea, net_weight: updatedNet, dest_count: enteredVal }
-      }
-      return tea
-    }))
+    if (data.dest_weight) {
+      const sourceCount = (data.dest_weight * enteredVal) / data.net_weight;
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, source_count: sourceCount, dest_count: enteredVal }
+        }
+        return tea
+      }))
+    } else if (data.source_count) {
+      const destWeight = (data.source_count * data.net_weight) / enteredVal;
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, dest_weight: destWeight, dest_count: enteredVal }
+        }
+        return tea
+      }))
+    } else {
+      setFilteredTeas(prev => prev.map(tea => {
+        if (isEqualPAckage(tea.box_number, tea.net_weight)) {
+          return {...tea, dest_count: enteredVal }
+        }
+        return tea
+      }))
+    }
+  }
+
+  const isEqualPAckage = (id: string, weight: number) => {
+    return updatingRow?.boxNo == id && updatingRow?.weight === weight;
   }
 
   const confirmSplit = async () => {
-    if (updatingRow != '') {
-      const selected = filteredTeas.find(item => item.id === updatingRow);
+    if (updatingRow) {
+      const selected = filteredTeas.find(item => isEqualPAckage(item.box_number, item.net_weight));
+      if (!selected?.source_count || !selected?.dest_count || !selected?.dest_weight) {
+        toast({
+          title: "Error",
+          description: "Please fill all fields",
+          variant: "destructive",
+        })
+        return;
+      }
+
       if (selected) {
         try {
           const params = {
             source: {
-              lot_id: selected.lot_no,
+              lot_id: selected.id,
               package_unit_quantity: selected.net_weight,
               count: selected.source_count
             },
@@ -259,14 +347,14 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
             description: "Split successful",
             variant: "default",
           })
+          setUpdatingRow(undefined);
+          fetchAllocations()
         } catch (err: any) {
           toast({
             title: "Error",
             description: err.message,
             variant: "destructive",
           })
-        } finally {
-          onClose();
         }
       }
     }
@@ -301,14 +389,14 @@ const SplitTeaDialog: React.FC<AvailableTeaDialogProps> = ({ blendId, isOpen, on
         </div>
         <div className="w-[650]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-[200px]">
+            <div className="flex items-center justify-center h-[400px]">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : <div ref={availableTeaTableRef} className="flex-grow"></div>}
         </div>
         <div className="mt-4 flex justify-end">
           <Button onClick={onClose} className="bg-green-600 text-white">
-            Confirm Split ({updatingRow.length})
+            Close
           </Button>
         </div>
       </DialogContent>
