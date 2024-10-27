@@ -29,12 +29,17 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
   }
 
     return (
-        <div
-                  key={data.id}
-                  className="p-2 mb-2 rounded bg-secondary flex flex-col cursor-pointer hover:bg-secondary-hover hover:shadow-md transition-all duration-200"
-                  onClick={() => onEdit(data)}
-                >
-                  <div className="flex justify-between items-center">
+<div
+  key={data.id}
+  className="p-4 mb-2 mt-2 bg-secondary flex flex-col cursor-pointer
+             border-4 border-transparent
+             transition-all duration-200 ease-in-out
+             hover:bg-secondary-hover hover:shadow-md
+             hover:border-primary/50"
+  onClick={() => onEdit(data)}
+>            
+    
+    <div className="flex justify-between items-center">
                     <span>{data.name} | {data.product_name} </span>
                     <Badge variant={data.status === 'confirmed' ? 'default' : 'secondary'}>
                       {data.status}

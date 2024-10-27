@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
     try {
         const response = await apiClient({
-            url: '/stock_lots',
+            url: '/tea/lot/packages',
             method: 'GET',
         });
 
