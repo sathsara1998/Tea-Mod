@@ -163,6 +163,7 @@ export interface ManufacturingAllocationTableData {
   weight_diff: number;
   total_cost: number;
   option?: string;
+  garden_mark?:string
 }
 
 interface Allocation {
@@ -208,6 +209,12 @@ export interface AddAllocationObject {
   quantity_packages: number;
   quantity_kgs: number;
 }
+
+export interface AddAllocationArray {
+allocations:[AddAllocationObject]
+}
+
+
 
 export interface AddSalesAllocation {
   blend_id: number;

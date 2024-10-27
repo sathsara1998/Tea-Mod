@@ -6,13 +6,14 @@ export async function PUT(req: Request) {
     const data = await req.json();
 
     try {
-        const response = await apiClient({
-            url: `/tea_blends/update_manufacturing_allocations`,
-            method: 'PUT',
-            data: data
-        });
+        console.log(data.data);
+        // const response = await apiClient({
+        //     url: `/tea/package/allocate`,
+        //     method: 'POST',
+        //     data: data
+        // });
 
-        return NextResponse.json(response.data);
+        // return NextResponse.json(response.data);
     } catch (err) {
         console.log(err);
         

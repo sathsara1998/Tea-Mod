@@ -378,9 +378,12 @@ export default function AllocationTableView() {
           per_package_quantity: item.net_weight
         }
       })
+
+   
+      const data = {allocations:params}
       
       try {
-        await deleteManufactureAllocs(params);
+        await deleteManufactureAllocs(data);
         toast({
           title: "Success",
           description: "Selected allocations have been removed",

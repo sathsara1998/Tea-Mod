@@ -4,10 +4,9 @@ import { NextResponse } from 'next/server';
 // Get Blend data by id
 export async function POST(req: Request) {
     const data = await req.json();
-
     try {
         const response = await apiClient({
-            url: '/tea_blends/add_manufacturing_allocations',
+            url: `/tea/package/allocate`,
             method: 'POST',
             data: data
         });

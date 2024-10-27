@@ -79,7 +79,8 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
           }
         })
         
-        await addAllocationtoBlend(allocations)
+        const data = {allocations:allocations}
+        await addAllocationtoBlend(data)
         
         // close on success
         onAddTeas(selectedTeas)

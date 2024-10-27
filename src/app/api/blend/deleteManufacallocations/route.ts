@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
     try {
         const response = await apiClient({
-            url: `/tea_blends/delete_manufacturing_allocations`,
+            url: `/tea/package/allocate`,
             method: 'POST',
             data: data
         });

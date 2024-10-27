@@ -40,13 +40,17 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
 >            
     
     <div className="flex justify-between items-center">
-                    <span>{data.name} | {data.product_name} </span>
+                   <div className='font-bold'> <div>{data.name}</div>
+                   <div className='font-semibold'>{data.product_name} </div></div>
+
                     <Badge variant={data.status === 'confirmed' ? 'default' : 'secondary'}>
                       {data.status}
                     </Badge>
                   </div>
                   <small>Customer: {data.customer_name}</small>
-                  <small>Quantity: {data.quantity.toFixed(3)}</small>
+                  <small>Export Quantity: {data.export_quantity.toFixed(3)}</small>
+                  <small>Blended Quantity: {data.allocated_quantity.toFixed(3)}</small>
+
                   <div className="flex justify-between mt-2">
                     <Popover>
                       <PopoverTrigger asChild>
