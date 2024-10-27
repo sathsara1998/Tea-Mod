@@ -30,6 +30,7 @@ import {
 } from './types'
 import AllocationDetailsDialog from './AllocationDetailsDialog'
 import { useRouter, usePathname, useSearchParams  } from 'next/navigation';
+import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
 
 interface Allocation {
   teaId: string
@@ -92,7 +93,7 @@ export default function AllocationTableView() {
       const adjustedAllocations : ManufacturingAllocationTableData[] = allocations.map((item) => {
         return {
           ...item,
-          option: item.option ? item.option : "Kgs"
+          option: item.option ? item.option : "Packages"
         }
       })
       
@@ -147,6 +148,7 @@ export default function AllocationTableView() {
             title: "Submit",
             formatter: () => "<button style='color: blue'>Submit</button>",
             width: 100,
+            frozen:true,
             hozAlign: "center",
             cellClick: (e, cell) => {
               const rowData = cell.getRow().getData();
@@ -720,6 +722,14 @@ export default function AllocationTableView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {isOpenPlit && selectedBlend && (
+        <SplitTeaDialog
+          blendId={selectedBlend.id}
+          isOpen={isOpenPlit}
+          onClose={() => setIsOpenPlit(false)}
+        />
+      )}
 
       {selectedBlend && (
         <AvailableTeaDialog

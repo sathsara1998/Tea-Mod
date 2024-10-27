@@ -401,6 +401,23 @@ export const useApiMethods = () => {
         }
     }, [apiClient]);
 
+    // Split package allocation
+    const splitPackage = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: "/api/package/split",
+            errorMessage: "An error occurred while splitting allocations.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error: any) {
+            throw new Error(error.response.data.error);
+        }
+    }, [apiClient]);
+
 
     return {
         getConfirmedSaleOrders,
@@ -423,6 +440,7 @@ export const useApiMethods = () => {
         addSalesAllocationtoBlend,
         getBlendByBlendNo,
         getBlendByCustomer,
-        editPackageAllocation
+        editPackageAllocation,
+        splitPackage
     }
 }
