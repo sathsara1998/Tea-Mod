@@ -162,6 +162,7 @@ export interface ManufacturingAllocationTableData {
   package_diff: number;
   weight_diff: number;
   total_cost: number;
+  option?: string;
 }
 
 interface Allocation {
