@@ -100,6 +100,7 @@ export default function AllocationTableView() {
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         data: adjustedAllocations,
         height: "500px",
+        layout: "fitColumns",
         selectable: isDraftBlend,
         selectableRollingSelection: false,
         columns: [
@@ -602,47 +603,25 @@ export default function AllocationTableView() {
 
   return (
   <>
-    <div className="p-4 mx-auto">
+    <div className="p-4 w-[100%]">
       <h1 className="text-2xl font-semibold mb-4">Tea Blend Allocation</h1>
       <div className="grid grid-cols-6 gap-4">
-        {/* Show the allocations */}
-        <div className="col-span-1">
-          {selectedBlend && <Card className="mb-5 max-h-[80vh]">
-            <CardHeader className="top-0 z-10 flex flex-row">
-              <CardTitle>Allocations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[80vh]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Order</TableHead>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Quantity</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedBlend.allocations.map((allocation, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{allocation.sale_order_name}</TableCell>
-                        <TableCell>{allocation.product_name}</TableCell>
-                        <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>}
-        </div>
-        <div className="col-span-3">
+        <div className="col-span-6">
         <Card className="mb-5">
-          <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
-            <CardTitle>Selected Blend</CardTitle>
-            <div className="flex gap-2">
-              <label className="text-md">
+          <CardHeader className="top-0 z-10 flex flex-row items-center justify-between pb-4">
+            <CardTitle>
+              Selected Blend
+              <label className="text-md ms-5">
                 {selectedBlend? selectedBlend.name : '-'}
               </label>
+            </CardTitle>
+              {selectedBlend && <label className="text-md">
+                Blend Standard: {blendInfo?.blendStandard}
+              </label>}
+              {selectedBlend && <label className="text-md">
+                Customer Name: {selectedBlend.customer_name}
+              </label>}
+            <div className="flex gap-2">
               <Dialog open={isBlendDialogOpen} onOpenChange={setIsBlendDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-green-600 text-white">Select Blend</Button>
@@ -656,7 +635,14 @@ export default function AllocationTableView() {
             </div>
           </CardHeader>
           <CardContent>
-            <div ref={blendsTableRef}></div>
+            <BlendInformationSection 
+              blendInfo={blendInfo} 
+              lotDetails={blendDetails}
+              onBlendInfoChange={handleBlendInfoChange}
+              onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
+              onSaveTableData={() => saveTableData()}
+            />
+            {/* <div ref={blendsTableRef}></div> */}
           </CardContent>
         </Card>
         <Card>
@@ -664,9 +650,40 @@ export default function AllocationTableView() {
             <CardTitle>Tea Allocations</CardTitle>
             {isDraftBlend && (
               <div className="flex gap-2">
-              <Button onClick={openSplit} className="bg-blue-600 text-white">
+                {/* View allocations */}
+                {selectedBlend && <Popover>
+                  <PopoverTrigger asChild>
+                    <Button className="bg-blue-600 text-white">
+                      View Order Lines
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <h4 className="font-semibold mb-2">Allocations</h4>
+                    <ScrollArea className="h-60">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Order</TableHead>
+                            <TableHead>Product</TableHead>
+                            <TableHead>Quantity</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {selectedBlend.allocations.map((allocation, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{allocation.sale_order_name}</TableCell>
+                            <TableCell>{allocation.product_name}</TableCell>
+                            <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
+                          </TableRow>
+                        ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>}
+              {/* <Button onClick={openSplit} className="bg-blue-600 text-white">
                 Split
-              </Button>
+              </Button> */}
               <Button onClick={selectAllRows} className="bg-blue-600 text-white">
                 Select All
               </Button>
@@ -688,15 +705,6 @@ export default function AllocationTableView() {
             <div ref={allocationsTableRef}></div>
           </CardContent>
         </Card>
-        </div>
-        <div className="col-span-2">
-          <BlendInformationSection 
-          blendInfo={blendInfo} 
-          lotDetails={blendDetails}
-          onBlendInfoChange={handleBlendInfoChange}
-          onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
-          onSaveTableData={() => saveTableData()}
-          />
         </div>
       </div>
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
