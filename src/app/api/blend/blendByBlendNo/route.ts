@@ -1,6 +1,9 @@
 import { apiClient } from '@/lib/utils';
 import { NextResponse } from 'next/server';
 
+export const dynamic = "force-dynamic";
+
+
 // Get Blend data by id
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);

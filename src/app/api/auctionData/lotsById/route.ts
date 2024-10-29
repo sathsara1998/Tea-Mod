@@ -4,7 +4,9 @@ import { NextResponse } from 'next/server';
 // Get All Auction data
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const id = []
+    id.push(searchParams.get('id'));
+
 
     console.log("id", id);
 

@@ -1,6 +1,9 @@
 import { apiClient } from '@/lib/utils';
 import { NextResponse } from 'next/server';
 
+export const dynamic = "force-dynamic";
+
+
 // Get Blends
 export async function GET() {
     try {
