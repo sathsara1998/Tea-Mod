@@ -163,7 +163,9 @@ export interface ManufacturingAllocationTableData {
   weight_diff: number;
   total_cost: number;
   option?: string;
-  garden_mark?:string
+  garden_mark?:string;
+  lot_no?:string
+
 }
 
 interface Allocation {

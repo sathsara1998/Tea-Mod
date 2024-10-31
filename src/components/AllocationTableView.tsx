@@ -31,6 +31,7 @@ import {
 import AllocationDetailsDialog from './AllocationDetailsDialog'
 import { useRouter, usePathname, useSearchParams  } from 'next/navigation';
 import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
+import TeaBlendReportButton from './TeaBlendReportButton'
 
 interface Allocation {
   teaId: string
@@ -107,32 +108,38 @@ export default function AllocationTableView() {
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
           { title: "Box Number", field: "box_number", hozAlign: "center"},
-          { title: "Package Weight (kg)", field: "net_weight", hozAlign: "center"},
+          { title: "Broker", field: "total_cost", hozAlign: "center"},
+          { title: "Garden Mark", field: "garden_mark", hozAlign: "center"},
+
+          { title: "Standard", field: "total_cost", hozAlign: "center"},
+
+          { title: "Inv No", field: "lot_no", hozAlign: "center"},
+
+          { title: "Net Weight", field: "net_weight", hozAlign: "center"},
           // { title: "Quantity", field: "quantity_kgs", hozAlign: "center" ,  topCalc:"sum"},
-          { title: "Allocated Quantity (kg)", field: "quantity_kgs", topCalc:"sum", hozAlign: "center", editor: "number", editorParams: {
-            min: 0,
-          }, formatter: (cell) => {
-            const value = cell.getValue();
-            const element = cell.getElement();
-            element.style.backgroundColor = "#f2de79";
-            return value;
-          }},
-          {
-            title: "Option",
-            field: "option",
-            hozAlign: "center",
-            formatter: (cell) => {
-              const value = cell.getValue();
-              return `<button style="background-color: #b0b5b1; border-radius: 10px; padding: 5px 10px">${value || "Kgs"}</button>`;
-            },
-            cellClick: (e, cell) => {
-              const row = cell.getRow();
-              const currentValue = cell.getValue();
+        
+          // {
+          //   title: "Option",
+          //   field: "option",
+          //   hozAlign: "center",
+          //   formatter: (cell) => {
+          //     const value = cell.getValue();
+          //     return `<button style="background-color: #b0b5b1; border-radius: 10px; padding: 5px 10px">${value || "Kgs"}</button>`;
+          //   },
+          //   cellClick: (e, cell) => {
+          //     const row = cell.getRow();
+          //     const currentValue = cell.getValue();
   
-              // Toggle between "Option A" and "Option B"
-              const newValue = currentValue === "Kgs" ? "Packages" : "Kgs";
-              row.update({ option: newValue });  // Update the row data
-            }
+          //     // Toggle between "Option A" and "Option B"
+          //     const newValue = currentValue === "Kgs" ? "Packages" : "Kgs";
+          //     row.update({ option: newValue });  // Update the row data
+          //   }
+          // },
+       
+        
+          { title: "Grade", field: "total_cost", hozAlign: "center"},
+          { title: "Purchased Price", field: "total_cost", hozAlign: "center"},
+          { title: "Quantity (Kg)", field: "quantity_kgs", topCalc:"sum", hozAlign: "center",frozen:true,
           },
           { title: "Allocated Packages", field: "quantity_packages", topCalc:"sum" , hozAlign: "center", editor: "number", editorParams: {
             min: 0,
@@ -142,12 +149,14 @@ export default function AllocationTableView() {
             const element = cell.getElement();
             element.style.backgroundColor = "#f2de79";
             return value;
-          }},
-          { title: "Cost", field: "total_cost", hozAlign: "center"},
-          { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
+          },
+          frozen:true,
+        },
+
+          // { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
           {
-            title: "Submit",
-            formatter: () => "<button style='color: blue'>Submit</button>",
+            title: "",
+            formatter: () => "<Button>Save</Button>",
             width: 100,
             frozen:true,
             hozAlign: "center",
@@ -192,10 +201,10 @@ export default function AllocationTableView() {
         }
       })
 
-      tabulatorRef.current.on("rowClick", function(e, row){
-        const rowData = row.getData();
-        handleViewDetails(rowData.lot_id);
-    });
+    //   tabulatorRef.current.on("rowClick", function(e, row){
+    //     const rowData = row.getData();
+    //     handleViewDetails(rowData.lot_id);
+    // });
 
       return () => {
         if (tabulatorRef.current) {
@@ -621,6 +630,9 @@ export default function AllocationTableView() {
               {selectedBlend && <label className="text-md">
                 Customer Name: {selectedBlend.customer_name}
               </label>}
+              {selectedBlend &&
+              <TeaBlendReportButton blendId={selectedBlend.id}/>
+              }
             <div className="flex gap-2">
               <Dialog open={isBlendDialogOpen} onOpenChange={setIsBlendDialogOpen}>
                 <DialogTrigger asChild>
