@@ -57,7 +57,7 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
 
   useEffect(() => {
     const filtered = availableBlends.filter(blend => 
-      (blend.customer_name.toLowerCase().includes(searchBlendName.toLowerCase())) ||
+      (blend.customer_name?.toLowerCase().includes(searchBlendName.toLowerCase())) ||
       (blend.name.toLowerCase().includes(searchBlendName.toLowerCase())) ||
       (blend.quantity.toString().includes(searchBlendName.toLowerCase()))
       && (searchStatus === 'All' || blend.status == searchStatus)
