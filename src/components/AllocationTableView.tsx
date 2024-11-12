@@ -143,7 +143,7 @@ export default function AllocationTableView() {
 
           { title: "Quantity (Kg)", field: "quantity_kgs", topCalc:"sum", hozAlign: "center",frozen:true,
           },
-          { title: "Allocated Packages", field: "quantity_packages", topCalc:"sum" , hozAlign: "center", editor: "number", editorParams: {
+          { title: "Pakages / Kilos", field: "quantity_packages", topCalc:"sum" , hozAlign: "center", editor: "number", editorParams: {
             min: 0,
             step: 1,
           }, formatter: (cell) => {
@@ -510,9 +510,9 @@ export default function AllocationTableView() {
         blendRefNo: "",
         date: "",
         blendStandard: teas.product_name,
-        propSample: 0,
+        propSample: teas.propSample,
         requiredDate: "",
-        packagingType: "",
+        packagingType: teas.packagingType,
         status: teas.status,
         customer: teas.customer_id,
         customerName: teas.customer_name,
