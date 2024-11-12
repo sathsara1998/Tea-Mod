@@ -111,7 +111,7 @@ export default function AllocationTableView() {
           { title: "Broker", field: "total_cost", hozAlign: "center"},
           { title: "Garden Mark", field: "garden_mark", hozAlign: "center"},
 
-          { title: "Standard", field: "total_cost", hozAlign: "center"},
+          { title: "Standard", field: "standard", hozAlign: "center"},
 
           { title: "Inv No", field: "lot_no", hozAlign: "center"},
 
@@ -137,8 +137,10 @@ export default function AllocationTableView() {
           // },
        
         
-          { title: "Grade", field: "total_cost", hozAlign: "center"},
-          { title: "Purchased Price", field: "total_cost", hozAlign: "center"},
+          { title: "Grade", field: "grade", hozAlign: "center"},
+          { title: "Cost", field: "unit_cost", hozAlign: "left"},
+          { title: "Purchased QTY", field: "purchased_qty", hozAlign: "left"},
+
           { title: "Quantity (Kg)", field: "quantity_kgs", topCalc:"sum", hozAlign: "center",frozen:true,
           },
           { title: "Allocated Packages", field: "quantity_packages", topCalc:"sum" , hozAlign: "center", editor: "number", editorParams: {

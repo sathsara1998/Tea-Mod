@@ -164,7 +164,14 @@ export interface ManufacturingAllocationTableData {
   total_cost: number;
   option?: string;
   garden_mark?:string;
-  lot_no?:string
+  lot_no?:string,
+  standard?:string;
+  broker?:string;
+  grade?:string;
+  purchased_qty?:number
+
+
+
 
 }
 

@@ -56,14 +56,18 @@ const SelectBlendsDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, onClose
   const statusTypes = useMemo(() => ['All', ...Array.from(new Set(availableBlends.map(blend => blend.status)))], [availableBlends]);
 
   useEffect(() => {
-    const filtered = availableBlends.filter(blend => 
-      (blend.customer_name?.toLowerCase().includes(searchBlendName.toLowerCase())) ||
-      (blend.name.toLowerCase().includes(searchBlendName.toLowerCase())) ||
-      (blend.quantity.toString().includes(searchBlendName.toLowerCase()))
-      && (searchStatus === 'All' || blend.status == searchStatus)
-    )
-    setFilteredBlends(filtered)
-  }, [availableBlends, searchBlendName, searchStatus])
+    const filtered = availableBlends.filter(blend => {
+      const nameMatch = typeof blend.customer_name === 'string' 
+        ? blend.customer_name.toLowerCase().includes(searchBlendName.toLowerCase())
+        : false;
+      const blendNameMatch = blend.name.toLowerCase().includes(searchBlendName.toLowerCase());
+      const quantityMatch = blend.quantity.toString().includes(searchBlendName.toLowerCase());
+      
+      return (nameMatch || blendNameMatch || quantityMatch) && 
+             (searchStatus === 'All' || blend.status === searchStatus);
+    });
+    setFilteredBlends(filtered);
+  }, [availableBlends, searchBlendName, searchStatus]);
 
   useEffect(() => {
     if (availableBlendTableRef.current) {
