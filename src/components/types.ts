@@ -117,8 +117,8 @@ export interface BlendInfo {
   balanceToAllocate: number;
   to_allocate_quantity?:number
   teaCost: number;
-  allocations?: Array<ManufacturingAllocationTableData>;
-  export_quantity?: number;
+  allocations: Array<ManufacturingAllocationTableData>;
+  export_quantity: number;
 }
 
 export interface TeaAllocation {
