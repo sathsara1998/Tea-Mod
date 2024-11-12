@@ -105,9 +105,9 @@ export interface BlendInfo {
   blendRefNo: string;
   date: string;
   blendStandard: string;
-  propSample?: number;
+  propSample: number;
   requiredDate: string;
-  packagingType?: string;
+  packagingType: string;
   status: string;
   customer: number;
   customerName: string;
