@@ -458,7 +458,8 @@ export default function AllocationTableView() {
     averageCostToAllocate: 0,
     balanceToAllocate: 0,
     teaCost: 0,
-    export_quantity: 0
+    export_quantity: 0,
+    allocations:[]
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
