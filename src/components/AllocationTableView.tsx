@@ -108,7 +108,7 @@ export default function AllocationTableView() {
           { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
           { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
           { title: "Box Number", field: "box_number", hozAlign: "center"},
-          { title: "Broker", field: "total_cost", hozAlign: "center"},
+          { title: "Broker", field: "broker", hozAlign: "center"},
           { title: "Garden Mark", field: "garden_mark", hozAlign: "center"},
 
           { title: "Standard", field: "standard", hozAlign: "center"},
