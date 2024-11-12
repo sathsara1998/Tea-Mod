@@ -510,9 +510,9 @@ export default function AllocationTableView() {
         blendRefNo: "",
         date: "",
         blendStandard: teas.product_name,
-        propSample: teas.propSample ?? 0, 
-        requiredDate: "", 
-        packagingType: teas.packagingType ?? "", 
+        propSample: teas.propSample ?? 0,
+        requiredDate: "",
+        packagingType: teas.packagingType ?? "",
         status: teas.status,
         customer: teas.customer_id,
         customerName: teas.customer_name,
@@ -521,7 +521,8 @@ export default function AllocationTableView() {
         averageCostToAllocate: teas.average_cost,
         balanceToAllocate: teas.to_allocate_quantity,
         teaCost: teas.average_cost,
-        export_quantity: teas.export_quantity
+        export_quantity: teas.export_quantity,
+        allocations: []
       }
       setBlendInfo(teablendInfo);
       const tableData = teas.manufacturing_allocations.map((item, index) => {
