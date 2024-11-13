@@ -96,12 +96,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       const margin = 40
 
       doc.setFontSize(18)
-      doc.setFont('Calibri', 'bold')
+      doc.setFont('Verdana', 'bold')
       doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
 
       // Add Date and Time on the Top Right Corner
       doc.setFontSize(10)
-      doc.setFont('Calibri', 'bold')
+      doc.setFont('Verdana', 'bold')
       doc.text(
         `Date: ${dateGenerated} ${timeGenerated}`,
         pageWidth - margin,
@@ -139,7 +139,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       ]
       const formattedDate = `${day}-${monthNames[parseInt(month) - 1]}-${year}`
       doc.setFontSize(18)
-      doc.setFont('Calibri', 'bold')
+      doc.setFont('Verdana', 'bold')
       doc.text(
         `${type} Blend Sheet as at ${formattedDate}- ${modal}`,
         pageWidth / 2,
@@ -154,72 +154,72 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       // Add blend info below the header
       if (blendInfo) {
         doc.setFontSize(10)
-        doc.setFont('Calibri', 'bold')
+        doc.setFont('Verdana', 'bold')
 
         const blendInfoStartY = 120
         const blendInfoGap = 20
 
-        // Center X positions for Left and Right Side Info
-        const leftColumnX = pageWidth / 4
-        const rightColumnX = (3 * pageWidth) / 4
+        // Calculate column positions for two-column layout
+        const leftColumnX = Math.floor(pageWidth * 0.1) // Start left column at 20% of page width
+        const rightColumnX = Math.floor(pageWidth * 0.7) // Position right column at 60% of page width
+        const columnGap = 80 // Increased gap between columns for better spacing
 
         // Left Side Blend Info
         doc.text(
           `Blend No: ${blendInfo.blendNo}`,
           leftColumnX,
           blendInfoStartY,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `Blend Ref. No: ${blendInfo.blendRefNo}`,
           leftColumnX,
           blendInfoStartY + blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `Customer: ${blendInfo.customerName}`,
           leftColumnX,
           blendInfoStartY + 2 * blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `Status: ${blendInfo.status}`,
           leftColumnX,
           blendInfoStartY + 3 * blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
-        // doc.text(`Blend Date: ${blendInfo.blendDate}`, leftColumnX, blendInfoStartY + 4 * blendInfoGap, { align: "center" });
 
         // Right Side Blend Info
         doc.text(
           `Blend Date: ${blendInfo.blendDate}`,
           rightColumnX,
           blendInfoStartY,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `Total Contract Qty: ${blendInfo.totalContractQty}`,
           rightColumnX,
           blendInfoStartY + blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `Blend Standard: ${blendInfo.blendStandard}`,
           rightColumnX,
           blendInfoStartY + 2 * blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `Blend Average: ${blendInfo.blendAverage}`,
           rightColumnX,
           blendInfoStartY + 3 * blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
         doc.text(
           `RT No: ${blendInfo.rtNo}`,
           rightColumnX,
           blendInfoStartY + 4 * blendInfoGap,
-          { align: 'center' },
+          { align: 'left' },
         )
       }
 
@@ -239,10 +239,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           textColor: [60, 60, 60], // Dark grey text for all table data (more professional)
         },
         headStyles: {
-          fillColor: [26, 13, 171], // Professional dark blue for the header
+          // Professional dark blue for the header
           textColor: 255, // White text for the header
         },
-        margin: { top: blendInfo ? 200 : 200 },
+        margin: { top: blendInfo ? 225 : 225 },
         didDrawPage: function (data) {
           // Optional: Re-add header on each page if table spans multiple pages
         },
