@@ -48,6 +48,7 @@ import AllocationDetailsDialog from './AllocationDetailsDialog'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
 import TeaBlendReportButton from './TeaBlendReportButton'
+import DownloadReportButton from './DownloadReportButton'
 
 interface Allocation {
   teaId: string
@@ -114,13 +115,13 @@ export default function AllocationTableView() {
           return {
             ...item,
             option: item.option ? item.option : 'Packages',
-            init_quantity:item.quantity_packages
+            init_quantity: item.quantity_packages,
           }
         })
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         height: '500px',
-        layout:"fitDataFill",
+        layout: 'fitDataFill',
         reactiveData: true,
         data: adjustedAllocations,
         selectable: isDraftBlend,
@@ -175,7 +176,7 @@ export default function AllocationTableView() {
             hozAlign: 'center',
             frozen: true,
           },
-          
+
           {
             title: 'Pakages / Kilos',
             field: 'quantity_packages',
@@ -757,7 +758,20 @@ export default function AllocationTableView() {
                   </label>
                 )}
                 {selectedBlend && (
-                  <TeaBlendReportButton blendId={selectedBlend.id} />
+                  <DownloadReportButton
+                    tabulatorRef={tabulatorRef}
+                    blendInfo={{
+                      blendNo: selectedBlend.name,
+                      blendRefNo: '',
+                      customerName: selectedBlend.customer_name,
+                      status: '',
+                      blendDate: '',
+                      totalContractQty: 0,
+                      blendStandard: blendInfo?.blendStandard || '',
+                      blendAverage: 0,
+                      rtNo: '',
+                    }}
+                  />
                 )}
                 <div className="flex gap-2">
                   <Dialog
