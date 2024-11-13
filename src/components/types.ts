@@ -105,9 +105,9 @@ export interface BlendInfo {
   blendRefNo: string;
   date: string;
   blendStandard: string;
-  propSample?: number;
-  requiredDate?: string;
-  packagingType?: string;
+  propSample: number;
+  requiredDate: string;
+  packagingType: string;
   status: string;
   customer: number;
   customerName: string;
@@ -169,7 +169,7 @@ export interface ManufacturingAllocationTableData {
   broker?:string;
   grade?:string;
   purchased_qty?:number
-
+  init_quantity?:number
 
 
 
