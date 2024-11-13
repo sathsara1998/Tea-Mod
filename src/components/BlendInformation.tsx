@@ -48,7 +48,7 @@ interface BlendInformationSectionProps {
         <div className="col-span-2 flex flex-col">
           <Button variant="outline" onClick={onSaveTableData}>Save data</Button>
           <Button variant="outline" onClick={onGenerateBlendSheet}>Generate Blend Sheet</Button>
-          <Button variant="outline">Edit Blend Sheet</Button>
+          {/* <Button variant="outline">Edit Blend Sheet</Button> */}
         </div>
       </div>
 

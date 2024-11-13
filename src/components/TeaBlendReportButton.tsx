@@ -68,7 +68,7 @@ export default function TeaBlendReportButton({
           Downloading...
         </>
       ) : (
-        'Download Report'
+        'Blendsheet Preview'
       )}
     </button>
   );
