@@ -14,6 +14,6 @@ export async function POST(req: Request) {
 
         return NextResponse.json(response.data);
     } catch (err: any) {
-        return NextResponse.json({ error: err.response.data.error || 'An error occurred while Adding Allocations.' }, { status: 500 });
+        return NextResponse.json({ error: err.response.data.results[0].error || 'An error occurred while Adding Allocations.' }, { status: 500 });
     }
 }

@@ -175,6 +175,20 @@ export default function AllocationTableView() {
             topCalc: 'sum',
             hozAlign: 'center',
             frozen: true,
+            editable: (cell) => cell.getRow().getData().allocation_type == 'w',
+            editor: 'number',
+            editorParams: {
+              min: 1,
+              step: 1,
+            },
+            formatter: (cell) => {
+              const value = cell.getValue()
+              const element = cell.getElement()
+              if (cell.getRow().getData().allocation_type == 'w') {
+                element.style.backgroundColor = '#f2de79'
+              }
+              return value
+            },
           },
 
           {
@@ -182,15 +196,18 @@ export default function AllocationTableView() {
             field: 'quantity_packages',
             topCalc: 'sum',
             hozAlign: 'center',
+            editable: (cell) => cell.getRow().getData().allocation_type == 'p',
             editor: 'number',
             editorParams: {
-              min: 0,
+              min: 1,
               step: 1,
             },
             formatter: (cell) => {
               const value = cell.getValue()
               const element = cell.getElement()
-              element.style.backgroundColor = '#f2de79'
+              if (cell.getRow().getData().allocation_type == 'p') {
+                element.style.backgroundColor = '#f2de79'
+              }
               return value
             },
             frozen: true,
@@ -204,8 +221,9 @@ export default function AllocationTableView() {
             frozen: true,
             hozAlign: 'center',
             cellClick: (e, cell) => {
-              const rowData = cell.getRow().getData()
-              handleSubmitRow(rowData)
+              const row = cell.getRow()
+              const rowData = row.getData()
+              handleSubmitRow(rowData, row);
             },
           },
         ],
@@ -254,7 +272,7 @@ export default function AllocationTableView() {
         if (cell.getField() === 'quantity_kgs') {
           handleKgChange(data.id, cell, 'kg')
         } else if (cell.getField() === 'quantity_packages') {
-          handleQuantityChange(data.id, cell.getValue(), 'packages')
+          handleQuantityChange(data.id, cell.getValue(), 'packages', row)
         }
       })
 
@@ -316,11 +334,11 @@ export default function AllocationTableView() {
   interface PackageAllocationParams {
     blend_id: string | number
     lot_id: string | number
-    allocation_type: 'total_quantity' | 'package_count'
+    allocation_type: 'w' | 'p'
     value: number
     per_package_quantity?: number
   }
-  const handleSubmitRow = async (rowData: any): Promise<void> => {
+  const handleSubmitRow = async (rowData: any, row: any): Promise<void> => {
     try {
       // Early return if row hasn't been updated
       if (!updatedRows.current?.includes(rowData.id)) {
@@ -347,9 +365,12 @@ export default function AllocationTableView() {
       const baseParams: Partial<PackageAllocationParams> = {
         blend_id: selectedBlend.id,
         lot_id: rowData.lot_id,
-        allocation_type:
-          rowData.option === 'Kgs' ? 'total_quantity' : 'package_count',
-        value: rowData.quantity_packages,
+        allocation_type: rowData.allocation_type.toUpperCase(),
+        value: rowData.allocation_type == 'p' ? rowData.quantity_packages : rowData.quantity_kgs
+      }
+
+      if (rowData.allocation_type == "p") {
+        baseParams.per_package_quantity = rowData.quantity_kgs
       }
 
       // Add per_package_quantity only for package allocation AND when net_weight exists
@@ -369,6 +390,9 @@ export default function AllocationTableView() {
         description: 'Allocation updated successfully',
         variant: 'default',
       })
+
+      row.getElement().style.backgroundColor = 'transparent'
+      fetchBlendData(selectedBlend.name, false, false)
 
       // Optionally reset the updated rows tracking
       if (updatedRows.current) {
@@ -396,47 +420,65 @@ export default function AllocationTableView() {
   }
 
   const handleKgChange = (id: number, cell: any, unit: string) => {
-    const row = cell.getRow()
-    const data: ManufacturingAllocationTableData = row.getData()
+    updatedRows.current.push(id)
+    // const row = cell.getRow()
+    // const data: ManufacturingAllocationTableData = row.getData()
 
-    const enteredVal = cell.getValue()
-    const packageWeight = data.net_weight
+    // const enteredVal = cell.getValue()
+    // const packageWeight = data.net_weight
 
-    const updatedQuantity =
-      Math.ceil(enteredVal / packageWeight) * data.net_weight
+    // const updatedQuantity =
+    //   Math.ceil(enteredVal / packageWeight) * data.net_weight
 
-    setAllocations((prev) =>
-      prev.map((a, index) => {
-        if (a.id === id) {
-          const newPackages = updatedQuantity / a.net_weight
-          console.log(newPackages)
-          if (newPackages != a.quantity_packages) {
-            updatedRows.current.push(id)
-          }
+    // setAllocations((prev) =>
+    //   prev.map((a, index) => {
+    //     if (a.id === id) {
+    //       const newPackages = updatedQuantity / a.net_weight
+    //       console.log(newPackages)
+    //       if (newPackages != a.quantity_packages) {
+    //         updatedRows.current.push(id)
+    //       }
 
-          return {
-            ...a,
-            package_diff:
-              newPackages -
-              originalAllocations.current[index].quantity_packages,
-            weight_diff:
-              updatedQuantity - originalAllocations.current[index].quantity_kgs,
-            total_cost: a.unit_cost * updatedQuantity,
-            quantity_kgs: updatedQuantity,
-            quantity_packages: newPackages,
-          }
-        }
-        return a
-      }),
-    )
+    //       return {
+    //         ...a,
+    //         package_diff:
+    //           newPackages -
+    //           originalAllocations.current[index].quantity_packages,
+    //         weight_diff:
+    //           updatedQuantity - originalAllocations.current[index].quantity_kgs,
+    //         total_cost: a.unit_cost * updatedQuantity,
+    //         quantity_kgs: updatedQuantity,
+    //         quantity_packages: newPackages,
+    //       }
+    //     }
+    //     return a
+    //   }),
+    // )
   }
 
   const handleQuantityChange = (
     id: number,
     newValue: number,
     unit: 'kg' | 'packages',
+    row: any
   ) => {
-    updatedRows.current.push(id)
+    const rowData = row.getData()
+
+    const newQuantity = newValue * rowData.net_weight
+    if (newQuantity != rowData.quantity_kgs) {
+      updatedRows.current.push(id)
+    }
+
+    const originalValue = originalAllocations.current.find(item => item.id == id)
+
+    row.update({
+      ...rowData,
+      package_diff: originalValue ? newValue - originalValue.quantity_packages : newValue,
+      weight_diff: originalValue ? newQuantity - originalValue.quantity_kgs : newQuantity,
+      total_cost: rowData.unit_cost * newQuantity,
+      quantity_kgs: newQuantity,
+      quantity_packages: Math.max(0, newValue),
+    })
 
     // setAllocations((prev) =>
     //   prev.map((a, index) => {
@@ -621,7 +663,7 @@ export default function AllocationTableView() {
 
   // Get blend data by blendid
   const fetchBlendData = useCallback(
-    async (id: string, isEdit: boolean = false) => {
+    async (id: string, isEdit: boolean = false, isAllocationUpdate: boolean = true) => {
       try {
         const data = await getBlendById(id)
         const teas: TeaBlend = data[0]
@@ -660,7 +702,9 @@ export default function AllocationTableView() {
             total_cost: item.unit_cost * item.quantity_kgs,
           }
         })
-        setAllocations(tableData)
+        if (isAllocationUpdate) {
+          setAllocations(tableData)
+        }
         originalAllocations.current = tableData
       } catch (err: any) {
         toast({
