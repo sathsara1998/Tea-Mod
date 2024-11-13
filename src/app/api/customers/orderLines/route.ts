@@ -1,22 +1,23 @@
 import { apiClient } from '@/lib/utils';
+import { NextApiRequest } from 'next';
 import { NextResponse } from 'next/server';
 
 export const dynamic = "force-dynamic";
 
 
-// Get Blends
+// Get Customer order lines
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
-    const sale_order_number = searchParams.get('sale_order_number');
-    
+    const id = searchParams.get('id');
+
     try {
         const response = await apiClient({
-            url: `/tea_blend_sales?sale_order_number=${sale_order_number}`,
+            url: `tea_blend_sales?partner_id=${id}`,
             method: 'GET',
         });
 
         return NextResponse.json(response.data);
     } catch (err) {
-        return NextResponse.json({ error: 'Error fetching confirmed sale orders. Please try again.' }, { status: 500 });
+        return NextResponse.json({ error: 'An error occurred while fetching Customers.' }, { status: 500 });
     }
 }

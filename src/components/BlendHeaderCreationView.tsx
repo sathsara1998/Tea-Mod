@@ -1,24 +1,26 @@
 "use client"
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import { Button } from "@/components/ui/button"
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import EditBlendDialog from './BlendHeaderCreationViewComponents/EditBlendDialog';
-import TotalDemandCard from './BlendHeaderCreationViewComponents/TotalDemandCard';
-import BlendCreation from './BlendHeaderCreationViewComponents/BlendCreation';
+import TotalDemandCard, { TotalDemand } from './BlendHeaderCreationViewComponents/TotalDemandCard';
+import BlendCreation, { BlendShowType } from './BlendHeaderCreationViewComponents/BlendCreation';
 import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
 import { useApiMethods } from '@/hooks/useApiMethods'
-import { 
-  TeaBlendDetail, 
-  OrderLine, 
-  SalesOrder, 
-  BlendAllocation, 
-  Blend, 
+import {
+  SalesOrder,
   SelectedBlend, 
   ConfirmedSaleOrder, 
-  TeaBlend
+  TeaBlend,
+  CustomerOrdersTableData,
+  BlendCreateReq,
+  Customer
 } from './types'
+import { CustomerFullBlends } from './BlendHeaderCreationViewComponents/NewBlendDialog'
+import CustomerSelection from './BlendHeaderCreationViewComponents/CustomerSelection'
+import { useRouter, usePathname, useSearchParams  } from 'next/navigation';
 
 
 export default function BlendAllocator() {
@@ -30,17 +32,40 @@ export default function BlendAllocator() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
+  const [selectedAllocations, setSelectedAllocations] = useState<CustomerOrdersTableData[]>([])
+  const [groupedDemands, setGroupedDemands] = useState<TotalDemand[]>([])
+  const [isEditBlend, setIsEditBlend] = useState(false)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [selectedPartnerId, setSelectedPartnerId] = useState(0);
+  const [editingBlendCustomer, setEditingBlendCustomer] = useState<Customer>();
+  const [editingBlendId, setEditingBlendId] = useState(0);
+  const [blendLoading, setBlendsLoading] = useState(false);
+  const [editingBlendInfo, setEditingBlendInfo] = useState<BlendShowType>({
+    name: '',
+    productName: '',
+    customerName: '',
+    quantity: 0
+  })
   const { toast } = useToast()
   const { 
     getConfirmedSaleOrders, 
     getBlends, 
     getTeaBlendSales, 
     createBlend,
-    updateBlend
+    updateBlend,
+    blendCreate,
+    updateSalesOrder,
+    getCustomers,
+    getBlendByBlendNo,
+    getBlendByCustomer
   } = useApiMethods();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
 
   const fetchConfirmedSaleOrders = useCallback(async () => {
-    setIsLoading(true)
     setError(null)
     try {
       const data = await getConfirmedSaleOrders();
@@ -52,37 +77,47 @@ export default function BlendAllocator() {
         description: 'Error fetching confirmed sale orders. Please try again.',
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
     }
   }, [])
 
-  const fetchBlends = useCallback(async () => {
-    setIsLoading(true)
+  const fetchBlends = async () => {
     setError(null)
+    setBlendsLoading(true);
     try {
-      const data = await getBlends();
+      const data = await getBlendByCustomer(selectedPartnerId);
       
       setBlends(data);
     } catch (err: any) {
-      setError('Error fetching blends. Please try again.')
       toast({
         title: "Error",
         description: err.message,
         variant: "destructive",
       })
+      setBlends([]);
     } finally {
-      setIsLoading(false)
+      setBlendsLoading(false)
+    }
+  }
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const customers = await getCustomers()
+      setCustomers(customers)
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
     }
   }, [])
 
   useEffect(() => {
     fetchConfirmedSaleOrders()
-    fetchBlends()
-  }, [fetchConfirmedSaleOrders, fetchBlends])
+    fetchCustomers()
+  }, [fetchConfirmedSaleOrders, fetchCustomers])
 
   const fetchSalesOrderDetails = async (saleOrderNumber: string) => {
-    setIsLoading(true)
     setError(null)
     try {
       const data = await getTeaBlendSales(saleOrderNumber);
@@ -95,8 +130,6 @@ export default function BlendAllocator() {
         variant: "destructive",
       })
       return null
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -167,36 +200,98 @@ export default function BlendAllocator() {
   }
 
   const handleConfirm = async () => {
-    if (selectedSalesOrders.length === 0) return
-
     setIsConfirming(true)
+    if (isEditBlend) {
+      editExistingBlend()
+    } else {
+      createNewBlend()
+    }
+  }
+
+  const editExistingBlend = async () => {
+    let sendData : any = [];
+
+    selectedAllocations.forEach((item, index) => {
+      if (initialSalesOrders.current.length > index) {
+        if (initialSalesOrders.current[index].blending_qty != item.blending_qty) {
+          sendData.push({
+            id: item.id,
+            quantity: item.blending_qty
+          })
+        }
+      }
+    })
 
     try {
-      const totalDemand = calculateTotalDemand()
-      for (const demand of totalDemand) {
-        const allocations = selectedSalesOrders.flatMap(order =>
-          order.order_lines.map(line => ({
-            lineId: line.line_id,
-            quantity: selectedBlends.find(b => b.blendName === demand.blendName)?.quantities[line.line_id] || 0
-          })).filter(a => a.quantity > 0)
-        )
-
-        await createBlend({
-          blendName: demand.blendName,
-          allocations: allocations
-        })
-      }
-
-      await fetchBlends()
-      toast({
-        title: "Blends Created",
-        description: `Created ${totalDemand.length} new blend(s).`,
+      await updateSalesOrder({
+        allocations: sendData
       })
-    } catch (error) {
-      console.error('Error creating blends:', error)
+      toast({
+        title: "Blend Updated",
+        description: `Updated blend successfully`,
+        variant: "default",
+      })
+      resetData()
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: "Failed to create blends. Please try again.",
+        description: err.message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsConfirming(false)
+    }
+  }
+
+  const createNewBlend = async () => {
+    let mainObj: {
+      partner_id: number;
+      products: {
+        product_id: number;
+        quantity: number;
+        allocations: {
+          sale_order_line_id: number;
+          quantity: number;
+        }[]
+      }[]
+    } = {
+      partner_id: selectedPartnerId,
+      products: []
+    };
+
+    groupedDemands.forEach(dem => {
+      let obj : any = {
+        product_id: dem.product_id,
+        quantity: dem.total,
+        allocations: []
+      }
+      let allocations : any = []
+      const allData = selectedAllocations.filter(item => item.product_id == dem.product_id)
+      if (allData.length > 0) {
+        allocations = allData.map(item => {
+          return {
+            sale_order_line_id: item.line_id,
+            quantity: item.blending_qty
+          }
+        })
+      }
+      obj.allocations = allocations;
+
+      mainObj.products.push(obj);
+    })
+
+    try {
+      await blendCreate(mainObj)
+      toast({
+        title: "Blend Created",
+        description: `Created blend successfully`,
+        variant: "default",
+      })
+      resetData()
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to create blend. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -226,66 +321,202 @@ export default function BlendAllocator() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+  function groupByProductNameAndSum(): TotalDemand[] {
+    const grouped = selectedAllocations.reduce((acc: Record<string, { total: number, product_id: number }>, order) => {
+      // If the product_name already exists, add the tea_weight to the total
+      if (acc[order.product_name]) {
+        acc[order.product_name].total += 1;
+      } else {
+        // Otherwise, initialize it with the current tea_weight and product_id
+        acc[order.product_name] = {
+          total: 1,
+          product_id: order.product_id // Add product_id here
+        };
+      }
+      return acc;
+    }, {});
+  
+    // Convert the grouped object to an array of { product_id, product_name, total }
+    return Object.entries(grouped).map(([product_name, { total, product_id }]) => ({
+      product_name,
+      product_id,
+      total,
+    }));
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-        <Button onClick={fetchConfirmedSaleOrders} variant="outline">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Retry
-        </Button>
-      </div>
-    )
+  useEffect(() => {
+    if (selectedAllocations.length > 0) {
+      setGroupedDemands(groupByProductNameAndSum());
+    }
+  }, [selectedAllocations])
+
+  const onNewBlendDataAdd = (data: CustomerFullBlends) => {
+    router.replace(pathname)
+    setIsEditBlend(false);
+    setSelectedAllocations(data.products);
   }
+
+  const resetData = () => {
+    setSelectedAllocations([]);
+    fetchBlends();
+  }
+
+  const onEditPressed = (blend: TeaBlend) => {
+    router.replace(`${pathname}?id=${blend.name}`);
+    getBlendData(blend.name);
+  }
+
+  const getBlendData = async (name: string) => {
+    try {
+      const data = await getBlendByBlendNo(name);
+      setEditingData(data[0]);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Get the id if it exists
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      getBlendData(id);
+    }
+  }, [searchParams]);
+
+  const setEditingData = (blend: TeaBlend) => {
+    setIsEditBlend(true);
+    const allocations : CustomerOrdersTableData[] = []
+    blend.allocations.forEach(alloc => {
+      const tableData : CustomerOrdersTableData = {
+        contract_number: alloc.contract_number,
+        contract_line_no: alloc.contract_no,
+        product_internal_ref: alloc.product_internal_ref,
+        product_uom_qty: alloc.product_uom_qty,
+        product_uom: alloc.product_uom,
+        product_name: alloc.product_name,
+        product_blend_internal_ref: alloc.product_internal_ref,
+        blend_details: "",
+        tea_weight: alloc.tea_weight,
+        allocated_blend_quantity: alloc.allocated_blend_quantity,
+        product_id: alloc.product_id,
+        release_number: 1,
+        blending_qty: alloc.tea_weight ? alloc.tea_weight - alloc.allocated_blend_quantity : 0,
+        standard: "",
+        line_id: 0,
+        id: alloc.id
+      }
+      allocations.push(tableData);
+    })
+    setEditingBlendCustomer({
+      id: blend.customer_id,
+      name: blend.customer_name
+    })
+    setEditingBlendInfo({
+      name: blend.name,
+      productName: blend.product_name,
+      customerName: blend.customer_name,
+      quantity: blend.quantity
+    })
+    setEditingBlendId(blend.id)
+    setSelectedPartnerId(blend.customer_id)
+    setSelectedAllocations(allocations);
+    initialSalesOrders.current = JSON.parse(JSON.stringify(allocations));
+  }
+
+  const allocationsDeleted = (ids: number[]) => {
+    setSelectedAllocations(prev => prev.filter((a: any) => !ids.includes(a.id)))
+  }
+
+
+  const customerSelected = (id: number) => {
+    setSelectedPartnerId(id);
+  }
+
+  useEffect(() => {
+    if (selectedPartnerId) {
+      resetData()
+    }
+  }, [selectedPartnerId])
+
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen">
+  //       <Loader2 className="h-8 w-8 animate-spin" />
+  //     </div>
+  //   )
+  // }
+
+  // if (error) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center h-screen">
+  //       <Alert variant="destructive" className="mb-4">
+  //         <AlertTriangle className="h-4 w-4" />
+  //         <AlertTitle>Error</AlertTitle>
+  //         <AlertDescription>{error}</AlertDescription>
+  //       </Alert>
+  //       <Button onClick={fetchConfirmedSaleOrders} variant="outline">
+  //         <RefreshCw className="mr-2 h-4 w-4" />
+  //         Retry
+  //       </Button>
+  //     </div>
+  //   )
+  // }
 
   return (
-    <div className="container w-full p-4 flex flex-row ml-0 mr-0">
+    <div className="grid grid-cols-4 gap-4">
       {/* Left Side - Blends */}
-      <div className="w-full md:w-1/3 mb-4 md:mb-0 md:mr-4 ml-0">
-        <BlendsList blends={blends} fetchBlends={fetchBlends} />
+      <div className="col-span-1">
+        <BlendsList 
+          customerId={selectedPartnerId}
+          blends={blends} 
+          fetchBlends={fetchBlends} 
+          onNewBlendDataAdd={onNewBlendDataAdd} 
+          onEditPress={onEditPressed}
+          loading={blendLoading}
+        />
       </div>
 
       {/* Middle - Blend Creation */}
-      <div className="w-full md:w-1/2 mb-4 md:mb-0 md:mr-4">
+      <div className="col-span-3">
+
+        <CustomerSelection
+          customers={customers} 
+          selectedCustomer={editingBlendCustomer}
+          customerSelected={customerSelected} />
+
         <BlendCreation
-          confirmedSaleOrders={confirmedSaleOrders}
-          selectedSalesOrders={selectedSalesOrders}
+          isEdit={isEditBlend}
           selectedBlends={selectedBlends}
           isConfirming={isConfirming}
-          handleSalesOrderSelect={handleSalesOrderSelect}
-          handleRemoveSalesOrder={handleRemoveSalesOrder}
-          handleBlendSelect={handleBlendSelect}
-          handleBlendQuantityChange={handleBlendQuantityChange}
-          handleAllocateFullQuantity={handleAllocateFullQuantity}
           handleConfirm={handleConfirm}
+          blendItems={selectedAllocations}
+          allocationsChanged={setSelectedAllocations}
+          deleted={allocationsDeleted}
+          customerId={selectedPartnerId}
+          blendId={editingBlendId}
+          editiingInfo={editingBlendInfo}
         />
       </div>
 
       {/* Right Side - Total Demand */}
-      <div className="w-full md:w-1/4">
-        <TotalDemandCard totalDemand={calculateTotalDemand()} />
-      </div>
+      {/* {!isEditBlend && (
+        <div className="w-full md:w-1/4">
+          <TotalDemandCard totalDemand={groupedDemands} />
+        </div>
+      )} */}
 
       {/* Edit Blend Dialog */}
-      {editingBlend && (
+      {/* {editingBlend && (
         <EditBlendDialog
         editingBlend={editingBlend}
         setEditingBlend={setEditingBlend}
         handleUpdateBlend={handleUpdateBlend}
       />
-      )}
+      )} */}
     </div>
   )
 }

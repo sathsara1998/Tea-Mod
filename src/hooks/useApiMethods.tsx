@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useApiClient from "./useApiClient";
 import { AxiosRequestConfig } from "axios";
-import { ConfirmedSaleOrder } from "@/components/types";
+import { AddAllocationArray, AddAllocationObject, AddSalesAllocation, BlendCreateReq, ConfirmedSaleOrder } from "@/components/types";
 
 interface CustomConfig extends AxiosRequestConfig {
     url: string;
@@ -10,6 +10,24 @@ interface CustomConfig extends AxiosRequestConfig {
 
 export const useApiMethods = () => {
     const apiClient = useApiClient();
+
+        // Get confirmed sale  search component
+        const getSalesContractDetailsByCustomerId = useCallback(async (customerId: number) => {
+            const config: CustomConfig = {
+                url: `/api/salesOrder/get_contract_details/${customerId}`,
+                errorMessage: "Error fetching customer sales details. Please try again.",
+                method: 'get'
+            }
+            try {
+                const response = await apiClient(config);
+                const data : ConfirmedSaleOrder[] = response.data;
+                return data;
+            } catch (error) {
+                throw new Error(config.errorMessage);
+            }
+        }, [apiClient]);
+    
+    
 
     // Get confirmed sale orders
     const getConfirmedSaleOrders = useCallback(async () => {
@@ -158,6 +176,247 @@ export const useApiMethods = () => {
     }, [apiClient]);
 
 
+    // Add allocation to blend
+    const addAllocationtoBlend = useCallback(async (data: AddAllocationArray) => {
+        const config: CustomConfig = {
+            url: "/api/blend/addManufacturingAllocations",
+            errorMessage: "An error occurred while Adding Allocations.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Update allocations
+    const updateAllocations = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/updateManufacturingAllocations`,
+            errorMessage: "An error occurred while Updating Allocations.",
+            method: 'put',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get lot info by id
+    const getLotInfoById = useCallback(async (id: number) => {
+        const config: CustomConfig = {
+            url: `/api/auctionData/lotsById?id=${id}`,
+            errorMessage: "An error occurred while fetching details.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get Custoers
+    const getCustomers = useCallback(async () => {
+        const config: CustomConfig = {
+            url: `/api/customers`,
+            errorMessage: "An error occurred while fetching Customers.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get Customer sales orders
+    const getCustomerOrders = useCallback(async (id: number) => {
+        const config: CustomConfig = {
+            url: `/api/customers/orderLines?id=${id}`,
+            errorMessage: "An error occurred while fetching Orders.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Create Blend
+    const blendCreate = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/createBlend`,
+            errorMessage: "An error occurred while creating blend.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get blend info
+    const updateSalesOrder = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/updateSalesAllocations`,
+            errorMessage: "An error occurred while updating blend data.",
+            method: 'put',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Delete Manufacture Allocations
+    const deleteManufactureAllocs = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/deleteManufacallocations`,
+            errorMessage: "An error occurred while deleting allocations",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+
+    // Delete Manufacture Allocations
+    const deleteSalesAllocs = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: `/api/blend/deleteSalesallocations`,
+            errorMessage: "An error occurred while deleting allocations",
+            method: 'post',
+            data: {
+                allocation_ids: data
+            }
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Add sales allocation to blend
+    const addSalesAllocationtoBlend = useCallback(async (data: AddSalesAllocation[]) => {
+        const config: CustomConfig = {
+            url: "/api/blend/addSalesAllocations",
+            errorMessage: "An error occurred while Adding Allocations.",
+            method: 'post',
+            data: {
+                allocations: data
+            }
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get blend by blend number
+    const getBlendByBlendNo = useCallback(async (id: string) => {
+        const config: CustomConfig = {
+            url: "/api/blend/getBlendByBlendNo?id=" + id,
+            errorMessage: "An error occurred while Adding Allocations.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error) {
+            throw new Error(config.errorMessage);
+        }
+    }, [apiClient]);
+
+    // Get blends by customer id
+    const getBlendByCustomer = useCallback(async (id: number) => {
+        const config: CustomConfig = {
+            url: "/api/blend/getBlendsbyCustomer?id=" + id,
+            errorMessage: "An error occurred while Fetching Blends.",
+            method: 'get',
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error: any) {
+            throw new Error(error.response.data.error);
+        }
+    }, [apiClient]);
+
+    // Get blends by customer id
+    const editPackageAllocation = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: "/api/package/allocate",
+            errorMessage: "An error occurred while adding allocations.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error: any) {
+            throw new Error(error.response.data.error);
+        }
+    }, [apiClient]);
+
+    // Split package allocation
+    const splitPackage = useCallback(async (data: any) => {
+        const config: CustomConfig = {
+            url: "/api/package/split",
+            errorMessage: "An error occurred while splitting allocations.",
+            method: 'post',
+            data: data
+        }
+        try {
+            const response = await apiClient(config);
+            const data = response.data;
+            return data;
+        } catch (error: any) {
+            throw new Error(error.response.data.error);
+        }
+    }, [apiClient]);
+
+
     return {
         getConfirmedSaleOrders,
         getBlends,
@@ -166,6 +425,20 @@ export const useApiMethods = () => {
         updateBlend,
         deleteBlend,
         getAllAuctionData,
-        getBlendById
+        getBlendById,
+        addAllocationtoBlend,
+        updateAllocations,
+        getLotInfoById,
+        getCustomers,
+        getCustomerOrders,
+        blendCreate,
+        updateSalesOrder,
+        deleteManufactureAllocs,
+        deleteSalesAllocs,
+        addSalesAllocationtoBlend,
+        getBlendByBlendNo,
+        getBlendByCustomer,
+        editPackageAllocation,
+        splitPackage
     }
 }

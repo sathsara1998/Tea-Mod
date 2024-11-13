@@ -1,13 +1,18 @@
 import { apiClient } from '@/lib/utils';
 import { NextResponse } from 'next/server';
 
-
-export const dynamic = "force-dynamic";
 // Get All Auction data
-export async function GET() {
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const id = []
+    id.push(searchParams.get('id'));
+
+
+    console.log("id", id);
+
     try {
         const response = await apiClient({
-            url: '/tea/lot/packages',
+            url: `/tea/lot/packages/${id}`,
             method: 'GET',
         });
 

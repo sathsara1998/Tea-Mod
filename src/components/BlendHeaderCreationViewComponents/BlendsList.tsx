@@ -1,12 +1,22 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import BlendCard from '../BlendHeaderCreationViewComponents/BlendCard'
-import NewBlendDialog from '../BlendHeaderCreationViewComponents/NewBlendDialog'
+import NewBlendDialog, { CustomerFullBlends } from '../BlendHeaderCreationViewComponents/NewBlendDialog'
 import EditBlendDialog from '../BlendHeaderCreationViewComponents/EditBlendDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
-import { TeaBlend } from '../types'
+import { Customer, TeaBlend } from '../types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 export type Blend = {
   id: number;
@@ -28,43 +38,46 @@ type BlendAllocation = {
 }
 
 type BlendsComponentProps = {
+  customerId: number;
   blends: TeaBlend[];
   fetchBlends: () => Promise<void>;
+  onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void;
+  onEditPress: (blend: TeaBlend) => void;
+  loading: boolean;
 }
 
-export default function BlendsComponent({ blends, fetchBlends }: BlendsComponentProps) {
+export default function BlendsComponent({ customerId, blends, fetchBlends, onNewBlendDataAdd, onEditPress, loading }: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [isNewOpen, setIsNewOpen] = useState(false);
   const { toast } = useToast()
-  const { createBlend, updateBlend, deleteBlend } = useApiMethods();
+  const { 
+    createBlend, 
+    updateBlend, 
+    deleteBlend,
+    getCustomers
+  } = useApiMethods();
 
-  const handleCreateNewBlend = async () => {
-    if (newBlendName.trim() === '') return
+  const handleCreateNewBlend = async (customerOrders: CustomerFullBlends) => {
+    onNewBlendDataAdd(customerOrders);
+  }
 
+  const fetchCustomers = useCallback(async () => {
     try {
-      await createBlend({
-        blendName: newBlendName,
-        allocations: []
-      })
-
-      await fetchBlends()
-      setNewBlendName('')
-      toast({
-        title: "New Blend Created",
-        description: `Created new blend: ${newBlendName}`,
-      })
-    } catch (error) {
-      console.error('Error creating new blend:', error)
+      const customers = await getCustomers()
+      setCustomers(customers)
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: "Failed to create new blend. Please try again.",
+        description: err.message,
         variant: "destructive",
       })
     }
-  }
+  }, [])
 
   const handleEditBlend = (blend: TeaBlend) => {
-    setEditingBlend(blend)
+    onEditPress(blend);
   }
 
   const handleUpdateBlend = async () => {
@@ -107,20 +120,38 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
     }
   }
 
+  const addNewBlend = () => {
+    if (customerId) {
+      setIsNewOpen(true)
+    } else {
+      toast({
+        title: "Error",
+        description: "Please select a customer",
+        variant: "destructive",
+      })
+    }
+  }
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           Blends
-          <NewBlendDialog
-            newBlendName={newBlendName}
-            setNewBlendName={setNewBlendName}
-            handleCreateNewBlend={handleCreateNewBlend}
-          />
+          <Button variant="outline" size="sm" onClick={() => addNewBlend()}>
+            New Blend
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[calc(100vh-200px)]">
+        {loading && <div className="h-[calc(100vh-200px)] flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>}
+
+        {!loading && <ScrollArea className="h-[calc(100vh-200px)]">
           {blends.map((blend) => (
             <BlendCard
               key={blend.id}
@@ -129,15 +160,24 @@ export default function BlendsComponent({ blends, fetchBlends }: BlendsComponent
               onDelete={handleDeleteBlend}
             />
           ))}
-        </ScrollArea>
+        </ScrollArea>}
       </CardContent>
-      {editingBlend && (
+      {/* {editingBlend && (
         <EditBlendDialog
           editingBlend={editingBlend}
           setEditingBlend={setEditingBlend}
           handleUpdateBlend={handleUpdateBlend}
         />
-      )}
+      )} */}
+      <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
+        <NewBlendDialog
+          isEdit={false}
+          isOpen={isNewOpen}
+          setIsOpen={setIsNewOpen}
+          onCreateBlend={handleCreateNewBlend}
+          customerId={customerId}
+        />
+          </Dialog>
     </Card>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { Edit, Info, Trash2 } from 'lucide-react';
 import {
     Popover,
@@ -12,6 +12,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { TeaBlend } from '../types';
+import { useRouter } from 'next/navigation';
 
 interface BlendCardProps{
     data: TeaBlend;
@@ -20,26 +21,42 @@ interface BlendCardProps{
 }
 
 const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
+  const router = useRouter();
+
+  const gotoAllocations = (e: MouseEvent, name: string) => {
+    e.stopPropagation();
+    router.push(`/allocate?id=${name}`);
+  }
 
     return (
-        <div
-                  key={data.id}
-                  className="p-2 mb-2 rounded bg-secondary flex flex-col"
-                >
-                  <div className="flex justify-between items-center">
-                    <span>{data.name}</span>
+<div
+  key={data.id}
+  className="p-4 mb-2 mt-2 bg-secondary flex flex-col cursor-pointer
+             border-4 border-transparent
+             transition-all duration-200 ease-in-out
+             hover:bg-secondary-hover hover:shadow-md
+             hover:border-primary/50"
+  onClick={() => onEdit(data)}
+>            
+    
+    <div className="flex justify-between items-center">
+                   <div className='font-bold'> <div>{data.name}</div>
+                   <div className='font-semibold'>{data.product_name} </div></div>
+
                     <Badge variant={data.status === 'confirmed' ? 'default' : 'secondary'}>
                       {data.status}
                     </Badge>
                   </div>
-                  <small>Blend: {data.name}</small>
-                  <small>Quantity: {data.quantity.toFixed(3)}</small>
+                  <small>Customer: {data.customer_name}</small>
+                  <small>Export Quantity: {data.export_quantity.toFixed(3)}</small>
+                  <small>Blended Quantity: {data.allocated_quantity.toFixed(3)}</small>
+
                   <div className="flex justify-between mt-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="flex-1">
                           <Info className="h-4 w-4 mr-2" />
-                          View Allocations
+                          View Order Lines
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
@@ -66,13 +83,15 @@ const BlendCard: React.FC<BlendCardProps> = ({data, onEdit, onDelete}) => {
                         </ScrollArea>
                       </PopoverContent>
                     </Popover>
-                    <Button variant="outline" size="sm" onClick={() => onEdit(data)}>
+                    {/* <Button variant="outline" size="sm" onClick={() => onEdit(data)} className='flex-1'>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => onDelete(data.id)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                    </Button> */}
+                    <Button variant="outline" size="sm" onClick={(e) => gotoAllocations(e, data.name)} className='flex-1'>
+                      {/* <Trash2 className="h-4 w-4 mr-2" /> */}
+                      <Edit className="h-4 w-4 mr-2" />
+                      View Allocations
+
                     </Button>
                   </div>
                 </div>
