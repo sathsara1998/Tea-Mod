@@ -230,6 +230,15 @@ export default function AllocationTableView() {
       tabulatorRef.current.on('cellEdited', function (cell: any) {
         const row = cell.getRow()
         const data = row.getData()
+        console.log(cell)
+        console.log(row)
+        const rowData = row.getData()
+        if (rowData.quantity_packages > rowData.init_quantity) {
+          row.getElement().style.backgroundColor = '#8aedb8'
+        } else if (rowData.quantity_packages < rowData.init_quantity) {
+          row.getElement().style.backgroundColor = '#eda18a'
+        }
+
 
         // Show the submit button if any cell in this row has been edited
         const submitCell = row.getCell('Submit')
