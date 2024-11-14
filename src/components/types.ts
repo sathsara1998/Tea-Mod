@@ -139,6 +139,8 @@ export interface TeaAllocation {
   break: string;
   invoice_no: string;
   blend_line_type: string;
+  allocation_type?: "p" | "w"
+
 }
 
 export interface ManufacturingAllocation {

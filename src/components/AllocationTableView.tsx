@@ -365,7 +365,7 @@ export default function AllocationTableView() {
       const baseParams: Partial<PackageAllocationParams> = {
         blend_id: selectedBlend.id,
         lot_id: rowData.lot_id,
-        allocation_type: rowData.allocation_type.toUpperCase(),
+        allocation_type: rowData.allocation_type,
         value: rowData.allocation_type == 'p' ? rowData.quantity_packages : rowData.quantity_kgs
       }
 

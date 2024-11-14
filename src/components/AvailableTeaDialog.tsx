@@ -73,7 +73,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({ isOpen, blendId
           return {
             blend_id: blendId,
             lot_id: Number(item.id),
-            allocation_type: "package_count",
+            allocation_type: item.allocation_type,
             value: 1,
             per_package_quantity: item.net_weight
           }
