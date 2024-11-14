@@ -553,7 +553,7 @@ export default function AllocationTableView() {
         return {
           blend_id: selectedBlend?.id,
           lot_id: item.lot_id,
-          allocation_type: 'package_count',
+          allocation_type: item.allocation_type,
           value: 0,
           per_package_quantity: item.net_weight,
         }
