@@ -29,7 +29,7 @@ import {
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 import { generatePDF, generateTestData } from '@/lib/utils'
-import BlendInformationSection, { FormField } from './BlendInformation'
+import BlendInformationSection from './BlendInformation'
 import BlendList from './BlendList'
 import AvailableTeaDialog from './AvailableTeaDialog'
 import SelectBlendsDialog from './SelectBlendsDialog'
@@ -114,7 +114,6 @@ export default function AllocationTableView() {
         allocations.map((item) => {
           return {
             ...item,
-            option: item.option ? item.option : 'Packages',
             init_quantity: item.quantity_packages,
           }
         })
@@ -133,99 +132,115 @@ export default function AllocationTableView() {
             titleFormatter: 'rowSelection',
             hozAlign: 'center',
             headerSort: false,
-            width: 60,
           },
-          { title: '#', formatter: 'rownum', width: 60, hozAlign: 'left' },
+          { title: '#', formatter: 'rownum', hozAlign: 'left' },
           { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
           { title: 'Broker', field: 'broker', hozAlign: 'left' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
 
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
 
-          { title: 'Inv No', field: 'lot_no', hozAlign: 'left' },
+          { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
+          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
 
-          { title: 'Net Weight', field: 'net_weight', hozAlign: 'left' },
-          // { title: "Quantity", field: "quantity_kgs", hozAlign: "center" ,  topCalc:"sum"},
-
-          // {
-          //   title: "Option",
-          //   field: "option",
-          //   hozAlign: "center",
-          //   formatter: (cell) => {
-          //     const value = cell.getValue();
-          //     return `<button style="background-color: #b0b5b1; border-radius: 10px; padding: 5px 10px">${value || "Kgs"}</button>`;
-          //   },
-          //   cellClick: (e, cell) => {
-          //     const row = cell.getRow();
-          //     const currentValue = cell.getValue();
-
-          //     // Toggle between "Option A" and "Option B"
-          //     const newValue = currentValue === "Kgs" ? "Packages" : "Kgs";
-          //     row.update({ option: newValue });  // Update the row data
-          //   }
-          // },
+          { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
 
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
-          { title: 'Cost', field: 'unit_cost', hozAlign: 'left' },
-          { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'left' },
+          {
+            title: 'Cost',
+            field: 'unit_cost',
+            formatter: function(cell) {
+              const value = cell.getValue()
+              return value ? value.toLocaleString('en-US', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4,
+                useGrouping: true
+              }) : '0.0000'
+            },
+            hozAlign: 'right'
+           },
+          { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
 
           {
             title: 'Quantity (Kg)',
             field: 'quantity_kgs',
-            topCalc: 'sum',
-            hozAlign: 'center',
-            frozen: true,
+            formatter: function(cell) {
+              const value = cell.getValue()
+              const element = cell.getElement()
+              
+              if (cell.getRow().getData().allocation_type === 'w') {
+                element.style.backgroundColor = '#e8f1fe'
+                element.style.border = '1px solid #bfd2e8'
+                return value ? value.toLocaleString('en-US', {
+                  minimumFractionDigits: 4,
+                  maximumFractionDigits: 4,
+                  useGrouping: true
+                }) : '0.0000'
+              }
+              return value ? value.toLocaleString('en-US', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4,
+                useGrouping: true
+              }) : '0.0000'
+            },
+            topCalc: function(values) {
+              const sum = values.reduce((acc, curr) => acc + (curr || 0), 0);
+              return sum.toLocaleString('en-US', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4,
+                useGrouping: true
+              });
+            },
+            hozAlign: 'right',
             editable: (cell) => cell.getRow().getData().allocation_type == 'w',
             editor: 'number',
-            editorParams: {
-              min: 1,
-              step: 1,
-            },
-            formatter: (cell) => {
-              const value = cell.getValue()
-              const element = cell.getElement()
-              if (cell.getRow().getData().allocation_type == 'w') {
-                element.style.backgroundColor = '#f2de79'
-              }
-              return value
-            },
-          },
-
+            frozen: true
+           },
           {
-            title: 'Pakages / Kilos',
+            title: 'Packages',
             field: 'quantity_packages',
-            topCalc: 'sum',
-            hozAlign: 'center',
-            editable: (cell) => cell.getRow().getData().allocation_type == 'p',
             editor: 'number',
-            editorParams: {
-              min: 1,
-              step: 1,
-            },
-            formatter: (cell) => {
+            formatter: function(cell) {
               const value = cell.getValue()
               const element = cell.getElement()
-              if (cell.getRow().getData().allocation_type == 'p') {
-                element.style.backgroundColor = '#f2de79'
+              
+              if (cell.getRow().getData().allocation_type === 'p') {
+                element.style.backgroundColor = '#e8f1fe'
+                element.style.border = '1px solid #bfd2e8'
+                return value 
               }
-              return value
+              return ""
             },
-            frozen: true,
-          },
+            topCalc: function(values, data) {
+              let sum = 0;
+              data.forEach(row => {
+                if (row.allocation_type === 'p') {
+                  sum += row.quantity_packages || 0;
+                }
+              });
+              return sum
+            },
+            hozAlign: 'right',
+            editable: (cell) => cell.getRow().getData().allocation_type == 'p',
+            frozen: true
+          }
+          ,
 
           // { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
-          {
-            title: '',
-            formatter: () => '<Button>Save</Button>',
-            width: 100,
-            frozen: true,
-            hozAlign: 'center',
-            cellClick: (e, cell) => {
-              const row = cell.getRow()
-              const rowData = row.getData()
-              handleSubmitRow(rowData, row);
-            },
-          },
+          // {
+          //   title: '',
+          //   formatter: () => '<Button>Save</Button>',
+          //   width: 100,
+          //   frozen: true,
+          //   hozAlign: 'center',
+          //   cellClick: (e, cell) => {
+          //     const row = cell.getRow()
+          //     const rowData = row.getData()
+
+          //     updatedRows.current = [...updatedRows.current, rowData.id]
+          //     handleSubmitRow(rowData, row)
+          //   },
+          // },
         ],
         rowFormatter: (row) => {
           const rowData = row.getData()
@@ -247,33 +262,19 @@ export default function AllocationTableView() {
 
       tabulatorRef.current.on('cellEdited', function (cell: any) {
         const row = cell.getRow()
-        const data = row.getData()
-        console.log(cell)
-        console.log(row)
         const rowData = row.getData()
-        if (rowData.quantity_packages > rowData.init_quantity) {
-          row.getElement().style.backgroundColor = '#8aedb8'
-        } else if (rowData.quantity_packages < rowData.init_quantity) {
+        updatedRows.current = [...updatedRows.current, rowData.id]
+
+        // if (cell.getOldValue() < cell.getValue()) {
+        //   row.getElement().style.backgroundColor = '#8aedb8'
+        // } else if (cell.getOldValue() > cell.getValue()) {
+        //   row.getElement().style.backgroundColor = '#eda18a'
+        // }
+
+        handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
-        }
-
-
-        // Show the submit button if any cell in this row has been edited
-        const submitCell = row.getCell('Submit')
-        if (submitCell) {
-          const submitButton = submitCell
-            .getElement()
-            .querySelector('.submit-button')
-          if (submitButton) {
-            submitButton.style.display = 'inline-block' // Make the submit button visible
-          }
-        }
-
-        if (cell.getField() === 'quantity_kgs') {
-          handleKgChange(data.id, cell, 'kg')
-        } else if (cell.getField() === 'quantity_packages') {
-          handleQuantityChange(data.id, cell.getValue(), 'packages', row)
-        }
+        })
+      
       })
 
       return () => {
@@ -313,14 +314,6 @@ export default function AllocationTableView() {
         setSelectedTeas(data)
       })
 
-      table.on('rowClick', function (e, row) {
-        //e - the click event object
-        //row - row component
-
-        console.log(e)
-        console.log(row)
-      })
-
       return () => {
         table.destroy()
       }
@@ -339,6 +332,7 @@ export default function AllocationTableView() {
     per_package_quantity?: number
   }
   const handleSubmitRow = async (rowData: any, row: any): Promise<void> => {
+    console.log('change request works')
     try {
       // Early return if row hasn't been updated
       if (!updatedRows.current?.includes(rowData.id)) {
@@ -361,16 +355,20 @@ export default function AllocationTableView() {
       ) {
         throw new Error('Valid quantity is required')
       }
+      console.log('before params')
 
       const baseParams: Partial<PackageAllocationParams> = {
         blend_id: selectedBlend.id,
         lot_id: rowData.lot_id,
         allocation_type: rowData.allocation_type,
-        value: rowData.allocation_type == 'p' ? rowData.quantity_packages : rowData.quantity_kgs
+        value:
+          rowData.allocation_type == 'p'
+            ? rowData.quantity_packages
+            : rowData.quantity_kgs,
       }
 
-      if (rowData.allocation_type == "p") {
-        baseParams.per_package_quantity = rowData.quantity_kgs
+      if (rowData.allocation_type == 'p') {
+        baseParams.per_package_quantity = rowData.net_weight
       }
 
       // Add per_package_quantity only for package allocation AND when net_weight exists
@@ -416,102 +414,6 @@ export default function AllocationTableView() {
 
       // Re-throw error if needed for parent component handling
       throw error
-    }
-  }
-
-  const handleKgChange = (id: number, cell: any, unit: string) => {
-    updatedRows.current.push(id)
-    // const row = cell.getRow()
-    // const data: ManufacturingAllocationTableData = row.getData()
-
-    // const enteredVal = cell.getValue()
-    // const packageWeight = data.net_weight
-
-    // const updatedQuantity =
-    //   Math.ceil(enteredVal / packageWeight) * data.net_weight
-
-    // setAllocations((prev) =>
-    //   prev.map((a, index) => {
-    //     if (a.id === id) {
-    //       const newPackages = updatedQuantity / a.net_weight
-    //       console.log(newPackages)
-    //       if (newPackages != a.quantity_packages) {
-    //         updatedRows.current.push(id)
-    //       }
-
-    //       return {
-    //         ...a,
-    //         package_diff:
-    //           newPackages -
-    //           originalAllocations.current[index].quantity_packages,
-    //         weight_diff:
-    //           updatedQuantity - originalAllocations.current[index].quantity_kgs,
-    //         total_cost: a.unit_cost * updatedQuantity,
-    //         quantity_kgs: updatedQuantity,
-    //         quantity_packages: newPackages,
-    //       }
-    //     }
-    //     return a
-    //   }),
-    // )
-  }
-
-  const handleQuantityChange = (
-    id: number,
-    newValue: number,
-    unit: 'kg' | 'packages',
-    row: any
-  ) => {
-    const rowData = row.getData()
-
-    const newQuantity = newValue * rowData.net_weight
-    if (newQuantity != rowData.quantity_kgs) {
-      updatedRows.current.push(id)
-    }
-
-    const originalValue = originalAllocations.current.find(item => item.id == id)
-
-    row.update({
-      ...rowData,
-      package_diff: originalValue ? newValue - originalValue.quantity_packages : newValue,
-      weight_diff: originalValue ? newQuantity - originalValue.quantity_kgs : newQuantity,
-      total_cost: rowData.unit_cost * newQuantity,
-      quantity_kgs: newQuantity,
-      quantity_packages: Math.max(0, newValue),
-    })
-
-    // setAllocations((prev) =>
-    //   prev.map((a, index) => {
-    //     if (a.id === id) {
-    //       if (unit === 'kg') {
-    //         // return { ...a, quantity: Math.max(0, newValue), packages: Math.ceil(newValue / tea.packageWeight) }
-    //       } else {
-    //         const newQuantity = newValue * a.net_weight
-    //         if (newQuantity != a.quantity_kgs) {
-    //           updatedRows.current.push(id)
-    //         }
-
-    //         return {
-    //           ...a,
-    //           package_diff:
-    //             newValue - originalAllocations.current[index].quantity_packages,
-    //           weight_diff:
-    //             newQuantity - originalAllocations.current[index].quantity_kgs,
-    //           total_cost: a.unit_cost * newQuantity,
-    //           quantity_kgs: newQuantity,
-    //           quantity_packages: Math.max(0, newValue),
-    //         }
-    //       }
-    //     }
-    //     return a
-    //   }),
-    // )
-  }
-
-  const openSplit = () => {
-    if (tabulatorRef.current) {
-      const selectedData = tabulatorRef.current.getSelectedData()
-      setIsOpenPlit(true)
     }
   }
 
@@ -663,7 +565,11 @@ export default function AllocationTableView() {
 
   // Get blend data by blendid
   const fetchBlendData = useCallback(
-    async (id: string, isEdit: boolean = false, isAllocationUpdate: boolean = true) => {
+    async (
+      id: string,
+      isEdit: boolean = false,
+      isAllocationUpdate: boolean = true,
+    ) => {
       try {
         const data = await getBlendById(id)
         const teas: TeaBlend = data[0]
