@@ -39,6 +39,20 @@ const LabelField: React.FC<{ label: string; value: string | number }> = ({ label
   );
 };
 
+export const FormField: React.FC<{ label: string; value: string | number; onChange?: (value: string) => void; type?: string; readOnly?: boolean }> = ({label, value, onChange, type = "text", readOnly = false}) => (
+  <div className="space-y-2">
+    <Label htmlFor={label}>{label}</Label>
+    <Input
+      id={label}
+      type={type}
+      value={value}
+      onChange={(e) => onChange && onChange(e.target.value)}
+      readOnly={readOnly}
+      className={readOnly ? "bg-gray-100 dark:bg-background" : ""}
+    />
+  </div>
+)
+
 const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   blendInfo,
   onBlendInfoChange,
