@@ -10,6 +10,7 @@ declare module 'jspdf' {
     autoTable: (options: UserOptions) => jsPDF
   }
 }
+
 interface TableRowData {
   '#': number
   'Box Number': string
@@ -72,12 +73,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Broker', dataKey: 'Broker' },
         { title: 'Garden Mark', dataKey: 'Garden Mark' },
         { title: 'Standard', dataKey: 'Standard' },
-        { title: 'Inv No', dataKey: 'Inv No' },
-        { title: 'Net Weight', dataKey: 'Net Weight' },
+        { title: 'Inv\nNo', dataKey: 'Inv No' },
+        { title: 'Net\nWeight', dataKey: 'Net Weight' },
         { title: 'Grade', dataKey: 'Grade' },
-        { title: 'Purchased Price', dataKey: 'Purchased Price' },
-        { title: 'Quantity (Kg)', dataKey: 'Quantity (Kg)' },
-        { title: 'Allocated Packages', dataKey: 'Allocated Packages' },
+        { title: 'Purchased\nPrice', dataKey: 'Purchased Price' },
+        { title: 'Quantity\n(Kg)', dataKey: 'Quantity (Kg)' },
+        { title: 'Allocated\nPackages', dataKey: 'Allocated Packages' },
       ]
 
       const doc = new jsPDF({
@@ -95,139 +96,121 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       const pageWidth = doc.internal.pageSize.getWidth()
       const margin = 40
 
-      doc.setFontSize(18)
-      doc.setFont('Verdana', 'bold')
-      doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
+      // First page header
+      const addFirstPageHeader = () => {
+        doc.setFontSize(18)
+        doc.setFont('Verdana', 'bold')
+        doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
 
-      // Add Date and Time on the Top Right Corner
-      doc.setFontSize(10)
-      doc.setFont('Verdana', 'bold')
-      doc.text(
-        `Date: ${dateGenerated} ${timeGenerated}`,
-        pageWidth - margin,
-        30,
-        { align: 'right' },
-      )
-
-      // Add a rectangle below the header
-      // doc.setDrawColor(0)
-      // doc.setFillColor(255, 255, 255)
-      // doc.rect(margin, 100, pageWidth - 2 * margin, 30, 'FD')
-
-      // Add small rectangle on the right side under the date
-      doc.setDrawColor(0)
-      doc.setFillColor(255, 255, 255)
-      doc.rect(pageWidth - margin - 120, 35, 110, 25, 'FD')
-      // Add Report Title Centered Below the Top Section
-      const type = 'Incompleted'
-      const modal = 'Finance'
-      const [month, day, year] = dateGenerated.split('/')
-
-      const monthNames = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ]
-      const formattedDate = `${day}-${monthNames[parseInt(month) - 1]}-${year}`
-      doc.setFontSize(18)
-      doc.setFont('Verdana', 'bold')
-      doc.text(
-        `${type} Blend Sheet as at ${formattedDate}- ${modal}`,
-        pageWidth / 2,
-        80,
-        { align: 'center' },
-      )
-
-      // Optionally, add a separator line below the header
-      doc.setLineWidth(0.5)
-      doc.line(margin, 90, pageWidth - margin, 90)
-
-      // Add blend info below the header
-      if (blendInfo) {
+        // Add Date and Time on the Top Right Corner
         doc.setFontSize(10)
         doc.setFont('Verdana', 'bold')
-
-        const blendInfoStartY = 120
-        const blendInfoGap = 20
-
-        // Calculate column positions for two-column layout
-        const leftColumnX = Math.floor(pageWidth * 0.1) // Start left column at 20% of page width
-        const rightColumnX = Math.floor(pageWidth * 0.7) // Position right column at 60% of page width
-        const columnGap = 80 // Increased gap between columns for better spacing
-
-        // Left Side Blend Info
         doc.text(
-          `Blend No: ${blendInfo.blendNo}`,
-          leftColumnX,
-          blendInfoStartY,
-          { align: 'left' },
-        )
-        doc.text(
-          `Blend Ref. No: ${blendInfo.blendRefNo}`,
-          leftColumnX,
-          blendInfoStartY + blendInfoGap,
-          { align: 'left' },
-        )
-        doc.text(
-          `Customer: ${blendInfo.customerName}`,
-          leftColumnX,
-          blendInfoStartY + 2 * blendInfoGap,
-          { align: 'left' },
-        )
-        doc.text(
-          `Status: ${blendInfo.status}`,
-          leftColumnX,
-          blendInfoStartY + 3 * blendInfoGap,
-          { align: 'left' },
+          `Date: ${dateGenerated} ${timeGenerated}`,
+          pageWidth - margin,
+          30,
+          { align: 'right' },
         )
 
-        // Right Side Blend Info
+        // Add small rectangle on the right side under the date
+        doc.setDrawColor(0)
+        doc.setFillColor(255, 255, 255)
+        doc.rect(pageWidth - margin - 120, 35, 110, 25, 'FD')
+
+        // Add Report Title
+        const type = 'Incompleted'
+        const modal = 'Finance'
+        const [month, day, year] = dateGenerated.split('/')
+        const monthNames = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ]
+        const formattedDate = `${day}-${monthNames[parseInt(month) - 1]}-${year}`
+        doc.setFontSize(18)
         doc.text(
-          `Blend Date: ${blendInfo.blendDate}`,
-          rightColumnX,
-          blendInfoStartY,
-          { align: 'left' },
+          `${type} Blend Sheet as at ${formattedDate}- ${modal}`,
+          pageWidth / 2,
+          80,
+          { align: 'center' },
         )
-        doc.text(
-          `Total Contract Qty: ${blendInfo.totalContractQty}`,
-          rightColumnX,
-          blendInfoStartY + blendInfoGap,
-          { align: 'left' },
-        )
-        doc.text(
-          `Blend Standard: ${blendInfo.blendStandard}`,
-          rightColumnX,
-          blendInfoStartY + 2 * blendInfoGap,
-          { align: 'left' },
-        )
-        doc.text(
-          `Blend Average: ${blendInfo.blendAverage}`,
-          rightColumnX,
-          blendInfoStartY + 3 * blendInfoGap,
-          { align: 'left' },
-        )
-        doc.text(
-          `RT No: ${blendInfo.rtNo}`,
-          rightColumnX,
-          blendInfoStartY + 4 * blendInfoGap,
-          { align: 'left' },
-        )
+
+        doc.setLineWidth(0.5)
+        doc.line(margin, 90, pageWidth - margin, 90)
+
+        // Add blend info
+        if (blendInfo) {
+          doc.setFontSize(10)
+          const blendInfoStartY = 120
+          const blendInfoGap = 20
+          const leftColumnX = Math.floor(pageWidth * 0.1)
+          const rightColumnX = Math.floor(pageWidth * 0.6)
+
+          // Left Side Blend Info
+          doc.text(
+            `Blend No: ${blendInfo.blendNo}`,
+            leftColumnX,
+            blendInfoStartY,
+          )
+          doc.text(
+            `Blend Ref. No: ${blendInfo.blendRefNo}`,
+            leftColumnX,
+            blendInfoStartY + blendInfoGap,
+          )
+          doc.text(
+            `Customer: ${blendInfo.customerName}`,
+            leftColumnX,
+            blendInfoStartY + 2 * blendInfoGap,
+          )
+          doc.text(
+            `Status: ${blendInfo.status}`,
+            leftColumnX,
+            blendInfoStartY + 3 * blendInfoGap,
+          )
+
+          // Right Side Blend Info
+          doc.text(
+            `Blend Date: ${blendInfo.blendDate}`,
+            rightColumnX,
+            blendInfoStartY,
+          )
+          doc.text(
+            `Total Contract Qty: ${blendInfo.totalContractQty}`,
+            rightColumnX,
+            blendInfoStartY + blendInfoGap,
+          )
+          doc.text(
+            `Blend Standard: ${blendInfo.blendStandard}`,
+            rightColumnX,
+            blendInfoStartY + 2 * blendInfoGap,
+          )
+          doc.text(
+            `Blend Average: ${blendInfo.blendAverage}`,
+            rightColumnX,
+            blendInfoStartY + 3 * blendInfoGap,
+          )
+          doc.text(
+            `RT No: ${blendInfo.rtNo}`,
+            rightColumnX,
+            blendInfoStartY + 4 * blendInfoGap,
+          )
+        }
       }
 
       doc.setProperties({
         title: 'Tea Allocation Report',
       })
 
-      // Add table
+      // Add table with modified styling
       doc.autoTable({
         head: [columns.map((col) => col.title)],
         body: tableData.map((row) =>
@@ -235,16 +218,51 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         ),
         styles: {
           fontSize: 8,
-          cellPadding: 2,
-          textColor: [60, 60, 60], // Dark grey text for all table data (more professional)
+          cellPadding: { top: 3, right: 2, bottom: 3, left: 2 },
+          lineColor: [0, 0, 0],
+          lineWidth: 0.1,
         },
         headStyles: {
-          // Professional dark blue for the header
-          textColor: 255, // White text for the header
+          fillColor: false,
+          textColor: 0,
+          fontSize: 8,
+          fontStyle: 'normal',
+          lineWidth: 0.1,
+          lineColor: [0, 0, 0],
+          cellPadding: { top: 3, right: 2, bottom: 3, left: 2 },
         },
-        margin: { top: blendInfo ? 225 : 225 },
+        bodyStyles: {
+          lineWidth: 0,
+          halign: 'center',
+          cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
+        },
+        margin: { top: blendInfo ? 225 : 225, left: margin, right: margin },
         didDrawPage: function (data) {
-          // Optional: Re-add header on each page if table spans multiple pages
+          // Only add header to first page
+          if (data.pageNumber === 1) {
+            addFirstPageHeader()
+          }
+
+          // Adjust startY for pages after first page
+          if (data.pageNumber >= 1) {
+            data.settings.margin.top = margin
+          }
+        },
+        startY: doc.getNumberOfPages() === 1 ? 225 : margin,
+        tableWidth: 'auto',
+        theme: 'plain',
+        columnStyles: {
+          0: { cellWidth: 30 }, // #
+          1: { cellWidth: 100 }, // Box Number
+          2: { cellWidth: 120 }, // Broker
+          3: { cellWidth: 100 }, // Garden Mark
+          4: { cellWidth: 80 }, // Standard
+          5: { cellWidth: 50 }, // Inv No
+          6: { cellWidth: 50 }, // Net Weight
+          7: { cellWidth: 50 }, // Grade
+          8: { cellWidth: 60 }, // Purchased Price
+          9: { cellWidth: 60 }, // Quantity (Kg)
+          10: { cellWidth: 60 }, // Allocated Packages
         },
       })
 
@@ -283,6 +301,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       doc.save('tea-allocations.pdf')
     }
   }
+
   return (
     <Button onClick={generateReport} className="bg-blue-600 text-white">
       Download Report
