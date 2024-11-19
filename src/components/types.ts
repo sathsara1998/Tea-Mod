@@ -139,6 +139,8 @@ export interface TeaAllocation {
   break: string;
   invoice_no: string;
   blend_line_type: string;
+  allocation_type?: "p" | "w"
+
 }
 
 export interface ManufacturingAllocation {
@@ -165,12 +167,13 @@ export interface ManufacturingAllocationTableData {
   option?: string;
   garden_mark?:string;
   lot_no?:string,
+  invoice_no?:string,
   standard?:string;
   broker?:string;
   grade?:string;
   purchased_qty?:number
   init_quantity?:number
-
+  allocation_type?: "p" | "w"
 
 
 }
