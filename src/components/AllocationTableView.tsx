@@ -355,7 +355,7 @@ export default function AllocationTableView() {
 
       if (
         typeof rowData.quantity_packages !== 'number' ||
-        rowData.quantity_packages <= 0
+        rowData.quantity_packages < 1
       ) {
         throw new Error('Valid quantity is required')
       }

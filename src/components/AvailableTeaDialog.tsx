@@ -88,7 +88,6 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
   !Updated By Kavishka[Intern SE] 19/11/2024
     1.Removed the API call addAllocationtoBlend from AvailableTeaDialog
 */
-
   // const addAllocations = async () => {
   //   try {
   //     if (blendId) {
@@ -144,7 +143,6 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
 
   /*
   !Updated By Kavishka[Intern SE] 20/11/2024
-
   1.Filtered Invalid Teas from the available teas and then pass the filtered data to the table
   TODO: When Adding selected teas need to add "0" Value
 
@@ -255,6 +253,15 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
   const handleAddSelectedTeas = () => {
     if (selectedTeas.length) {
       // Pass selected teas to parent component
+
+      // const teasToAdd = selectedTeas.map((tea) => {
+      //   return {
+      //     ...tea,
+      //     length: 0, // Set packages to 0 before adding
+      //     purchased_price: 10,
+      //   }
+      // })
+      // console.log(selectedTeas)
       onAddTeas(selectedTeas)
       onClose()
     }
