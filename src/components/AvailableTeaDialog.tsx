@@ -85,8 +85,8 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
   }, [])
 
   /*
-!Updated By Kavishka[Intern SE] 19/11/2024
-  1.Removed the API call addAllocationtoBlend from AvailableTeaDialog
+  !Updated By Kavishka[Intern SE] 19/11/2024
+    1.Removed the API call addAllocationtoBlend from AvailableTeaDialog
 */
 
   // const addAllocations = async () => {
@@ -142,10 +142,25 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
     setFilteredTeas(filtered)
   }, [availableTeas, searchTerm, selectedType])
 
+  /*
+  !Updated By Kavishka[Intern SE] 20/11/2024
+
+  1.Filtered Invalid Teas from the available teas and then pass the filtered data to the table
+  TODO: When Adding selected teas need to add "0" Value
+
+*/
+
   useEffect(() => {
     if (availableTeaTableRef.current) {
+      // Filter out invalid teas before passing to the table
+      const validTeas = filteredTeas.filter((tea) => {
+        return !selectedIds.some(
+          (id) => id.weight === tea.net_weight && id.boxNo === tea.box_number,
+        )
+      })
+
       const table = new Tabulator(availableTeaTableRef.current, {
-        data: filteredTeas,
+        data: validTeas, // Use filtered data
         placeholder: 'Loading ...',
         groupBy: 'standard',
         columns: [
@@ -196,7 +211,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
       })
 
       table.on('rowSelectionChanged', function (selectedData, rows) {
-        // Filter out the rows with disabled IDs
+        // Deselect invalid rows
         rows.forEach((row) => {
           const rowData = row.getData()
           if (
@@ -212,15 +227,13 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
           }
         })
 
-        // Set the selected teas excluding the disabled ones
-        // Disable selection for invalid rows and filter out any that might have been selected
+        // Filter out invalid selections
         const validSelections = selectedData.filter((item) => {
           const isInvalid = selectedIds.some(
             (id) =>
               id.weight === item.net_weight && id.boxNo === item.box_number,
           )
           if (isInvalid) {
-            // Find and deselect the row
             const row = table.getRow(item.id)
             if (row) {
               row.deselect()
@@ -241,11 +254,12 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
 
   const handleAddSelectedTeas = () => {
     if (selectedTeas.length) {
-      // Directly pass selected teas to parent component
+      // Pass selected teas to parent component
       onAddTeas(selectedTeas)
       onClose()
     }
   }
+
   console.log()
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
