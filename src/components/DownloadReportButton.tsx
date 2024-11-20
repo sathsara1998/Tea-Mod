@@ -298,7 +298,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         )
       }
 
-      doc.save('tea-allocations.pdf')
+      doc.save(`tea-allocations_${dateGenerated}_${timeGenerated}.pdf`)
     }
   }
 
