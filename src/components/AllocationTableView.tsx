@@ -421,9 +421,19 @@ export default function AllocationTableView() {
     }
   }
 
+  /*
+!Updated By Kavishka[Intern SE] 19/11/2024
+  *Modified addSelectedTeasToBlend in AllocationTableView to:
+
+  1.Convert selected teas to the correct table data format
+  2.Directly update the Tabulator table using React state
+  3.Update the total quantities and costs
+  4.Maintain reactivity through React's state management
+
+*/
   const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
     if (selectedBlend && tabulatorRef.current) {
-      // Transform selected teas into the format needed for the allocation table
+      //* Transform selected teas into the format needed for the allocation table
       const newAllocations: ManufacturingAllocationTableData[] =
         selectedTeas.map((tea, index) => ({
           id: allocations.length + index + 1,
@@ -449,7 +459,7 @@ export default function AllocationTableView() {
             (tea.allocation_type === 'w' ? 0 : tea.net_weight),
         }))
 
-      // Update the allocations state with new data
+      //* Update the allocations state with new data
       setAllocations((prevAllocations) => [
         ...prevAllocations,
         ...newAllocations,

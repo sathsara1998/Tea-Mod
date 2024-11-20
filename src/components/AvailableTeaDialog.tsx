@@ -84,6 +84,11 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
     }
   }, [])
 
+  /*
+!Updated By Kavishka[Intern SE] 19/11/2024
+  1.Removed the API call addAllocationtoBlend from AvailableTeaDialog
+*/
+
   // const addAllocations = async () => {
   //   try {
   //     if (blendId) {
@@ -241,7 +246,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
       onClose()
     }
   }
-
+  console.log()
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="flex max-h-[80vh] max-w-6xl flex-col rounded bg-white p-4 shadow-lg">
