@@ -430,6 +430,9 @@ export default function AllocationTableView() {
   3.Update the total quantities and costs
   4.Maintain reactivity through React's state management
 
+  !Updated By Kavishka[Intern SE] 20/11/2024
+      quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
+      init_quantity: tea.init_quantity,
 */
   const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
     if (selectedBlend && tabulatorRef.current) {
@@ -449,8 +452,8 @@ export default function AllocationTableView() {
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
           quantity_kgs: tea.allocation_type === 'w' ? 0 : tea.net_weight,
-          quantity_packages: tea.allocation_type === 'p' ? 1 : 0,
-          init_quantity: tea.allocation_type === 'p' ? 1 : 0,
+          quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
+          init_quantity: tea.init_quantity,
           allocation_type: tea.allocation_type,
           package_diff: 0,
           weight_diff: 0,

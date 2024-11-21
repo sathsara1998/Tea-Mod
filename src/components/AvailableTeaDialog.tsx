@@ -267,7 +267,6 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
     }
   }
 
-  console.log()
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="flex max-h-[80vh] max-w-6xl flex-col rounded bg-white p-4 shadow-lg">
