@@ -148,6 +148,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
   /*
   !Updated By Kavishka[Intern SE] 20/11/2024
   1.Filtered Invalid Teas from the available teas and then pass the filtered data to the table
+  !21/11/2024
   //TODO: When Adding selected teas need to add "0" Value
 
 */
@@ -255,6 +256,19 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
       }
     }
   }, [availableTeas, selectedIds])
+
+  /*
+Implemented two new useEffect hooks:
+
+One for the search term that filters across multiple columns using Tabulator's setFilter method
+One for the type filter using Tabulator's addFilter and removeFilter methods
+
+
+Removed the manual filtering logic and filteredTeas state since Tabulator now handles the filtering
+
+!Updated By Kavishka[Intern SE] 22/11/2024
+
+*/
 
   // Add effect for search term
   useEffect(() => {

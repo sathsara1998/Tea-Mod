@@ -35,6 +35,9 @@ interface TableRowData {
 interface DownloadReportButtonProps {
   tabulatorRef: any
   blendInfo?: {
+    averagePrice: any
+
+    export_quantity: any
     blendNo: string
     blendRefNo: string
     customerName: string
@@ -191,7 +194,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             blendInfoStartY,
           )
           doc.text(
-            `Total Contract Qty: ${blendInfo.totalContractQty}`,
+            `Total Contract Qty: ${blendInfo.export_quantity}`,
             rightColumnX,
             blendInfoStartY + blendInfoGap,
           )
@@ -201,7 +204,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             blendInfoStartY + 2 * blendInfoGap,
           )
           doc.text(
-            `Blend Average: ${blendInfo.blendAverage}`,
+            `Blend Average: ${blendInfo.averagePrice}`,
             rightColumnX,
             blendInfoStartY + 3 * blendInfoGap,
           )
@@ -272,7 +275,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           10: { cellWidth: 60 }, // Allocated Packages
         },
       })
-
+      console.log(blendInfo)
       // Calculate and add totals at the bottom
       const totalKgs = tableData.reduce(
         (sum, row) => sum + row['Quantity (Kg)'],

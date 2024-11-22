@@ -758,6 +758,8 @@ export default function AllocationTableView() {
     }
   }, [searchParams])
 
+  console.log('selected', selectedBlend)
+  console.log('blendinfo', blendInfo)
   return (
     <>
       <div className="w-[100%] p-4">
@@ -789,15 +791,18 @@ export default function AllocationTableView() {
                       blendNo: selectedBlend.name,
                       blendRefNo: '',
                       customerName: selectedBlend.customer_name,
-                      status: '',
+                      status: blendInfo?.status || '',
                       blendDate: '',
                       totalContractQty: 0,
                       blendStandard: blendInfo?.blendStandard || '',
-                      blendAverage: 0,
+                      blendAverage: blendInfo?.averagePrice || 0,
                       rtNo: '',
+                      export_quantity: blendInfo?.export_quantity || 0,
+                      averagePrice: blendInfo?.averagePrice || 0,
                     }}
                   />
                 )}
+
                 <div className="flex gap-2">
                   <Dialog
                     open={isBlendDialogOpen}
