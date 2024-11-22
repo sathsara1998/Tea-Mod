@@ -59,9 +59,9 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
   const [selectedType, setSelectedType] = useState<string>('All')
   const [selectedTeas, setSelectedTeas] = useState<TeaAllocation[]>([])
   const [availableTeas, setAvailableTeas] = useState<TeaAllocation[]>([])
-  const [filteredTeas, setFilteredTeas] = useState<TeaAllocation[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const availableTeaTableRef = useRef(null)
+  const availableTeaTableRef = useRef<any>(null)
+  const tabulatorRef = useRef<any>(null)
   const { getAllAuctionData, addAllocationtoBlend, editPackageAllocation } =
     useApiMethods()
   const { toast } = useToast()
@@ -71,7 +71,6 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
     try {
       const data = await getAllAuctionData()
       const teas: TeaAllocation[] = data
-
       setAvailableTeas(teas)
     } catch (err: any) {
       toast({
@@ -130,35 +129,40 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
     ],
     [availableTeas],
   )
+  /*
+  !Removed By Kavishka[Intern SE] 22/11/2024
 
-  useEffect(() => {
-    const filtered = availableTeas.filter(
-      (tea) =>
-        (tea.standard.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tea.box_number.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (selectedType === 'All' || tea.blend_line_type === selectedType),
-    )
-    setFilteredTeas(filtered)
-  }, [availableTeas, searchTerm, selectedType])
+  Updated Filter To Built in Tabulator Filter
+
+*/
+  // useEffect(() => {
+  //   const filtered = availableTeas.filter(
+  //     (tea) =>
+  //       (tea.standard.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //         tea.box_number.toLowerCase().includes(searchTerm.toLowerCase())) &&
+  //       (selectedType === 'All' || tea.blend_line_type === selectedType),
+  //   )
+  //   setFilteredTeas(filtered)
+  // }, [availableTeas, searchTerm, selectedType])
 
   /*
   !Updated By Kavishka[Intern SE] 20/11/2024
   1.Filtered Invalid Teas from the available teas and then pass the filtered data to the table
-  TODO: When Adding selected teas need to add "0" Value
+  //TODO: When Adding selected teas need to add "0" Value
 
 */
 
   useEffect(() => {
     if (availableTeaTableRef.current) {
       // Filter out invalid teas before passing to the table
-      const validTeas = filteredTeas.filter((tea) => {
+      const validTeas = availableTeas.filter((tea) => {
         return !selectedIds.some(
           (id) => id.weight === tea.net_weight && id.boxNo === tea.box_number,
         )
       })
 
       const table = new Tabulator(availableTeaTableRef.current, {
-        data: validTeas, // Use filtered data
+        data: validTeas,
         placeholder: 'Loading ...',
         groupBy: 'standard',
         columns: [
@@ -208,6 +212,8 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
         selectableRollingSelection: false,
       })
 
+      tabulatorRef.current = table
+
       table.on('rowSelectionChanged', function (selectedData, rows) {
         // Deselect invalid rows
         rows.forEach((row) => {
@@ -248,20 +254,33 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
         table.destroy()
       }
     }
-  }, [filteredTeas, selectedIds])
+  }, [availableTeas, selectedIds])
+
+  // Add effect for search term
+  useEffect(() => {
+    if (tabulatorRef.current) {
+      tabulatorRef.current.setFilter([
+        [
+          { field: 'standard', type: 'like', value: searchTerm },
+          { field: 'box_number', type: 'like', value: searchTerm },
+          { field: 'garden_mark', type: 'like', value: searchTerm },
+          { field: 'invoice_no', type: 'like', value: searchTerm },
+        ],
+      ])
+    }
+  }, [searchTerm])
+
+  // Add effect for type filter
+  useEffect(() => {
+    if (tabulatorRef.current && selectedType !== 'All') {
+      tabulatorRef.current.addFilter('blend_line_type', '=', selectedType)
+    } else if (tabulatorRef.current) {
+      tabulatorRef.current.removeFilter('blend_line_type', '=', selectedType)
+    }
+  }, [selectedType])
 
   const handleAddSelectedTeas = () => {
     if (selectedTeas.length) {
-      // Pass selected teas to parent component
-
-      // const teasToAdd = selectedTeas.map((tea) => {
-      //   return {
-      //     ...tea,
-      //     length: 0, // Set packages to 0 before adding
-      //     purchased_price: 10,
-      //   }
-      // })
-      // console.log(selectedTeas)
       onAddTeas(selectedTeas)
       onClose()
     }

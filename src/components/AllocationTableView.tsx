@@ -434,7 +434,7 @@ export default function AllocationTableView() {
       quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
       init_quantity: tea.init_quantity,
 */
-  const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
+  const addSelectedTeasToBlend = (selectedTeas: any[]) => {
     if (selectedBlend && tabulatorRef.current) {
       //* Transform selected teas into the format needed for the allocation table
       const newAllocations: ManufacturingAllocationTableData[] =
