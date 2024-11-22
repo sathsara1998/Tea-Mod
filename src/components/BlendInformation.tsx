@@ -99,6 +99,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
             className="w-full justify-start bg-green-50 hover:bg-green-100 text-green-700">
             Generate Blend Sheet
           </Button>
+          
         </div>
       </div>
     </div>

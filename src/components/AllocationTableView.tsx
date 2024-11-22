@@ -93,6 +93,7 @@ export default function AllocationTableView() {
     getLotInfoById,
     deleteManufactureAllocs,
     editPackageAllocation,
+    blendConfirm
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -535,33 +536,9 @@ export default function AllocationTableView() {
     setBlendInfo((prev) => ({ ...prev, ...info }))
   }, [])
 
-  const handleGenerateBlendSheet = useCallback(async () => {
-    // Create a BlendAllocation object from blendInfo and allocations
-    const blendAllocation: any = {
-      ...blendInfo,
-      allocations: allocations,
-      // Add any other necessary fields
-    }
 
-    setIsGenerateConfirmOpen(false)
 
-    const success = await generatePDF(blendAllocation, availableTeas)
-    if (success) {
-      console.log('Blend sheet generated successfully')
-      // You can add a success message for the user here
-    } else {
-      console.error('Failed to generate blend sheet')
-      // You can add an error message for the user here
-    }
-  }, [blendInfo, allocations, availableTeas])
 
-  useEffect(() => {
-    if (isInitialAllocations.current == true) {
-      isInitialAllocations.current = false
-    } else {
-      updateTotalQuantity()
-    }
-  }, [allocations])
 
   // Get blend data by blendid
   const fetchBlendData = useCallback(
@@ -622,6 +599,55 @@ export default function AllocationTableView() {
     },
     [],
   )
+
+  const handleGenerateBlendSheet = useCallback(async () => {
+    try {
+      // Create a BlendAllocation object from blendInfo and allocations
+      const blendAllocation: any = {
+        ...blendInfo,
+        allocations: allocations,
+      }
+  
+      const blendName = { blend_name: blendAllocation.blendNo }
+      setIsGenerateConfirmOpen(false)
+  
+      const success = await blendConfirm(blendName)
+  
+      if (success) {
+        console.log('Blend sheet generated successfully')
+        toast({
+          title: 'Success',
+          description: 'Blend sheet generated successfully',
+          variant: 'default',
+        })
+  
+        // Fetch updated data only if selectedBlend exists
+        if (selectedBlend) {
+          await fetchBlendData(selectedBlend.name)
+        }
+      } else {
+        console.error('Failed to generate blend sheet')
+        toast({
+          title: 'Error',
+          description: 'Failed to generate blend sheet',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      console.error('Error generating blend sheet:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to generate blend sheet',
+        variant: 'destructive',
+      })
+    }
+  }, [blendInfo, allocations, selectedBlend, blendConfirm, fetchBlendData, toast])
+ 
+  useEffect(() => {
+    if (selectedBlend) {
+      fetchBlendData(selectedBlend.name)
+    }
+  }, [selectedBlend,fetchBlendData ])
 
   const saveTableData = async () => {
     const updatingObjs = updatedRows.current
