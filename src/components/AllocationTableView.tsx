@@ -137,14 +137,10 @@ export default function AllocationTableView() {
           { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
           { title: 'Broker', field: 'broker', hozAlign: 'left' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
-
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
-
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
           { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
-
           { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
-
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           {
             title: 'Cost',
@@ -451,7 +447,7 @@ export default function AllocationTableView() {
           grade: tea.grade || '',
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
-          quantity_kgs: tea.allocation_type === 'w' ? 0 : tea.net_weight,
+          quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
           quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,
           allocation_type: tea.allocation_type,
@@ -758,8 +754,8 @@ export default function AllocationTableView() {
     }
   }, [searchParams])
 
-  console.log('selected', selectedBlend)
-  console.log('blendinfo', blendInfo)
+  // console.log('selected', selectedBlend)
+  // console.log('blendinfo', blendInfo)
   return (
     <>
       <div className="w-[100%] p-4">
