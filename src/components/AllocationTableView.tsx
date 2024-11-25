@@ -150,82 +150,87 @@ export default function AllocationTableView() {
           {
             title: 'Cost',
             field: 'unit_cost',
-            formatter: function(cell) {
+            formatter: function (cell) {
               const value = cell.getValue()
-              return value ? value.toLocaleString('en-US', {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4,
-                useGrouping: true
-              }) : '0.0000'
+              return value
+                ? value.toLocaleString('en-US', {
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                    useGrouping: true,
+                  })
+                : '0.0000'
             },
-            hozAlign: 'right'
-           },
+            hozAlign: 'right',
+          },
           { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
 
           {
             title: 'Quantity (Kg)',
             field: 'quantity_kgs',
-            formatter: function(cell) {
+            formatter: function (cell) {
               const value = cell.getValue()
               const element = cell.getElement()
-              
+
               if (cell.getRow().getData().allocation_type === 'w') {
                 element.style.backgroundColor = '#e8f1fe'
                 element.style.border = '1px solid #bfd2e8'
-                return value ? value.toLocaleString('en-US', {
-                  minimumFractionDigits: 4,
-                  maximumFractionDigits: 4,
-                  useGrouping: true
-                }) : '0.0000'
+                return value
+                  ? value.toLocaleString('en-US', {
+                      minimumFractionDigits: 4,
+                      maximumFractionDigits: 4,
+                      useGrouping: true,
+                    })
+                  : '0.0000'
               }
-              return value ? value.toLocaleString('en-US', {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4,
-                useGrouping: true
-              }) : '0.0000'
+              return value
+                ? value.toLocaleString('en-US', {
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                    useGrouping: true,
+                  })
+                : '0.0000'
             },
-            topCalc: function(values) {
-              const sum = values.reduce((acc, curr) => acc + (curr || 0), 0);
+            topCalc: function (values) {
+              const sum = values.reduce((acc, curr) => acc + (curr || 0), 0)
               return sum.toLocaleString('en-US', {
                 minimumFractionDigits: 4,
                 maximumFractionDigits: 4,
-                useGrouping: true
-              });
+                useGrouping: true,
+              })
             },
             hozAlign: 'right',
             editable: (cell) => cell.getRow().getData().allocation_type == 'w',
             editor: 'number',
-            frozen: true
-           },
+            frozen: true,
+          },
           {
             title: 'Packages',
             field: 'quantity_packages',
             editor: 'number',
-            formatter: function(cell) {
+            formatter: function (cell) {
               const value = cell.getValue()
               const element = cell.getElement()
-              
+
               if (cell.getRow().getData().allocation_type === 'p') {
                 element.style.backgroundColor = '#e8f1fe'
                 element.style.border = '1px solid #bfd2e8'
-                return value 
+                return value
               }
-              return ""
+              return ''
             },
-            topCalc: function(values, data) {
-              let sum = 0;
-              data.forEach(row => {
+            topCalc: function (values, data) {
+              let sum = 0
+              data.forEach((row) => {
                 if (row.allocation_type === 'p') {
-                  sum += row.quantity_packages || 0;
+                  sum += row.quantity_packages || 0
                 }
-              });
+              })
               return sum
             },
             hozAlign: 'right',
             editable: (cell) => cell.getRow().getData().allocation_type == 'p',
-            frozen: true
-          }
-          ,
+            frozen: true,
+          },
 
           // { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
           // {
@@ -275,7 +280,6 @@ export default function AllocationTableView() {
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
         })
-      
       })
 
       return () => {
@@ -352,7 +356,7 @@ export default function AllocationTableView() {
 
       if (
         typeof rowData.quantity_packages !== 'number' ||
-        rowData.quantity_packages <= 0
+        rowData.quantity_packages < 1
       ) {
         throw new Error('Valid quantity is required')
       }
@@ -418,12 +422,74 @@ export default function AllocationTableView() {
     }
   }
 
-  const addSelectedTeasToBlend = (selectedTeas: TeaAllocation[]) => {
-    if (selectedBlend) {
-      fetchBlendData(selectedBlend.name)
+  /*
+!Updated By Kavishka[Intern SE] 19/11/2024
+  *Modified addSelectedTeasToBlend in AllocationTableView to:
+
+  1.Convert selected teas to the correct table data format
+  2.Directly update the Tabulator table using React state
+  3.Update the total quantities and costs
+  4.Maintain reactivity through React's state management
+
+  !Updated By Kavishka[Intern SE] 20/11/2024
+      quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
+      init_quantity: tea.init_quantity,
+*/
+  const addSelectedTeasToBlend = (selectedTeas: any[]) => {
+    if (selectedBlend && tabulatorRef.current) {
+      //* Transform selected teas into the format needed for the allocation table
+      const newAllocations: ManufacturingAllocationTableData[] =
+        selectedTeas.map((tea, index) => ({
+          id: allocations.length + index + 1,
+          lot_id: Number(tea.id),
+          box_number: tea.box_number,
+          broker: tea.box_number || '',
+          garden_mark: tea.garden_mark,
+          standard: tea.standard,
+          invoice_no: tea.invoice_no,
+          lot_no: tea.lot_no || '',
+          net_weight: tea.net_weight,
+          grade: tea.grade || '',
+          unit_cost: tea.purchased_price || 0,
+          purchased_qty: tea.purchased_price || 0,
+          quantity_kgs: tea.allocation_type === 'w' ? 0 : tea.net_weight,
+          quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
+          init_quantity: tea.init_quantity,
+          allocation_type: tea.allocation_type,
+          package_diff: 0,
+          weight_diff: 0,
+          total_cost:
+            (tea.purchased_price || 0) *
+            (tea.allocation_type === 'w' ? 0 : tea.net_weight),
+        }))
+
+      //* Update the allocations state with new data
+      setAllocations((prevAllocations) => [
+        ...prevAllocations,
+        ...newAllocations,
+      ])
+
+      // Clear selected rows count
+      setSelectedRowCount(0)
+
+      // Update the original allocations reference
+      originalAllocations.current = [
+        ...originalAllocations.current,
+        ...newAllocations,
+      ]
+
+      // Add these IDs to the updatedRows ref for tracking changes
+      updatedRows.current = [
+        ...updatedRows.current,
+        ...newAllocations.map((allocation) => allocation.id),
+      ]
+
+      // Update the table data
+      if (tabulatorRef.current) {
+        tabulatorRef.current.setData([...allocations, ...newAllocations])
+      }
     }
   }
-
   const updateTotalQuantity = () => {
     const total = allocations.reduce(
       (sum, allocation) => sum + allocation.quantity_kgs,
@@ -718,6 +784,8 @@ export default function AllocationTableView() {
     }
   }, [searchParams])
 
+  console.log('selected', selectedBlend)
+  console.log('blendinfo', blendInfo)
   return (
     <>
       <div className="w-[100%] p-4">
@@ -749,15 +817,18 @@ export default function AllocationTableView() {
                       blendNo: selectedBlend.name,
                       blendRefNo: '',
                       customerName: selectedBlend.customer_name,
-                      status: '',
+                      status: blendInfo?.status || '',
                       blendDate: '',
                       totalContractQty: 0,
                       blendStandard: blendInfo?.blendStandard || '',
-                      blendAverage: 0,
+                      blendAverage: blendInfo?.averagePrice || 0,
                       rtNo: '',
+                      export_quantity: blendInfo?.export_quantity || 0,
+                      averagePrice: blendInfo?.averagePrice || 0,
                     }}
                   />
                 )}
+
                 <div className="flex gap-2">
                   <Dialog
                     open={isBlendDialogOpen}

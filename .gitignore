@@ -40,3 +40,5 @@ yarn-error.log*
 # swc
 .swc
 .env
+.env
+.env
