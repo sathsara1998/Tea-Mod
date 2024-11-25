@@ -28,7 +28,7 @@ interface TableRowData {
 interface DownloadReportButtonProps {
   tabulatorRef: any
   blendInfo?: {
-    averagePrice: Number
+    averagePrice: number
     export_quantity: any
     blendNo: string
     blendRefNo: string
@@ -56,7 +56,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           Broker: row.broker,
           'Garden Mark': row.garden_mark,
           Standard: row.standard,
-          'Inv No': row.lot_no,
+          'Inv No': row.invoice_no,
+          'Lot No': row.lot_no,
           'Net Weight': row.net_weight,
           Grade: row.grade,
           'Purchased Price': row.unit_cost,
@@ -67,7 +68,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       const columns = [
         { title: '#', dataKey: '#', align: 'left' },
         { title: 'Broker', dataKey: 'Broker', align: 'left' },
-        { title: 'Lot No', dataKey: 'Inv No', align: 'left' },
+        { title: 'Lot No', dataKey: 'Lot No', align: 'left' },
         { title: 'Box/Blend\n Number', dataKey: 'Box Number', align: 'left' },
         { title: 'Sale/Blend\n Date', dataKey: 'Inv No', align: 'left' },
         { title: 'Sale No', dataKey: 'Inv No', align: 'left' },

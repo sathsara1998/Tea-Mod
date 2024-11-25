@@ -1,46 +1,55 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { Tea , TeaAllocation } from '@/components/types'
-import { AxiosRequestConfig } from "axios"
-import axios from "axios"
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+import { Tea, TeaAllocation } from '@/components/types'
+import { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 
 interface BlendAllocation {
-    id: string
-    name: string
-    blendNo: string
-    allocations: { 
-      teaId: string
-      quantity: number
-      packages: number
-    }[]
-    totalQuantity: number
-    toAllocate: number
-    balance: number
-    status: 'draft' | 'confirmed' | 'cancel'
-    createdAt: Date
-    exportQuantity?: number
-    allocatedQuantity?: number
-    allocatedQuantityDate?: Date
-    customerOrderNo?: string
-    orderLineNumber?: string
-    sampleAllocationDate?: Date
-    requiredDate?: Date
-    packagingType?: 'bulk' | 'packet' | 'tea bag'
-    averagePrice?: number
-    teaCost?: number
-  }
+  id: string
+  name: string
+  blendNo: string
+  allocations: {
+    teaId: string
+    quantity: number
+    packages: number
+  }[]
+  totalQuantity: number
+  toAllocate: number
+  balance: number
+  status: 'draft' | 'confirmed' | 'cancel'
+  createdAt: Date
+  exportQuantity?: number
+  allocatedQuantity?: number
+  allocatedQuantityDate?: Date
+  customerOrderNo?: string
+  orderLineNumber?: string
+  sampleAllocationDate?: Date
+  requiredDate?: Date
+  packagingType?: 'bulk' | 'packet' | 'tea bag'
+  averagePrice?: number
+  teaCost?: number
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
-
 export const generateTeas = (): Tea[] => {
   const teas: Tea[] = []
-  const teaTypes = ["Assam", "Darjeeling", "Ceylon", "Earl Grey", "English Breakfast", "Green", "Oolong", "Pu-erh", "White", "Chai"]
-  const grades = ["TGFOP", "FBOP", "OP", "BOP", "CTC"]
-  
+  const teaTypes = [
+    'Assam',
+    'Darjeeling',
+    'Ceylon',
+    'Earl Grey',
+    'English Breakfast',
+    'Green',
+    'Oolong',
+    'Pu-erh',
+    'White',
+    'Chai',
+  ]
+  const grades = ['TGFOP', 'FBOP', 'OP', 'BOP', 'CTC']
+
   for (let i = 0; i < 50; i++) {
     const teaType = teaTypes[Math.floor(Math.random() * teaTypes.length)]
     const grade = grades[Math.floor(Math.random() * grades.length)]
@@ -59,10 +68,10 @@ export const generateTeas = (): Tea[] => {
       freeQuantity: packageWeight * packages,
       packageWeight: packageWeight,
       packages: packages,
-      buyingPrice: 0
+      buyingPrice: 0,
     })
   }
-  
+
   return teas
 }
 
@@ -70,11 +79,14 @@ export const formatDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
-export const calculateBalance = (totalQuantity: number, toAllocate: number): number => {
+export const calculateBalance = (
+  totalQuantity: number,
+  toAllocate: number,
+): number => {
   return toAllocate - totalQuantity
 }
 
@@ -86,29 +98,32 @@ export const generateBlendNumber = (year: number, sequence: number): string => {
   return `${year.toString().slice(-2)}/${sequence}`
 }
 
-export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) => {
-  if (typeof window === 'undefined') return; // Ensure we're on the client side
+export const generatePDF = async (
+  blend: BlendAllocation,
+  availableTeas: Tea[],
+) => {
+  if (typeof window === 'undefined') return // Ensure we're on the client side
 
   try {
-    const { default: jsPDF } = await import('jspdf');  // Dynamic import of jsPDF
-    const autoTable = (await import('jspdf-autotable')).default; 
+    const { default: jsPDF } = await import('jspdf') // Dynamic import of jsPDF
+    const autoTable = (await import('jspdf-autotable')).default
 
-    const doc = new jsPDF();
-    
+    const doc = new jsPDF()
+
     // Add title
-    doc.setFontSize(18);
-    doc.text(`Blend Report: ${blend.name}`, 14, 22);
-    
+    doc.setFontSize(18)
+    doc.text(`Blend Report: ${blend.name}`, 14, 22)
+
     // Add blend details
-    doc.setFontSize(12);
-    doc.text(`Blend Number: ${blend.blendNo}`, 14, 32);
-    doc.text(`Total Quantity: ${blend.totalQuantity} kg`, 14, 40);
-    doc.text(`To Allocate: ${blend.toAllocate} kg`, 14, 48);
-    doc.text(`Status: ${blend.status}`, 14, 56);
-    
+    doc.setFontSize(12)
+    doc.text(`Blend Number: ${blend.blendNo}`, 14, 32)
+    doc.text(`Total Quantity: ${blend.totalQuantity} kg`, 14, 40)
+    doc.text(`To Allocate: ${blend.toAllocate} kg`, 14, 48)
+    doc.text(`Status: ${blend.status}`, 14, 56)
+
     // Add tea allocations table
-    const tableData = blend.allocations.map(allocation => {
-      const tea = availableTeas.find(t => t.id === allocation.teaId)!;
+    const tableData = blend.allocations.map((allocation) => {
+      const tea = availableTeas.find((t) => t.id === allocation.teaId)!
       return [
         tea.name,
         tea.lotNumber,
@@ -117,33 +132,74 @@ export const generatePDF = async (blend: BlendAllocation, availableTeas: Tea[]) 
         tea.grade,
         tea.gardenMark,
         tea.teaStandard,
-      ];
-    });
-    
+      ]
+    })
+
     autoTable(doc, {
       startY: 65,
-      head: [['Tea Name', 'Lot Number', 'Quantity (kg)', 'Packages', 'Grade', 'Garden Mark', 'Tea Standard']],
+      head: [
+        [
+          'Tea Name',
+          'Lot Number',
+          'Quantity (kg)',
+          'Packages',
+          'Grade',
+          'Garden Mark',
+          'Tea Standard',
+        ],
+      ],
       body: tableData,
-    });
-    
-    // Save the PDF
-    doc.save(`${blend.name}_report.pdf`);
+    })
 
-    return true; // Indicate success
+    // Save the PDF
+    doc.save(`${blend.name}_report.pdf`)
+
+    return true // Indicate success
   } catch (error) {
-    console.error("Error generating PDF:", error);
-    return false; // Indicate failure
+    console.error('Error generating PDF:', error)
+    return false // Indicate failure
   }
-};
+}
 
 export const generateTestData = (): TeaAllocation[] => {
-  const teaTypes = ['Black', 'Green', 'Oolong', 'White', 'Pu-erh', 'Yellow', 'Purple']
-  const origins = ['China', 'India', 'Sri Lanka', 'Japan', 'Taiwan', 'Kenya', 'Nepal']
-  const grades = ['SFTGFOP1', 'FTGFOP1', 'TGFOP1', 'FOP', 'OP', 'BOP', 'FBOP', 'Sencha', 'Gyokuro', 'Matcha']
+  const teaTypes = [
+    'Black',
+    'Green',
+    'Oolong',
+    'White',
+    'Pu-erh',
+    'Yellow',
+    'Purple',
+  ]
+  const origins = [
+    'China',
+    'India',
+    'Sri Lanka',
+    'Japan',
+    'Taiwan',
+    'Kenya',
+    'Nepal',
+  ]
+  const grades = [
+    'SFTGFOP1',
+    'FTGFOP1',
+    'TGFOP1',
+    'FOP',
+    'OP',
+    'BOP',
+    'FBOP',
+    'Sencha',
+    'Gyokuro',
+    'Matcha',
+  ]
   const types = ['BB', 'BG', 'STRL']
 
   const generateRandomDate = (start: Date, end: Date) => {
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0]
+    return new Date(
+      start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+    )
+      .toISOString()
+      .split('T')[0]
   }
 
   const generateRealisticPackageWeight = (): number => {
@@ -178,10 +234,12 @@ export const generateTestData = (): TeaAllocation[] => {
       allocated_qty: 5,
       allocated_packages: 4,
       free_packages: 4,
-      sample_allowance: "",
+      sample_allowance: '',
       purchased_price: 50,
-      break: "",
-      invoice_no: ""
+      break: '',
+      invoice_no: '',
+      length: 0,
+      init_quantity: 0,
     })
   }
 
@@ -189,20 +247,20 @@ export const generateTestData = (): TeaAllocation[] => {
 }
 
 type ApiclientConfig = {
-  url: string;
-  data?: object;
+  url: string
+  data?: object
   method: string
 }
 
 // For external api calls
 export const apiClient = (configs: ApiclientConfig) => {
-  const token = process.env.NEXT_PUBLIC_API_KEY;
+  const token = process.env.NEXT_PUBLIC_API_KEY
   const mainConfigs: AxiosRequestConfig = {
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
   }
-  return axios({ ...configs, ...mainConfigs});
+  return axios({ ...configs, ...mainConfigs })
 }
