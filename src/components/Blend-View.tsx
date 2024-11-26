@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import 'tabulator-tables/dist/css/tabulator.min.css'
+import 'tabulator-tables/dist/css/tabulator_bootstrap5.min.css'
 import { ArrowRight } from 'lucide-react'
 import { useApiMethods } from '@/hooks/useApiMethods'
 
