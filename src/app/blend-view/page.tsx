@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
-import { useApiMethods } from '@/hooks/useApiMethods'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator.min.css'
 import { ArrowRight } from 'lucide-react'
+import { useApiMethods } from '@/hooks/useApiMethods'
 
 const BlendView = () => {
   const { getBlends } = useApiMethods()
@@ -23,12 +23,12 @@ const BlendView = () => {
 
         if (tableContainerRef.current && !tableRef.current) {
           tableRef.current = new Tabulator(tableContainerRef.current, {
-            data,
+            height: '500px',
             layout: 'fitColumns',
+            data,
             responsiveLayout: 'collapse',
             pagination: true,
             paginationSize: 20,
-            height: '70vh',
             columns: [
               {
                 title: 'Name',
@@ -36,6 +36,7 @@ const BlendView = () => {
                 sorter: 'string',
                 headerFilter: true,
                 widthGrow: 2,
+                headerSort: false,
               },
               {
                 title: 'Allocated Quantity',
@@ -93,7 +94,15 @@ const BlendView = () => {
                   const container = document.createElement('div')
                   const button = document.createElement('button')
                   const iconContainer = document.createElement('div')
-
+                  button.style.backgroundColor = 'transparent'
+                  button.style.border = 'none'
+                  button.style.cursor = 'pointer'
+                  button.addEventListener('mouseover', () => {
+                    button.style.backgroundColor = '#e8f1fe'
+                  })
+                  button.addEventListener('mouseout', () => {
+                    button.style.backgroundColor = 'transparent'
+                  })
                   ReactDOM.render(<ArrowRight size={20} />, iconContainer)
                   button.appendChild(iconContainer)
                   container.appendChild(button)
@@ -110,8 +119,23 @@ const BlendView = () => {
               },
             ],
             initialSort: [{ column: 'name', dir: 'asc' }],
+            rowFormatter: (row) => {
+              const element = row.getElement()
+              element.style.backgroundColor = '' // Light row background
+              element.style.color = '#333' // Text color
+              element.style.borderBottom = '' // Subtle border
+            },
           })
+
+          const headerElement = tableContainerRef.current.querySelector(
+            '.tabulator-header',
+          ) as HTMLElement
+          if (headerElement) {
+            headerElement.style.backgroundColor = '#e8f1fe' // Darker header background
+            headerElement.style.color = '#fff' // Header text color
+          }
         }
+
         setIsLoading(false)
       } catch (err) {
         setError(
