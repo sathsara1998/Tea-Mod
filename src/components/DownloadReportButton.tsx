@@ -126,7 +126,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         'Last Ammend Date': 55,
       }
 
-      const addFirstPageHeader = () => {
+      const addFirstPageHeader = (doc: jsPDF) => {
         doc.setFontSize(16)
         doc.setFont('Calibri', 'bold')
         doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
@@ -178,52 +178,40 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const leftColumnX = Math.floor(pageWidth * 0.1)
           const rightColumnX = Math.floor(pageWidth * 0.6)
 
-          doc.text(
-            `Blend No: ${blendInfo.blendNo}`,
-            leftColumnX,
-            blendInfoStartY,
-          )
-          doc.text(
-            `Blend Ref. No: ${blendInfo.blendRefNo}`,
-            leftColumnX,
-            blendInfoStartY + blendInfoGap,
-          )
-          doc.text(
-            `Customer: ${blendInfo.customerName}`,
-            leftColumnX,
-            blendInfoStartY + 2 * blendInfoGap,
-          )
-          doc.text(
-            `Status: ${blendInfo.status}`,
-            leftColumnX,
-            blendInfoStartY + 3 * blendInfoGap,
-          )
+          const blendInfoDetails = [
+            [
+              `Blend No: ${blendInfo.blendNo}`,
+              `Blend Date: ${blendInfo.blendDate}`,
+            ],
+            [
+              `Blend Ref. No: ${blendInfo.blendRefNo}`,
+              `Total Contract Qty: ${blendInfo.export_quantity}`,
+            ],
+            [
+              `Customer: ${blendInfo.customerName}`,
+              `Blend Standard: ${blendInfo.blendStandard}`,
+            ],
+            [
+              `Status: ${blendInfo.status}`,
+              `Blend Average: ${blendInfo.averagePrice}`,
+            ],
+            [null, `RT No: ${blendInfo.rtNo}`],
+          ]
 
-          doc.text(
-            `Blend Date: ${blendInfo.blendDate}`,
-            rightColumnX,
-            blendInfoStartY,
-          )
-          doc.text(
-            `Total Contract Qty: ${blendInfo.export_quantity}`,
-            rightColumnX,
-            blendInfoStartY + blendInfoGap,
-          )
-          doc.text(
-            `Blend Standard: ${blendInfo.blendStandard}`,
-            rightColumnX,
-            blendInfoStartY + 2 * blendInfoGap,
-          )
-          doc.text(
-            `Blend Average: ${blendInfo.averagePrice}`,
-            rightColumnX,
-            blendInfoStartY + 3 * blendInfoGap,
-          )
-          doc.text(
-            `RT No: ${blendInfo.rtNo}`,
-            rightColumnX,
-            blendInfoStartY + 4 * blendInfoGap,
-          )
+          blendInfoDetails.forEach((row, index) => {
+            doc.text(
+              row[0] || '',
+              leftColumnX,
+              blendInfoStartY + index * blendInfoGap,
+            )
+            if (row[1]) {
+              doc.text(
+                row[1],
+                rightColumnX,
+                blendInfoStartY + index * blendInfoGap,
+              )
+            }
+          })
         }
       }
 
@@ -231,12 +219,19 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         title: 'Tea Allocation Report',
       })
 
-      // Updated table styling
+      // Use a custom startY to control first page layout
+      const firstPageStartY = 225
+
+      // Add first page header manually
+      addFirstPageHeader(doc)
+
+      // Generate table
       doc.autoTable({
         head: [columns.map((col) => col.title)],
         body: tableData.map((row) =>
           columns.map((col) => row[col.dataKey as keyof TableRowData]),
         ),
+        startY: firstPageStartY,
         styles: {
           fontSize: 8,
           cellPadding: { top: 2.5, right: 1.5, bottom: 1.5, left: 1.5 },
@@ -252,11 +247,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           lineWidth: 0.2,
           halign: 'center',
         },
-        margin: { top: blendInfo ? 225 : 225, left: margin, right: margin },
+        margin: { top: 40, left: margin, right: margin },
         didDrawPage: function (data) {
-          if (data.pageNumber === 1) {
-            addFirstPageHeader()
-          }
           doc.setFontSize(8)
           doc.text(
             `Page ${data.pageNumber}`,
@@ -273,16 +265,15 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             data.cell.styles.fontStyle = 'bold'
           }
           if (
-            data.column.index >= 9 && // Starting from 'No Of Packages'
-            data.column.index <= 11 && // Up to 'Value(Rs)'
+            data.column.index >= 9 &&
+            data.column.index <= 11 &&
             data.row.section === 'body'
           ) {
             data.cell.styles.halign = 'center'
           }
-          // Right align price-related columns
           if (
-            data.column.index >= 11 && // Starting from 'No Of Packages'
-            data.column.index <= 13 && // Up to 'Value(Rs)'
+            data.column.index >= 11 &&
+            data.column.index <= 13 &&
             data.row.section === 'body'
           ) {
             data.cell.styles.halign = 'right'

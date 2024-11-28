@@ -23,7 +23,7 @@ const BlendView = () => {
 
         if (tableContainerRef.current && !tableRef.current) {
           tableRef.current = new Tabulator(tableContainerRef.current, {
-            height: '700px',
+            height: '600px',
             layout: 'fitColumns',
             data,
             responsiveLayout: 'collapse',
@@ -97,9 +97,7 @@ const BlendView = () => {
                   button.style.backgroundColor = 'transparent'
                   button.style.border = 'none'
                   button.style.cursor = 'pointer'
-                  button.addEventListener('mouseover', () => {
-                    button.style.backgroundColor = '#e8f1fe'
-                  })
+
                   button.addEventListener('mouseout', () => {
                     button.style.backgroundColor = 'transparent'
                   })
@@ -116,7 +114,7 @@ const BlendView = () => {
                   return container
                 },
                 hozAlign: 'center',
-                width: 50,
+                width: 75,
               },
             ],
             initialSort: [{ column: 'name', dir: 'asc' }],
