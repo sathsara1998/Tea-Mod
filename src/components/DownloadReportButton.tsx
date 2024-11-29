@@ -104,19 +104,19 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Broker', dataKey: 'Broker', width: 40 },
         { title: 'Lot No', dataKey: 'Lot No', width: 40 },
         { title: 'Box/Blend\nNumber', dataKey: 'Box Number', width: 55 },
-        { title: 'Sale/Blend\nDate', dataKey: 'Sale/Blend Date', width: 60 },
+        { title: 'Purchased\nDate', dataKey: 'Sale/Blend Date', width: 60 },
         { title: 'Sale No', dataKey: 'Sale No', width: 40 },
         { title: 'Inv No', dataKey: 'Inv No', width: 40 },
         { title: 'Garden Mark', dataKey: 'Garden Mark', width: 65 },
         { title: 'Grade', dataKey: 'Grade', width: 40 },
-        { title: 'No Of\nPackages', dataKey: 'Allocated Packages', width: 45 },
+        { title: 'No Of\nPkgs', dataKey: 'Allocated Packages', width: 45 },
         { title: 'Weight\n(Kg)', dataKey: 'Net Weight', width: 45 },
         { title: 'Net Qty\n(Kg)', dataKey: 'Quantity (Kg)', width: 45 },
         { title: 'Price\n(Rs)', dataKey: 'Purchased Price', width: 45 },
         { title: 'Value(Rs)', dataKey: 'Value (Rs)', width: 65 },
         { title: 'Rcd', dataKey: 'Rcd', width: 30 },
         { title: 'Prop\nSamp', dataKey: 'Purchased Price', width: 45 },
-        { title: 'Last\nAmmend\nDate', dataKey: 'Last Ammend Date', width: 55 },
+        { title: 'Updated\nDate', dataKey: 'Last Ammend Date', width: 55 },
       ]
 
       const now = new Date()
@@ -205,44 +205,71 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
         if (blendInfo) {
           doc.setFontSize(10)
-          const blendInfoStartY = 120
-          const blendInfoGap = 20
-          const leftColumnX = Math.floor(pageWidth * 0.1)
-          const rightColumnX = Math.floor(pageWidth * 0.6)
+          const blendInfoStartY = 105
+          const blendInfoGap = 15
+          const leftColumnX = Math.floor(pageWidth * 0.1) // Left column starts at 10%
+          const rightColumnX = Math.floor(pageWidth * 0.5) // Right column starts at 50%
 
-          const blendInfoDetails = [
-            [
-              `Blend No: ${blendInfo.blendNo}`,
-              `Blend Date: ${blendInfo.blendDate}`,
-            ],
-            [
-              `Blend Ref. No: ${blendInfo.blendRefNo}`,
-              `Total Contract Qty: ${blendInfo.export_quantity}`,
-            ],
-            [
-              `Customer: ${blendInfo.customerName}`,
-              `Blend Standard: ${blendInfo.blendStandard}`,
-            ],
-            [
-              `Status: ${blendInfo.status}`,
-              `Blend Average: ${blendInfo.averagePrice}`,
-            ],
-            [null, `RT No: ${blendInfo.rtNo}`],
+          // Left column labels
+          const leftLabels = [
+            'Blend No',
+            'Blend Date',
+            'Blend Ref. No',
+            'Total Contract Qty',
+            'Customer Name',
           ]
 
-          blendInfoDetails.forEach((row, index) => {
+          // Right column labels
+          const rightLabels = [
+            'Blend Standard Description',
+            'Blend Average',
+            'RT No',
+            'Status',
+          ]
+
+          // Left column values
+          const leftValues = [
+            blendInfo.blendNo,
+            blendInfo.blendDate,
+            blendInfo.blendRefNo,
+            blendInfo.export_quantity.toLocaleString(),
+            blendInfo.customerName,
+          ]
+
+          // Right column values
+          const rightValues = [
+            blendInfo.blendStandard,
+            blendInfo.averagePrice.toLocaleString(),
+            blendInfo.rtNo,
+            blendInfo.status,
+          ]
+
+          // Draw left column
+          leftLabels.forEach((label, index) => {
             doc.text(
-              row[0] || '',
+              `${label}`,
               leftColumnX,
               blendInfoStartY + index * blendInfoGap,
             )
-            if (row[1]) {
-              doc.text(
-                row[1],
-                rightColumnX,
-                blendInfoStartY + index * blendInfoGap,
-              )
-            }
+            doc.text(
+              `: ${leftValues[index]}`,
+              leftColumnX + 100,
+              blendInfoStartY + index * blendInfoGap,
+            )
+          })
+
+          // Draw right column
+          rightLabels.forEach((label, index) => {
+            doc.text(
+              `${label}`,
+              rightColumnX,
+              blendInfoStartY + index * blendInfoGap,
+            )
+            doc.text(
+              `: ${rightValues[index]}`,
+              rightColumnX + 100,
+              blendInfoStartY + index * blendInfoGap,
+            )
           })
         }
       }
@@ -277,7 +304,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           scaledColumns.map((col) => row[col.dataKey as keyof TableRowData]),
         ),
         theme: 'plain', // Clean layout
-        startY: 225,
+        startY: 180,
         tableWidth: pageWidth - 2 * margin,
         margin: { left: margin, right: margin },
 
@@ -295,7 +322,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           valign: 'middle', // Vertically centered
           cellPadding: { top: 6, right: 8, bottom: 6, left: 8 }, // Generous padding for headers
           lineWidth: 1,
-          lineColor: [200, 200, 200], // Subtle border for headers
+          lineColor: [0, 0, 0], // Subtle border for headers
         },
         bodyStyles: {
           fillColor: false, // White background for a clean look
