@@ -202,74 +202,89 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           80,
           { align: 'center' },
         )
-
         if (blendInfo) {
           doc.setFontSize(10)
-          const blendInfoStartY = 105
-          const blendInfoGap = 15
-          const leftColumnX = Math.floor(pageWidth * 0.1) // Left column starts at 10%
-          const rightColumnX = Math.floor(pageWidth * 0.5) // Right column starts at 50%
+          const blendInfoStartY = 105 // Starting Y position for the info section
+          const blendInfoGap = 15 // Gap between rows
+          const leftColumnX = Math.floor(pageWidth * 0.2) // Left column starts at 10% of the page width
+          const rightColumnX = Math.floor(pageWidth * 0.6) // Right column starts at 55% of the page width
+          const labelWidth = 10 // Fixed width for labels
+          const colonWidth = 10 // Fixed width for the colon spacing
+          const valueStartX = leftColumnX + labelWidth + colonWidth // Start position for values
 
-          // Left column labels
-          const leftLabels = [
-            'Blend No',
-            'Blend Date',
-            'Blend Ref. No',
-            'Total Contract Qty',
-            'Customer Name',
+          // Left column labels and values
+          const leftColumnData = [
+            { label: 'Blend No', value: blendInfo.blendNo },
+            { label: 'Blend Ref. No', value: blendInfo.blendRefNo },
+            { label: 'Customer Name', value: blendInfo.customerName },
+            { label: 'Blend Date', value: blendInfo.blendDate },
+            {
+              label: 'Total Contract Qty',
+              value: blendInfo.export_quantity.toLocaleString(),
+            },
           ]
 
-          // Right column labels
-          const rightLabels = [
-            'Blend Standard Description',
-            'Blend Average',
-            'RT No',
-            'Status',
+          // Right column labels and values
+          const rightColumnData = [
+            {
+              label: 'Blend Average',
+              value: blendInfo.averagePrice.toLocaleString(),
+            },
+            { label: 'RT No', value: blendInfo.rtNo },
+            { label: 'Status', value: blendInfo.status },
+            {
+              label: 'Blend Standard Description',
+              value: blendInfo.blendStandard,
+            },
           ]
 
-          // Left column values
-          const leftValues = [
-            blendInfo.blendNo,
-            blendInfo.blendDate,
-            blendInfo.blendRefNo,
-            blendInfo.export_quantity.toLocaleString(),
-            blendInfo.customerName,
-          ]
+          // Helper function to draw a label, colon, and value with consistent alignment
+          interface LabelValueDrawParams {
+            label: string
+            value: string | number
+            x: number
+            y: number
+          }
 
-          // Right column values
-          const rightValues = [
-            blendInfo.blendStandard,
-            blendInfo.averagePrice.toLocaleString(),
-            blendInfo.rtNo,
-            blendInfo.status,
-          ]
+          const drawAlignedLabelAndValue = ({
+            label,
+            value,
+            x,
+            y,
+          }: LabelValueDrawParams): void => {
+            const labelText = `${label}`
+            doc.setFont('Calibri', 'bold')
+            doc.text(labelText, x, y, { align: 'right' }) // Draw the label
+
+            // Draw the colon at a fixed position
+            const colonX = x + labelWidth
+            doc.text(':', colonX, y)
+
+            // Draw the value after the colon
+            doc.setFont('Calibri', 'bold')
+            doc.text(value.toString(), colonX + colonWidth, y)
+          }
 
           // Draw left column
-          leftLabels.forEach((label, index) => {
-            doc.text(
-              `${label}`,
-              leftColumnX,
-              blendInfoStartY + index * blendInfoGap,
-            )
-            doc.text(
-              `: ${leftValues[index]}`,
-              leftColumnX + 100,
-              blendInfoStartY + index * blendInfoGap,
-            )
+          leftColumnData.forEach((item, index) => {
+            const y = blendInfoStartY + index * blendInfoGap // Calculate Y position for each row
+            drawAlignedLabelAndValue({
+              label: item.label,
+              value: item.value,
+              x: leftColumnX,
+              y,
+            })
           })
 
           // Draw right column
-          rightLabels.forEach((label, index) => {
-            doc.text(
-              `${label}`,
-              rightColumnX,
-              blendInfoStartY + index * blendInfoGap,
-            )
-            doc.text(
-              `: ${rightValues[index]}`,
-              rightColumnX + 100,
-              blendInfoStartY + index * blendInfoGap,
-            )
+          rightColumnData.forEach((item, index) => {
+            const y = blendInfoStartY + index * blendInfoGap // Calculate Y position for each row
+            drawAlignedLabelAndValue({
+              label: item.label,
+              value: item.value,
+              x: rightColumnX,
+              y,
+            })
           })
         }
       }
