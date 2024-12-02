@@ -2,7 +2,7 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
-import { HAlignType } from 'jspdf-autotable'
+import autoTable, { HAlignType } from 'jspdf-autotable'
 import { UserOptions } from 'jspdf-autotable'
 
 declare module 'jspdf' {
@@ -42,6 +42,17 @@ interface DownloadReportButtonProps {
     rtNo: string
   }
 }
+// Function to return head styles
+const getHeadStyles = () => ({
+  textColor: [0, 0, 0] as [number, number, number],
+  fontSize: 8,
+  fontStyle: 'bold' as const,
+  halign: 'center' as const, // Center-aligned headers
+  valign: 'middle' as const, // Vertically centered
+  cellPadding: { top: 6, right: 8, bottom: 6, left: 8 },
+  lineWidth: 1,
+  lineColor: [0, 0, 0] as [number, number, number], // Subtle border for headers
+})
 
 const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
   tabulatorRef,
@@ -118,7 +129,60 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Prop\nSamp', dataKey: 'Purchased Price', width: 45 },
         { title: 'Updated\nDate', dataKey: 'Last Ammend Date', width: 55 },
       ]
+      const columns2 = [
+        { header: 'Co No', dataKey: 'co_no' },
+        { header: 'Co Line', dataKey: 'co_line' },
+        { header: 'R', dataKey: 'r' },
+        { header: 'FG Description', dataKey: 'fg_description' },
+        { header: 'FG Qty', dataKey: 'fg_qty' },
+        { header: 'Qty', dataKey: 'qty' },
+        { header: 'Category', dataKey: 'category' },
+        { header: 'Line No', dataKey: 'line_no' },
+      ]
+      const data = [
+        {
+          co_no: '1001',
+          co_line: 'L01',
+          r: 'R1',
+          fg_description: 'Item A',
+          fg_qty: 10,
+          qty: 20,
+          category: 'Cat1',
+          line_no: 1,
+        },
+        {
+          co_no: '1002',
+          co_line: 'L02',
+          r: 'R2',
+          fg_description: 'Item B',
+          fg_qty: 15,
+          qty: 30,
+          category: 'Cat2',
+          line_no: 2,
+        },
+        {
+          co_no: '1003',
+          co_line: 'L03',
+          r: 'R3',
+          fg_description: 'Item C',
+          fg_qty: 12,
+          qty: 25,
+          category: 'Cat3',
+          line_no: 3,
+        },
+      ]
 
+      const totalRow = {
+        co_no: 'Total',
+        co_line: '',
+        r: '',
+        fg_description: '',
+        fg_qty: data.reduce((sum, item) => sum + item.fg_qty, 0),
+        qty: data.reduce((sum, item) => sum + item.qty, 0),
+        category: '',
+        line_no: 0,
+      }
+      data.push(totalRow)
       const now = new Date()
       const dateGenerated = now.toLocaleDateString()
       const timeGenerated = now.toLocaleTimeString()
@@ -196,12 +260,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         const formattedDate = `${day}-${monthNames[parseInt(month) - 1]}-${year}`
 
         doc.setFontSize(12)
-        doc.text(
-          `${type} Blend Sheet as at ${formattedDate}- ${modal}`,
-          pageWidth / 2,
-          80,
-          { align: 'center' },
-        )
+
         if (blendInfo) {
           doc.setFontSize(10)
           const blendInfoStartY = 105 // Starting Y position for the info section
@@ -313,83 +372,236 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       }))
 
       // Generate table with full-width layout
-      doc.autoTable({
-        head: [scaledColumns.map((col) => col.title)],
-        body: tableData.map((row) =>
-          scaledColumns.map((col) => row[col.dataKey as keyof TableRowData]),
-        ),
-        theme: 'plain', // Clean layout
-        startY: 180,
-        tableWidth: pageWidth - 2 * margin,
-        margin: { left: margin, right: margin },
+      BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      doc.addPage()
+      ContractTable(doc, columns2, data)
 
-        styles: {
-          fontSize: 6,
-          cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
-          lineWidth: 0, // No body row lines
-        },
-        headStyles: {
-          // Light gray background
-          textColor: [0, 0, 0],
-          fontSize: 8, // Slightly larger font for headers
-          fontStyle: 'bold',
-          halign: 'center', // Center-aligned headers
-          valign: 'middle', // Vertically centered
-          cellPadding: { top: 6, right: 8, bottom: 6, left: 8 }, // Generous padding for headers
-          lineWidth: 1,
-          lineColor: [0, 0, 0], // Subtle border for headers
-        },
-        bodyStyles: {
-          fillColor: false, // White background for a clean look
-          textColor: [0, 0, 0],
-          fontSize: 8,
-        },
-        columnStyles: Object.fromEntries(
-          scaledColumns.map((col, index) => [
-            index,
-            {
-              cellWidth: col.width || 'auto', // Dynamically fit content
-              halign: col.title.includes('\n') ? 'center' : 'left', // Center-align for multi-line headers
-            },
-          ]),
-        ),
-        didDrawPage: function (data) {
-          // Footer with page number
-          doc.setFontSize(8)
-          doc.text(
-            `Page ${data.pageNumber}`,
-            pageWidth - margin,
-            pageHeight - 20,
-            { align: 'right' },
-          )
-        },
-        willDrawCell: function (data) {
-          // Check if it's the totals row
-          if (
-            data.row.section === 'body' &&
-            data.row.index === tableData.length - 1
-          ) {
-            data.cell.styles.fontStyle = 'bold' // Bold totals
-            data.cell.styles.fontSize = 10 // Slightly larger font for totals
-            // Apply only top and bottom borders for totals row cells
-            data.cell.styles.lineWidth = {
-              top: 0.5,
-              bottom: 0.5,
-              left: 0,
-              right: 0,
-            }
-            data.cell.styles.lineColor = [0, 0, 0] // Black line for emphasis
-          }
+      doc.setTextColor(255, 0, 0) // Set text color to red
+      doc.text(
+        'There is a mismatch with the allocated packages and allocated Qty in KGs.',
+        40,
+        pageHeight - 350,
+      )
+      doc.text(
+        'Therefore, please recheck this blend sheet before placing your signatures on the same.',
+        40,
+        pageHeight - 335,
+      )
+      doc.setTextColor(0, 0, 0)
+      finalSignatures(doc, pageHeight - 300)
 
-          // Right-align numeric values
-          if (data.column.index >= 9 && data.column.index <= 13) {
-            data.cell.styles.halign = 'right'
-          }
-        },
-      })
-
+      const totalPages = doc.getNumberOfPages() // Get total number of pages
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i) // Set the current page to add the page number
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'bold')
+        doc.text(
+          `Page No : Page ${i} of ${totalPages}`,
+          pageWidth - margin,
+          80,
+          {
+            align: 'right',
+          },
+        )
+      }
       doc.save(`tea-allocations_${dateGenerated}_${timeGenerated}.pdf`)
     }
+  }
+
+  //--------------------------------------------------------------------------------------------------------------------------------
+  // Function to generate the table with the blend allocations
+  const BlendTable = (
+    doc: jsPDF,
+    tableData: TableRowData[],
+    columns: any[],
+    pageWidth: number,
+    margin: number,
+    pageHeight: number,
+  ) => {
+    const scaledColumns = columns.map((col) => ({
+      ...col,
+      width:
+        (col.width * (pageWidth - 2 * margin)) /
+        columns.reduce((sum, col) => sum + (col.width || 0), 0),
+    }))
+
+    doc.autoTable({
+      head: [scaledColumns.map((col) => col.title)],
+      body: tableData.map((row) =>
+        scaledColumns.map((col) => row[col.dataKey as keyof TableRowData]),
+      ),
+      theme: 'plain', // Clean layout
+      startY: 180,
+      tableWidth: pageWidth - 3 * margin,
+      margin: { left: margin, right: margin },
+
+      styles: {
+        fontSize: 6,
+        cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
+        lineWidth: 0, // No body row lines
+      },
+      headStyles: getHeadStyles(),
+      bodyStyles: {
+        fillColor: false, // White background for a clean look
+        textColor: [0, 0, 0],
+        fontSize: 8,
+      },
+      columnStyles: Object.fromEntries(
+        scaledColumns.map((col, index) => [
+          index,
+          {
+            cellWidth: col.width || 'auto', // Dynamically fit content
+            halign: col.title.includes('\n') ? 'center' : 'left', // Center-align for multi-line headers
+          },
+        ]),
+      ),
+
+      willDrawCell: function (data) {
+        // Check if it's the totals row
+        if (
+          data.row.section === 'body' &&
+          data.row.index === tableData.length - 1
+        ) {
+          data.cell.styles.fontStyle = 'bold' // Bold totals
+          data.cell.styles.fontSize = 10 // Slightly larger font for totals
+          // Apply only top and bottom borders for totals row cells
+          data.cell.styles.lineWidth = {
+            top: 0.5,
+            bottom: 0.5,
+            left: 0,
+            right: 0,
+          }
+          data.cell.styles.lineColor = [0, 0, 0] // Black line for emphasis
+        }
+
+        // Right-align numeric values
+        if (data.column.index >= 9 && data.column.index <= 13) {
+          data.cell.styles.halign = 'right'
+        }
+      },
+    })
+  }
+
+  const ContractTable = (doc: jsPDF, columns: any[], data: any[]) => {
+    // Main table
+    autoTable(doc, {
+      head: [columns.map((col) => col.header)],
+      theme: 'plain',
+      body: data.map((row) =>
+        columns.map((col) => row[col.dataKey as keyof typeof row] || ''),
+      ),
+      startY: 40, // Space after heading
+      tableWidth: 'auto',
+      styles: {
+        fontSize: 6,
+        cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
+        lineWidth: 0, // No body row lines
+      },
+      headStyles: getHeadStyles(),
+      bodyStyles: {
+        fillColor: false, // White background for a clean look
+        textColor: [0, 0, 0],
+        fontSize: 8,
+      },
+      margin: { left: 40 }, // Keep some free space after table head
+    })
+
+    // Get the Y-coordinate where the previous table ended
+    const finalY = (doc as any).autoTable.previous.finalY || 30 // Default to 30 if no table exists
+
+    // Add header for "Summary of Grades"
+    doc.setFont('helvetica', 'bold', 'underline')
+    doc.setFontSize(10)
+    doc.text('Summary of Grades', 105, finalY + 10, { align: 'center' })
+
+    // Define columns for "Summary of Grades"
+    const gradeColumns = [
+      { header: 'Grade Desc', dataKey: 'grade_desc' },
+      { header: 'Quantity', dataKey: 'quantity' },
+      { header: 'Percentage', dataKey: 'percentage' },
+    ]
+
+    // Define data for "Summary of Grades"
+    const gradeData = [
+      { grade_desc: 'SILVER TIPS', quantity: '3.57', percentage: '12.00' },
+      { grade_desc: 'LEAF TEA', quantity: '26.15', percentage: '88.00' },
+      { grade_desc: 'Total', quantity: '29.72', percentage: '100.00' },
+    ]
+
+    // Add "Summary of Grades" table
+    autoTable(doc, {
+      head: [gradeColumns.map((col) => col.header)],
+      body: gradeData.map((row) =>
+        gradeColumns.map((col) => row[col.dataKey as keyof typeof row] || ''),
+      ),
+      startY: finalY + 20, // Position table below the header
+      tableWidth: 'auto', // Table width adjusts to content
+      theme: 'plain',
+      styles: {
+        fontSize: 6,
+        cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
+        lineWidth: 0, // No body row lines
+      },
+      headStyles: getHeadStyles(),
+      bodyStyles: {
+        fillColor: false, // White background for a clean look
+        textColor: [0, 0, 0],
+        fontSize: 8,
+      },
+      margin: { left: 40 }, // Center align the smaller table by adjusting margin
+    })
+
+    // Add disclaimer text and signature lines
+    const newY = (doc as any).autoTable.previous.finalY + 20
+  }
+  const finalSignatures = (doc: jsPDF, newY: number) => {
+    // Set default font and size
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+
+    // Add the disclaimer text with better formatting
+
+    // Density placeholders
+    const densityY = newY + 20 // Starting position for density section
+    doc.setFontSize(9)
+    doc.text('Density (100 Grm, Free Fall):', 10, densityY)
+    doc.text('______ CC', 60, densityY)
+    doc.text('______ CC', 110, densityY)
+    doc.text('______ CC', 160, densityY)
+
+    // Approval section headers
+    const approvalY = densityY + 20
+    doc.setFontSize(8)
+    doc.text('Hand blend approved by', 10, approvalY)
+    doc.text('Prop sample approved by', 70, approvalY)
+    doc.text('Final blend approved by', 140, approvalY)
+
+    // Approval signature lines
+    const signatureY = approvalY + 10
+    doc.text('________________________', 10, signatureY)
+    doc.text('_________________________', 70, signatureY)
+    doc.text('_________________________', 140, signatureY)
+
+    // Signature labels
+    const signatureLabelY = signatureY + 5
+    doc.text('Signature', 20, signatureLabelY)
+    doc.text('Signature', 90, signatureLabelY)
+    doc.text('Signature', 160, signatureLabelY)
+
+    // Prepared by, checked by, and date-time section
+    const footerY = signatureLabelY + 20
+    doc.setFontSize(9)
+    doc.text('Prepared By:', 10, footerY)
+    doc.text('_______________________', 35, footerY)
+
+    doc.text('Checked By:', 70, footerY)
+    doc.text('_______________________', 95, footerY)
+
+    doc.text('Date:', 140, footerY)
+    doc.text('___________', 155, footerY)
+
+    doc.text('Time:', 170, footerY)
+    doc.text('___________', 185, footerY)
   }
 
   return (

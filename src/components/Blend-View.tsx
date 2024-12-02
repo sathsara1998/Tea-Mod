@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import 'tabulator-tables/dist/css/tabulator_bootstrap5.min.css'
+import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 import { ArrowRight } from 'lucide-react'
 import { useApiMethods } from '@/hooks/useApiMethods'
 
@@ -23,7 +23,7 @@ const BlendView = () => {
 
         if (tableContainerRef.current && !tableRef.current) {
           tableRef.current = new Tabulator(tableContainerRef.current, {
-            height: '600px',
+            height: 'auto',
             layout: 'fitColumns',
             data,
             responsiveLayout: 'collapse',
