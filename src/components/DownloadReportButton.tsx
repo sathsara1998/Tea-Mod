@@ -4,6 +4,7 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import autoTable, { HAlignType } from 'jspdf-autotable'
 import { UserOptions } from 'jspdf-autotable'
+import { Console } from 'console'
 
 declare module 'jspdf' {
   interface jsPDF {
@@ -54,6 +55,7 @@ const getHeadStyles = () => ({
   lineColor: [0, 0, 0] as [number, number, number], // Subtle border for headers
 })
 
+const font = 'Montserrat'
 const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
   tabulatorRef,
   blendInfo,
@@ -118,9 +120,14 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Purchased\nDate', dataKey: 'Sale/Blend Date', width: 60 },
         { title: 'Sale No', dataKey: 'Sale No', width: 40 },
         { title: 'Inv No', dataKey: 'Inv No', width: 40 },
-        { title: 'Garden Mark', dataKey: 'Garden Mark', width: 65 },
+        {
+          title: 'Garden Mark',
+          dataKey: 'Garden Mark',
+          width: 80,
+          styles: { cellWidth: 'wrap', fontSize: 8 },
+        },
         { title: 'Grade', dataKey: 'Grade', width: 40 },
-        { title: 'No Of\nPkgs', dataKey: 'Allocated Packages', width: 45 },
+        { title: 'No/\nPkgs', dataKey: 'Allocated Packages', width: 30 },
         { title: 'Weight\n(Kg)', dataKey: 'Net Weight', width: 45 },
         { title: 'Net Qty\n(Kg)', dataKey: 'Quantity (Kg)', width: 45 },
         { title: 'Price\n(Rs)', dataKey: 'Purchased Price', width: 45 },
@@ -159,6 +166,26 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           qty: 30,
           category: 'Cat2',
           line_no: 2,
+        },
+        {
+          co_no: '1003',
+          co_line: 'L03',
+          r: 'R3',
+          fg_description: 'Item C',
+          fg_qty: 12,
+          qty: 25,
+          category: 'Cat3',
+          line_no: 3,
+        },
+        {
+          co_no: '1003',
+          co_line: 'L03',
+          r: 'R3',
+          fg_description: 'Item C',
+          fg_qty: 12,
+          qty: 25,
+          category: 'Cat3',
+          line_no: 3,
         },
         {
           co_no: '1003',
@@ -223,18 +250,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       // Add totals row to table data
       tableData.push(totalsRow)
       const addFirstPageHeader = (doc: jsPDF) => {
-        doc.setFontSize(16)
-        doc.setFont('Calibri', 'bold')
-        doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
+        // Ensure font is set consistently across all text elements
+        doc.addFont('/Lato-Bold.ttf', 'Lato', 'normal')
+        doc.setFont(font, 'normal')
 
-        doc.setFontSize(10)
-        doc.setFont('Calibri', 'bold')
-        doc.text(
-          `Date: ${dateGenerated} ${timeGenerated}`,
-          pageWidth - margin,
-          30,
-          { align: 'right' },
-        )
+        doc.setFontSize(16)
+        doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
 
         doc.setDrawColor(0)
         doc.setFillColor(255, 255, 255)
@@ -260,13 +281,20 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         const formattedDate = `${day}-${monthNames[parseInt(month) - 1]}-${year}`
 
         doc.setFontSize(12)
+        doc.text(
+          `${type} Blend Sheet as at ${formattedDate}- ${modal}`,
+          pageWidth / 2,
+          80,
+          { align: 'center' },
+        )
 
         if (blendInfo) {
+          doc.setFont('Oswald', 'normal')
           doc.setFontSize(10)
-          const blendInfoStartY = 105 // Starting Y position for the info section
-          const blendInfoGap = 15 // Gap between rows
+          const blendInfoStartY = 100 // Starting Y position for the info section
+          const blendInfoGap = 20 // Gap between rows
           const leftColumnX = Math.floor(pageWidth * 0.2) // Left column starts at 10% of the page width
-          const rightColumnX = Math.floor(pageWidth * 0.6) // Right column starts at 55% of the page width
+          const rightColumnX = Math.floor(pageWidth * 0.7) // Right column starts at 55% of the page width
           const labelWidth = 10 // Fixed width for labels
           const colonWidth = 10 // Fixed width for the colon spacing
           const valueStartX = leftColumnX + labelWidth + colonWidth // Start position for values
@@ -312,7 +340,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             y,
           }: LabelValueDrawParams): void => {
             const labelText = `${label}`
-            doc.setFont('Calibri', 'bold')
+
+            // Ensure consistent font for labels and values
+            doc.setFont(font, 'normal')
             doc.text(labelText, x, y, { align: 'right' }) // Draw the label
 
             // Draw the colon at a fixed position
@@ -320,7 +350,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             doc.text(':', colonX, y)
 
             // Draw the value after the colon
-            doc.setFont('Calibri', 'bold')
+            doc.setFont(font, 'normal')
             doc.text(value.toString(), colonX + colonWidth, y)
           }
 
@@ -352,8 +382,6 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         title: 'Tea Allocation Report',
       })
 
-      // Use a custom startY to control first page layout
-      const firstPageStartY = 225
       // Add first page header manually
       addFirstPageHeader(doc)
 
@@ -372,33 +400,123 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       }))
 
       // Generate table with full-width layout
-      BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
+        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+
+      // Get the final Y position after the auto table
+      const finalY = (doc as any).autoTable.previous.finalY || 30
+
+      // Set font and size for the document
+      doc.setFontSize(8)
+      doc.setLineWidth(0.5)
+
+      // Line above "Grand Total of the Blend"
+      doc.line(
+        pageWidth - margin - 240, // Starting X position
+        finalY + 20, // Y position adjusted relative to table end
+        pageWidth - margin - 100, // Ending X position
+        finalY + 20, // Y position
+      )
+
+      // Text for "Grand Total of the Blend"
+      doc.setFont(font, 'bold')
+      doc.text(
+        `Grand Total of the Blend`,
+        pageWidth - margin - 240,
+        finalY + 35,
+        { align: 'left' },
+      )
+      doc.text(`${grandTotal}`, pageWidth - margin - 100, finalY + 35, {
+        align: 'right',
+      })
+
+      // Line under "Grand Total of the Blend"
+      doc.line(
+        pageWidth - margin - 240,
+        finalY + 40,
+        pageWidth - margin - 100,
+        finalY + 40,
+      )
+
+      // Text for "Contract Qty"
+      doc.text(`Contract Qty`, pageWidth - margin - 240, finalY + 50, {
+        align: 'left',
+      })
+      doc.text(`212123`, pageWidth - margin - 100, finalY + 50, {
+        align: 'right',
+      })
+
+      // Line under "Contract Qty"
+      doc.line(
+        pageWidth - margin - 240,
+        finalY + 55,
+        pageWidth - margin - 100,
+        finalY + 55,
+      )
+
+      // Text for "Blend Balance"
+      doc.text(
+        `Blend Balance: ${blendBalance}`,
+        pageWidth - margin - 240,
+        finalY + 65,
+        { align: 'left' },
+      )
+
+      // Line under "Blend Balance"
+      doc.line(
+        pageWidth - margin - 240,
+        finalY + 70,
+        pageWidth - margin - 100,
+        finalY + 70,
+      )
+
+      // Text for "Packing Avg"
+      doc.text(
+        `Packing Avg: ${packingAvg}`,
+        pageWidth - margin - 240,
+        finalY + 80,
+        { align: 'left' },
+      )
+
+      // Line under "Packing Avg"
+      doc.line(
+        pageWidth - margin - 240,
+        finalY + 85,
+        pageWidth - margin - 100,
+        finalY + 85,
+      )
+
+      // Text for "Straight Line Avg"
+      doc.text(
+        `Straight Line Avg: ${straightLineAvg}`,
+        pageWidth - margin - 240,
+        finalY + 95,
+        { align: 'left' },
+      )
+
+      // Final bottom line
+      doc.line(
+        pageWidth - margin - 240,
+        finalY + 100,
+        pageWidth - margin - 100,
+        finalY + 100,
+      )
+
       doc.addPage()
       ContractTable(doc, columns2, data)
 
-      doc.setTextColor(255, 0, 0) // Set text color to red
-      doc.text(
-        'There is a mismatch with the allocated packages and allocated Qty in KGs.',
-        40,
-        pageHeight - 350,
-      )
-      doc.text(
-        'Therefore, please recheck this blend sheet before placing your signatures on the same.',
-        40,
-        pageHeight - 335,
-      )
-      doc.setTextColor(0, 0, 0)
-      finalSignatures(doc, pageHeight - 300)
+      // finalSignatures(doc, pageHeight - 300)
 
       const totalPages = doc.getNumberOfPages() // Get total number of pages
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i) // Set the current page to add the page number
         doc.setFontSize(8)
-        doc.setFont('helvetica', 'bold')
+        doc.setFont(font)
         doc.text(
-          `Page No : Page ${i} of ${totalPages}`,
+          `Date: ${dateGenerated} ${timeGenerated}      ` +
+            `Page No : Page ${i} of ${totalPages}`,
           pageWidth - margin,
-          80,
+          30,
           {
             align: 'right',
           },
@@ -425,13 +543,28 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         columns.reduce((sum, col) => sum + (col.width || 0), 0),
     }))
 
+    // Calculate the grand total of the blend
+    const grandTotal =
+      tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
+
+    // Calculate the blend balance
+    const blendBalance =
+      tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
+
+    // Calculate the packing average
+    const packingAvg = grandTotal / tableData.length
+
+    // Calculate the straight line average
+    const straightLineAvg = grandTotal / tableData.length
+
     doc.autoTable({
       head: [scaledColumns.map((col) => col.title)],
       body: tableData.map((row) =>
         scaledColumns.map((col) => row[col.dataKey as keyof TableRowData]),
       ),
       theme: 'plain', // Clean layout
-      startY: 180,
+
+      startY: 200,
       tableWidth: pageWidth - 3 * margin,
       margin: { left: margin, right: margin },
 
@@ -439,6 +572,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         fontSize: 6,
         cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
         lineWidth: 0, // No body row lines
+        font: font,
       },
       headStyles: getHeadStyles(),
       bodyStyles: {
@@ -480,8 +614,15 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         }
       },
     })
-  }
 
+    // Return the calculated values
+    return {
+      grandTotal,
+      blendBalance,
+      packingAvg,
+      straightLineAvg,
+    }
+  }
   const ContractTable = (doc: jsPDF, columns: any[], data: any[]) => {
     // Main table
     autoTable(doc, {
@@ -490,12 +631,14 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       body: data.map((row) =>
         columns.map((col) => row[col.dataKey as keyof typeof row] || ''),
       ),
-      startY: 40, // Space after heading
+
+      startY: 60, // Space after heading
       tableWidth: 'auto',
       styles: {
         fontSize: 6,
         cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
         lineWidth: 0, // No body row lines
+        font: font,
       },
       headStyles: getHeadStyles(),
       bodyStyles: {
@@ -510,7 +653,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     const finalY = (doc as any).autoTable.previous.finalY || 30 // Default to 30 if no table exists
 
     // Add header for "Summary of Grades"
-    doc.setFont('helvetica', 'bold', 'underline')
+    doc.setFont(font, 'underline')
     doc.setFontSize(10)
     doc.text('Summary of Grades', 105, finalY + 10, { align: 'center' })
 
@@ -525,6 +668,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     const gradeData = [
       { grade_desc: 'SILVER TIPS', quantity: '3.57', percentage: '12.00' },
       { grade_desc: 'LEAF TEA', quantity: '26.15', percentage: '88.00' },
+      { grade_desc: 'Total', quantity: '29.72', percentage: '100.00' },
+      { grade_desc: 'Total', quantity: '29.72', percentage: '100.00' },
+      { grade_desc: 'Total', quantity: '29.72', percentage: '100.00' },
+      { grade_desc: 'Total', quantity: '29.72', percentage: '100.00' },
       { grade_desc: 'Total', quantity: '29.72', percentage: '100.00' },
     ]
 
@@ -541,6 +688,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         fontSize: 6,
         cellPadding: { top: 4, right: 6, bottom: 4, left: 6 }, // Increased padding
         lineWidth: 0, // No body row lines
+        font: font,
       },
       headStyles: getHeadStyles(),
       bodyStyles: {
@@ -551,57 +699,74 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       margin: { left: 40 }, // Center align the smaller table by adjusting margin
     })
 
-    // Add disclaimer text and signature lines
-    const newY = (doc as any).autoTable.previous.finalY + 20
+    // Get final Y position after summary grades table
+    const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
+
+    // Add disclaimer text and signature lines after summary table
+    finalSignatures(doc, summaryTableFinalY)
   }
-  const finalSignatures = (doc: jsPDF, newY: number) => {
-    // Set default font and size
-    doc.setFont('helvetica', 'normal')
+
+  const finalSignatures = (doc: jsPDF, startY: number) => {
+    // Set font and size for the document
+    doc.setFont(font, 'bold')
     doc.setFontSize(8)
 
-    // Add the disclaimer text with better formatting
+    const pageWidth = doc.internal.pageSize.getWidth()
 
-    // Density placeholders
-    const densityY = newY + 20 // Starting position for density section
+    // Add red disclaimer text
     doc.setFontSize(9)
-    doc.text('Density (100 Grm, Free Fall):', 10, densityY)
-    doc.text('______ CC', 60, densityY)
-    doc.text('______ CC', 110, densityY)
-    doc.text('______ CC', 160, densityY)
+    doc.setFont(font, 'bold')
+    doc.setTextColor(255, 0, 0)
+    doc.text(
+      'There is a mismatch with the allocated packages and allocated Qty in KGs,Therefore, please recheck this blend sheet before placing your\nsignatures on the same.',
+      40,
+      startY,
+    )
 
-    // Approval section headers
-    const approvalY = densityY + 20
-    doc.setFontSize(8)
-    doc.text('Hand blend approved by', 10, approvalY)
-    doc.text('Prop sample approved by', 70, approvalY)
-    doc.text('Final blend approved by', 140, approvalY)
+    doc.setTextColor(0, 0, 0)
+    // "Density" placeholders starting after disclaimer
+    const densityY = startY + 40
+    doc.text(
+      'Density100 Grm, Free Fall ______  CC \n Hand blend approved by',
+      225,
+      densityY,
+    )
+    doc.text(
+      'Density100 Grm, Free Fall ______  CC \n Hand blend approved by',
+      395,
+      densityY,
+    )
+    doc.text(
+      'Density100 Grm, Free Fall ______  CC \n Hand blend approved by',
+      pageWidth - 285,
+      densityY,
+    )
 
-    // Approval signature lines
-    const signatureY = approvalY + 10
-    doc.text('________________________', 10, signatureY)
-    doc.text('_________________________', 70, signatureY)
-    doc.text('_________________________', 140, signatureY)
+    // Rest of signature sections adjusted based on new densityY
+    const approvalY = densityY + 35
+    doc.text('______________________________', 225, approvalY)
+    doc.text('______________________________', 395, approvalY)
+    doc.text('______________________________', pageWidth - 285, approvalY)
 
-    // Signature labels
-    const signatureLabelY = signatureY + 5
-    doc.text('Signature', 20, signatureLabelY)
-    doc.text('Signature', 90, signatureLabelY)
-    doc.text('Signature', 160, signatureLabelY)
+    doc.text('Signature', 260, approvalY + 15)
+    doc.text('Signature', 430, approvalY + 15)
+    doc.text('Signature', pageWidth - 240, approvalY + 15)
 
-    // Prepared by, checked by, and date-time section
-    const footerY = signatureLabelY + 20
+    doc.text('Date:___________Time_________', 260, approvalY + 35)
+    doc.text('Date:___________Time_________', 430, approvalY + 35)
+    doc.text('Date:___________Time_________', pageWidth - 240, approvalY + 35)
+
+    const footerY = approvalY + 60
+    const margin = 10
     doc.setFontSize(9)
-    doc.text('Prepared By:', 10, footerY)
-    doc.text('_______________________', 35, footerY)
 
-    doc.text('Checked By:', 70, footerY)
-    doc.text('_______________________', 95, footerY)
+    doc.text('Prepared By:', margin + 10, footerY)
+    doc.text('________________________', margin + 10, footerY - 20)
 
-    doc.text('Date:', 140, footerY)
-    doc.text('___________', 155, footerY)
-
-    doc.text('Time:', 170, footerY)
-    doc.text('___________', 185, footerY)
+    doc.text('Checked By:', margin + 150, footerY, { align: 'right' })
+    doc.text('________________________', margin + 150, footerY - 20, {
+      align: 'right',
+    })
   }
 
   return (
