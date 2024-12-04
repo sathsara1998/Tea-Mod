@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -86,6 +87,8 @@ export default function AllocationTableView() {
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false)
   const [blendDetails, setBlendDetails] = useState<StockLot>()
   const [isOpenPlit, setIsOpenPlit] = useState(false)
+  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
 
   const {
     getBlendById,
@@ -93,7 +96,7 @@ export default function AllocationTableView() {
     getLotInfoById,
     deleteManufactureAllocs,
     editPackageAllocation,
-    blendConfirm
+    blendConfirm,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -252,6 +255,14 @@ export default function AllocationTableView() {
             row.getElement().style.backgroundColor = '#eda18a'
           }
         },
+      })
+
+      tabulatorRef.current.on('cellClick', (e, cell) => {
+        if (cell.getColumn().getField() === 'box_number') {
+          // Only trigger for the "name" column
+          setCellData(cell.getValue())
+          setIsTeaDialogOpen(true)
+        }
       })
 
       tabulatorRef.current.on(
@@ -598,10 +609,6 @@ export default function AllocationTableView() {
     setBlendInfo((prev) => ({ ...prev, ...info }))
   }, [])
 
-
-
-
-
   // Get blend data by blendid
   const fetchBlendData = useCallback(
     async (
@@ -669,12 +676,12 @@ export default function AllocationTableView() {
         ...blendInfo,
         allocations: allocations,
       }
-  
+
       const blendName = { blend_name: blendAllocation.blendNo }
       setIsGenerateConfirmOpen(false)
-  
+
       const success = await blendConfirm(blendName)
-  
+
       if (success) {
         console.log('Blend sheet generated successfully')
         toast({
@@ -682,7 +689,7 @@ export default function AllocationTableView() {
           description: 'Blend sheet generated successfully',
           variant: 'default',
         })
-  
+
         // Fetch updated data only if selectedBlend exists
         if (selectedBlend) {
           await fetchBlendData(selectedBlend.name)
@@ -699,17 +706,27 @@ export default function AllocationTableView() {
       console.error('Error generating blend sheet:', error)
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to generate blend sheet',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate blend sheet',
         variant: 'destructive',
       })
     }
-  }, [blendInfo, allocations, selectedBlend, blendConfirm, fetchBlendData, toast])
- 
+  }, [
+    blendInfo,
+    allocations,
+    selectedBlend,
+    blendConfirm,
+    fetchBlendData,
+    toast,
+  ])
+
   useEffect(() => {
     if (selectedBlend) {
       fetchBlendData(selectedBlend.name)
     }
-  }, [selectedBlend,fetchBlendData ])
+  }, [selectedBlend, fetchBlendData])
 
   const saveTableData = async () => {
     const updatingObjs = updatedRows.current
@@ -853,6 +870,18 @@ export default function AllocationTableView() {
                 />
                 {/* <div ref={blendsTableRef}></div> */}
               </CardContent>
+              <Dialog open={isTeaDialogOpen} onOpenChange={setIsTeaDialogOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Cell Data</DialogTitle>
+                    <DialogDescription>
+                      {cellData
+                        ? `You clicked on: ${cellData}`
+                        : 'No data available'}
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </Card>
             <Card>
               <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">

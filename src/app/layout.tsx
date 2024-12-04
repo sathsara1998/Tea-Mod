@@ -39,9 +39,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReactQueryProvider>
-            <div className="duration-600 flex h-screen transition-all">
+            <div className="duration-600 flex h-screen w-full overflow-hidden transition-all">
               {pathname !== '/login' && <Sidebar />}
-              <main className={`duration-600 ml-4 flex-1 p-4 transition-all`}>
+              <main
+                className={`duration-600 flex-1 overflow-auto p-4 transition-all`}
+              >
                 {children}
               </main>
               <Toaster />
