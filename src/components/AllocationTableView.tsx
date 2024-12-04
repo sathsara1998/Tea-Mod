@@ -50,6 +50,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
 import TeaBlendReportButton from './TeaBlendReportButton'
 import DownloadReportButton from './DownloadReportButton'
+import TeaViewDialog from './TeaViewDialog'
 
 interface Allocation {
   teaId: string
@@ -870,18 +871,11 @@ export default function AllocationTableView() {
                 />
                 {/* <div ref={blendsTableRef}></div> */}
               </CardContent>
-              <Dialog open={isTeaDialogOpen} onOpenChange={setIsTeaDialogOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Cell Data</DialogTitle>
-                    <DialogDescription>
-                      {cellData
-                        ? `You clicked on: ${cellData}`
-                        : 'No data available'}
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
+              <TeaViewDialog
+                isTeaDialogOpen={isTeaDialogOpen}
+                setIsTeaDialogOpen={setIsTeaDialogOpen}
+                cellData={cellData}
+              />
             </Card>
             <Card>
               <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
