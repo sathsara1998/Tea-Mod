@@ -62,9 +62,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 }) => {
   const generateReport = () => {
     if (tabulatorRef.current) {
-      // Function to truncate or format broker names
       const formatBrokerName = (brokerName: string) => {
-        // Split broker names and take first word or initials
         const nameParts = brokerName.split(/\s+/)
         return nameParts.length > 1
           ? nameParts.map((part) => part[0]).join('')
@@ -72,7 +70,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             ? brokerName.slice(0, 10) + '.'
             : brokerName
       }
-      const formatboxNumber = (boxNumber: string) => {
+
+      const formatBoxNumber = (boxNumber: string) => {
         return boxNumber.length > 10 ? boxNumber.slice(-10) : boxNumber
       }
 
@@ -84,7 +83,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const value = quantity * unitCost
 
           return {
-            'Box Number': formatboxNumber(row.box_number || ''),
+            'Box Number': formatBoxNumber(row.box_number || ''),
             'Sale/Blend Date': '16/04/2024',
             'Sale No': '2024/IM/0003',
             Rcd: 'Y',
@@ -111,7 +110,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
       const pageWidth = doc.internal.pageSize.getWidth()
       const pageHeight = doc.internal.pageSize.getHeight()
-      const margin = 10 // Reduced margin for wider table
+      const margin = 10
 
       const columns = [
         { title: 'Broker', dataKey: 'Broker', width: 40 },
@@ -136,6 +135,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Prop\nSamp', dataKey: 'Purchased Price', width: 45 },
         { title: 'Updated\nDate', dataKey: 'Last Ammend Date', width: 55 },
       ]
+
       const columns2 = [
         { header: 'Co No', dataKey: 'co_no' },
         { header: 'Co Line', dataKey: 'co_line' },
@@ -146,6 +146,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { header: 'Category', dataKey: 'category' },
         { header: 'Line No', dataKey: 'line_no' },
       ]
+
       const data = [
         {
           co_no: '1001',
@@ -210,11 +211,11 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         line_no: 0,
       }
       data.push(totalRow)
+
       const now = new Date()
       const dateGenerated = now.toLocaleDateString()
       const timeGenerated = now.toLocaleTimeString()
 
-      // Calculate totals
       const totalKgs = tableData.reduce(
         (sum, row) => sum + (row['Quantity (Kg)'] || 0),
         0,
@@ -232,7 +233,6 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         0,
       )
 
-      // Prepare totals row for the table
       const totalsRow: TableRowData = {
         Broker: '',
         'Lot No': '',
@@ -247,13 +247,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         'Value (Rs)': parseFloat(totalValue.toFixed(2)),
       }
 
-      // Add totals row to table data
       tableData.push(totalsRow)
+
       const addFirstPageHeader = (doc: jsPDF) => {
-        // Ensure font is set consistently across all text elements
-
         doc.setFont(font, 'bold')
-
         doc.setFontSize(16)
         doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
 
@@ -289,17 +286,15 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         )
 
         if (blendInfo) {
-          // doc.setFont('Oswald', 'normal')
           doc.setFontSize(10)
-          const blendInfoStartY = 100 // Starting Y position for the info section
-          const blendInfoGap = 20 // Gap between rows
-          const leftColumnX = Math.floor(pageWidth * 0.2) // Left column starts at 10% of the page width
-          const rightColumnX = Math.floor(pageWidth * 0.7) // Right column starts at 55% of the page width
-          const labelWidth = 10 // Fixed width for labels
-          const colonWidth = 10 // Fixed width for the colon spacing
-          const valueStartX = leftColumnX + labelWidth + colonWidth // Start position for values
+          const blendInfoStartY = 100
+          const blendInfoGap = 20
+          const leftColumnX = Math.floor(pageWidth * 0.2)
+          const rightColumnX = Math.floor(pageWidth * 0.7)
+          const labelWidth = 10
+          const colonWidth = 10
+          const valueStartX = leftColumnX + labelWidth + colonWidth
 
-          // Left column labels and values
           const leftColumnData = [
             { label: 'Blend No', value: blendInfo.blendNo },
             { label: 'Blend Ref. No', value: blendInfo.blendRefNo },
@@ -311,7 +306,6 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             },
           ]
 
-          // Right column labels and values
           const rightColumnData = [
             {
               label: 'Blend Average',
@@ -325,10 +319,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             },
           ]
 
-          // Helper function to draw a label, colon, and value with consistent alignment
           interface LabelValueDrawParams {
             label: string
-            value: string | number
+            value: string
             x: number
             y: number
           }
@@ -340,23 +333,16 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             y,
           }: LabelValueDrawParams): void => {
             const labelText = `${label}`
-
-            // Ensure consistent font for labels and values
             doc.setFont(font, 'bold')
-            doc.text(labelText, x, y, { align: 'right' }) // Draw the label
-
-            // Draw the colon at a fixed position
+            doc.text(labelText, x, y, { align: 'right' })
             const colonX = x + labelWidth
             doc.text(':', colonX, y)
-
-            // Draw the value after the colon
             doc.setFont(font, 'bold')
             doc.text(value.toString(), colonX + colonWidth, y)
           }
 
-          // Draw left column
           leftColumnData.forEach((item, index) => {
-            const y = blendInfoStartY + index * blendInfoGap // Calculate Y position for each row
+            const y = blendInfoStartY + index * blendInfoGap
             drawAlignedLabelAndValue({
               label: item.label,
               value: item.value,
@@ -365,9 +351,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             })
           })
 
-          // Draw right column
           rightColumnData.forEach((item, index) => {
-            const y = blendInfoStartY + index * blendInfoGap // Calculate Y position for each row
+            const y = blendInfoStartY + index * blendInfoGap
             drawAlignedLabelAndValue({
               label: item.label,
               value: item.value,
@@ -378,14 +363,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         }
       }
 
-      doc.setProperties({
-        title: 'Tea Allocation Report',
-      })
-
-      // Add first page header manually
+      doc.setProperties({ title: 'Tea Allocation Report' })
       addFirstPageHeader(doc)
 
-      // Calculate total column widths
       const totalColumnWidth = columns.reduce(
         (sum, col) => sum + (col.width || 0),
         0,
@@ -393,32 +373,30 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       const availableWidth = pageWidth - 2 * margin
       const scaleFactor = availableWidth / totalColumnWidth
 
-      // Adjust column widths proportionally
       const scaledColumns = columns.map((col) => ({
         ...col,
         width: col.width * scaleFactor,
       }))
 
-      // Generate table with full-width layout
       const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
         BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
 
-      // Get the final Y position after the auto table
-      const finalY = (doc as any).autoTable.previous.finalY || 30
+      let finalY = (doc as any).autoTable.previous.finalY || 30
+      const requiredSpace = 120
+      if (finalY + requiredSpace > pageHeight - margin) {
+        doc.addPage()
+        finalY = margin + 20
+      }
 
-      // Set font and size for the document
       doc.setFontSize(8)
       doc.setLineWidth(0.5)
 
-      // Line above "Grand Total of the Blend"
       doc.line(
-        pageWidth - margin - 240, // Starting X position
-        finalY + 20, // Y position adjusted relative to table end
-        pageWidth - margin - 100, // Ending X position
-        finalY + 20, // Y position
+        pageWidth - margin - 240,
+        finalY + 20,
+        pageWidth - margin - 100,
+        finalY + 20,
       )
-
-      // Text for "Grand Total of the Blend"
       doc.setFont(font, 'bold')
       doc.text(
         `Grand Total of the Blend`,
@@ -429,8 +407,6 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       doc.text(`${grandTotal}`, pageWidth - margin - 100, finalY + 35, {
         align: 'right',
       })
-
-      // Line under "Grand Total of the Blend"
       doc.line(
         pageWidth - margin - 240,
         finalY + 40,
@@ -438,15 +414,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         finalY + 40,
       )
 
-      // Text for "Contract Qty"
       doc.text(`Contract Qty`, pageWidth - margin - 240, finalY + 50, {
         align: 'left',
       })
       doc.text(`212123`, pageWidth - margin - 100, finalY + 50, {
         align: 'right',
       })
-
-      // Line under "Contract Qty"
       doc.line(
         pageWidth - margin - 240,
         finalY + 55,
@@ -454,15 +427,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         finalY + 55,
       )
 
-      // Text for "Blend Balance"
       doc.text(
         `Blend Balance: ${blendBalance}`,
         pageWidth - margin - 240,
         finalY + 65,
         { align: 'left' },
       )
-
-      // Line under "Blend Balance"
       doc.line(
         pageWidth - margin - 240,
         finalY + 70,
@@ -470,15 +440,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         finalY + 70,
       )
 
-      // Text for "Packing Avg"
       doc.text(
         `Packing Avg: ${packingAvg}`,
         pageWidth - margin - 240,
         finalY + 80,
         { align: 'left' },
       )
-
-      // Line under "Packing Avg"
       doc.line(
         pageWidth - margin - 240,
         finalY + 85,
@@ -486,15 +453,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         finalY + 85,
       )
 
-      // Text for "Straight Line Avg"
       doc.text(
         `Straight Line Avg: ${straightLineAvg}`,
         pageWidth - margin - 240,
         finalY + 95,
         { align: 'left' },
       )
-
-      // Final bottom line
       doc.line(
         pageWidth - margin - 240,
         finalY + 100,
@@ -502,26 +466,34 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         finalY + 100,
       )
 
-      doc.addPage()
-      ContractTable(doc, columns2, data)
+      let contractStartY = finalY + 140
+      ContractTable(doc, columns2, data, contractStartY)
+      const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
 
-      // finalSignatures(doc, pageHeight - 300)
+      const spaceNeededForSignatures = 200
+      const currentY = summaryTableFinalY
+      const remainingSpace = pageHeight - currentY
 
-      const totalPages = doc.getNumberOfPages() // Get total number of pages
+      if (remainingSpace < spaceNeededForSignatures) {
+        doc.addPage()
+        finalSignatures(doc, 50, 40)
+      } else {
+        finalSignatures(doc, currentY, 40)
+      }
+
+      const totalPages = doc.getNumberOfPages()
       for (let i = 1; i <= totalPages; i++) {
-        doc.setPage(i) // Set the current page to add the page number
+        doc.setPage(i)
         doc.setFontSize(8)
         doc.setFont(font)
         doc.text(
-          `Date: ${dateGenerated} ${timeGenerated}      ` +
-            `Page No : Page ${i} of ${totalPages}`,
+          `Date: ${dateGenerated} ${timeGenerated}      Page No : Page ${i} of ${totalPages}`,
           pageWidth - margin,
           30,
-          {
-            align: 'right',
-          },
+          { align: 'right' },
         )
       }
+
       doc.save(`tea-allocations_${dateGenerated}_${timeGenerated}.pdf`)
     }
   }
@@ -623,7 +595,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       straightLineAvg,
     }
   }
-  const ContractTable = (doc: jsPDF, columns: any[], data: any[]) => {
+  const ContractTable = (
+    doc: jsPDF,
+    columns: any[],
+    data: any[],
+    startY: number,
+  ) => {
     // Main table
     autoTable(doc, {
       head: [columns.map((col) => col.header)],
@@ -632,7 +609,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         columns.map((col) => row[col.dataKey as keyof typeof row] || ''),
       ),
 
-      startY: 60, // Space after heading
+      startY: startY, // Use the provided startY parameter
       tableWidth: 'auto',
       styles: {
         fontSize: 6,
@@ -700,10 +677,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     })
 
     // Get final Y position after summary grades table
-    const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
 
     // Add disclaimer text and signature lines after summary table
-    finalSignatures(doc, summaryTableFinalY, 40)
   }
 
   const finalSignatures = (doc: jsPDF, startY: number, marginValue: number) => {
