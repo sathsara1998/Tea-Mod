@@ -703,16 +703,16 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
 
     // Add disclaimer text and signature lines after summary table
-    finalSignatures(doc, summaryTableFinalY)
+    finalSignatures(doc, summaryTableFinalY, 40)
   }
 
-  const finalSignatures = (doc: jsPDF, startY: number) => {
+  const finalSignatures = (doc: jsPDF, startY: number, marginValue: number) => {
     // Set font and size for the document
     doc.setFont(font, 'bold')
     doc.setFontSize(8)
 
     const pageWidth = doc.internal.pageSize.getWidth()
-
+    const margin = marginValue + 20
     // Add red disclaimer text
     doc.setFontSize(9)
     doc.setFont(font, 'bold')
@@ -726,49 +726,57 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     doc.setTextColor(0, 0, 0)
     // "Density" placeholders starting after disclaimer
     const densityY = startY + 40
+
     doc.text(
       'Density100 Grm, Free Fall ______  CC \n Hand blend approved by',
-      225,
+      225 + margin,
       densityY,
     )
     doc.text(
       'Density100 Grm, Free Fall ______  CC \n Hand blend approved by',
-      395,
+      395 + margin,
       densityY,
     )
     doc.text(
       'Density100 Grm, Free Fall ______  CC \n Hand blend approved by',
-      pageWidth - 285,
+      pageWidth - 285 + margin,
       densityY,
     )
 
     // Rest of signature sections adjusted based on new densityY
     const approvalY = densityY + 35
-    doc.text('______________________________', 225, approvalY)
-    doc.text('______________________________', 395, approvalY)
-    doc.text('______________________________', pageWidth - 285, approvalY)
+    doc.text('______________________________', 225 + margin, approvalY)
+    doc.text('______________________________', 395 + margin, approvalY)
+    doc.text(
+      '______________________________',
+      pageWidth - 285 + margin,
+      approvalY,
+    )
 
-    doc.text('Signature', 260, approvalY + 15)
-    doc.text('Signature', 430, approvalY + 15)
-    doc.text('Signature', pageWidth - 240, approvalY + 15)
+    doc.text('Signature', 260 + margin, approvalY + 15)
+    doc.text('Signature', 430 + margin, approvalY + 15)
+    doc.text('Signature', pageWidth - 240 + margin, approvalY + 15)
 
-    doc.text('Date:___________Time_________', 260, approvalY + 35)
-    doc.text('Date:___________Time_________', 430, approvalY + 35)
-    doc.text('Date:___________Time_________', pageWidth - 240, approvalY + 35)
+    doc.text('Date:___________Time_________', 225 + margin, approvalY + 35)
+    doc.text('Date:___________Time_________', 395 + margin, approvalY + 35)
+    doc.text(
+      'Date:___________Time_________',
+      pageWidth - 285 + margin,
+      approvalY + 35,
+    )
 
     const footerY = approvalY + 60
-    const margin = 10
+
     doc.setFontSize(9)
 
-    doc.text('Prepared By:', margin + 10, footerY)
-    doc.text('________________________', margin + 10, footerY - 20)
+    doc.text('Prepared By:', margin + 40, footerY)
+    doc.text('________________________', margin + 40, footerY - 20)
 
-    doc.text('Checked By:', margin + 150, footerY, { align: 'right' })
-    doc.text('________________________', margin + 150, footerY - 20, {
+    doc.text('Checked By:', margin + 180, footerY, { align: 'right' })
+    doc.text('  ______________________', margin + 200, footerY - 20, {
       align: 'right',
     })
   }
-
   return (
     <Button onClick={generateReport} className="bg-blue-600 text-white">
       Download Report
