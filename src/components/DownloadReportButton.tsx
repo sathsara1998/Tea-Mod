@@ -55,7 +55,7 @@ const getHeadStyles = () => ({
   lineColor: [0, 0, 0] as [number, number, number], // Subtle border for headers
 })
 
-const font = 'Montserrat'
+const font = 'Helvetica'
 const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
   tabulatorRef,
   blendInfo,
@@ -124,7 +124,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           title: 'Garden Mark',
           dataKey: 'Garden Mark',
           width: 80,
-          styles: { cellWidth: 'wrap', fontSize: 8 },
+          styles: { cellWidth: 'wrap', fontSize: 10 },
         },
         { title: 'Grade', dataKey: 'Grade', width: 40 },
         { title: 'No/\nPkgs', dataKey: 'Allocated Packages', width: 30 },
@@ -251,8 +251,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       tableData.push(totalsRow)
       const addFirstPageHeader = (doc: jsPDF) => {
         // Ensure font is set consistently across all text elements
-        doc.addFont('/Lato-Bold.ttf', 'Lato', 'normal')
-        doc.setFont(font, 'normal')
+
+        doc.setFont(font, 'bold')
 
         doc.setFontSize(16)
         doc.text('TEA TANG(PVT) LTD', pageWidth / 2, 50, { align: 'center' })
@@ -289,7 +289,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         )
 
         if (blendInfo) {
-          doc.setFont('Oswald', 'normal')
+          // doc.setFont('Oswald', 'normal')
           doc.setFontSize(10)
           const blendInfoStartY = 100 // Starting Y position for the info section
           const blendInfoGap = 20 // Gap between rows
@@ -342,7 +342,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             const labelText = `${label}`
 
             // Ensure consistent font for labels and values
-            doc.setFont(font, 'normal')
+            doc.setFont(font, 'bold')
             doc.text(labelText, x, y, { align: 'right' }) // Draw the label
 
             // Draw the colon at a fixed position
@@ -350,7 +350,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             doc.text(':', colonX, y)
 
             // Draw the value after the colon
-            doc.setFont(font, 'normal')
+            doc.setFont(font, 'bold')
             doc.text(value.toString(), colonX + colonWidth, y)
           }
 

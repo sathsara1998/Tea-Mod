@@ -6,9 +6,10 @@ import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import ReactQueryProvider from '@/providers/ReactQueryProvider'
-import { Toaster } from "@/components/ui/toaster"
-import Sidebar from "@/components/SideBar";
+import { Toaster } from '@/components/ui/toaster'
+import Sidebar from '@/components/SideBar'
 import { usePathname } from 'next/navigation'
+import Snowfall from 'react-snowfall'
 
 // const defaultUrl = process.env.VERCEL_URL
 //   ? `https://${process.env.VERCEL_URL}`
@@ -24,16 +25,12 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
-}
-) 
-{
+}) {
   const pathname = usePathname()
   return (
-    <html
-      lang="en"
-      className={GeistSans.className}
-    >
+    <html lang="en" className={GeistSans.className}>
       <body className="text-foreground">
+        <Snowfall snowflakeCount={50} />
         <NextTopLoader showSpinner={false} height={2} color="#2acf80" />
         <ThemeProvider
           attribute="class"
@@ -42,15 +39,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReactQueryProvider>
-          <div className="flex h-screen transition-all duration-600">
-          {pathname !== '/login' && <Sidebar />}
-        <main className={`flex-1 p-4 transition-all duration-600 ml-4`}>
-          {children}
-        </main>
-        <Toaster />
-      </div>
-              <Analytics />{' '}
-              {/* ^^ remove this if you are not deploying to vercel. See more at https://vercel.com/docs/analytics  */}
+            <div className="duration-600 flex h-screen transition-all">
+              {pathname !== '/login' && <Sidebar />}
+              <main className={`duration-600 ml-4 flex-1 p-4 transition-all`}>
+                {children}
+              </main>
+              <Toaster />
+            </div>
+            <Analytics />{' '}
+            {/* ^^ remove this if you are not deploying to vercel. See more at https://vercel.com/docs/analytics  */}
             {/* <ReactQueryDevtools initialIsOpen={false} /> */}
           </ReactQueryProvider>
         </ThemeProvider>
