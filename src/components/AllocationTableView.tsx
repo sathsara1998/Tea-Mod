@@ -451,7 +451,7 @@ export default function AllocationTableView() {
           id: allocations.length + index + 1,
           lot_id: Number(tea.id),
           box_number: tea.box_number,
-          broker: tea.box_number || '',
+          broker: tea.broker || '',
           garden_mark: tea.garden_mark,
           standard: tea.standard,
           invoice_no: tea.invoice_no,
@@ -589,6 +589,7 @@ export default function AllocationTableView() {
   const [blendInfo, setBlendInfo] = useState<BlendInfo>({
     blendNo: '',
     blendRefNo: '',
+    broker: '',
     date: '',
     blendStandard: '',
     propSample: 0,
@@ -644,6 +645,7 @@ export default function AllocationTableView() {
           teaCost: teas.average_cost,
           export_quantity: teas.export_quantity,
           allocations: [],
+          broker: teas.broker,
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
@@ -837,6 +839,7 @@ export default function AllocationTableView() {
                       blendStandard: blendInfo?.blendStandard || '',
                       blendAverage: blendInfo?.averagePrice || 0,
                       rtNo: '',
+                      broker: blendInfo?.broker || '',
                       export_quantity: blendInfo?.export_quantity || 0,
                       averagePrice: blendInfo?.averagePrice || 0,
                     }}

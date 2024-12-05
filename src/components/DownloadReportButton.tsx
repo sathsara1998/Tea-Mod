@@ -41,6 +41,7 @@ interface DownloadReportButtonProps {
     blendStandard: string
     blendAverage: number
     rtNo: string
+    broker: string
   }
 }
 // Function to return head styles
@@ -62,19 +63,41 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 }) => {
   const generateReport = () => {
     if (tabulatorRef.current) {
-      const formatBrokerName = (brokerName: string) => {
-        const nameParts = brokerName.split(/\s+/)
-        return nameParts.length > 1
-          ? nameParts.map((part) => part[0]).join('')
-          : brokerName.length > 10
-            ? brokerName.slice(0, 10) + '.'
-            : brokerName
-      }
+      // const formatBrokerName = (brokerName: string) => {
+      //   const nameParts = brokerName.split(/\s+/)
+      //   return nameParts.length > 1
+      //     ? nameParts.map((part) => part[0]).join('')
+      //     : brokerName.length > 10
+      //       ? brokerName.slice(0, 10) + '.'
+      //       : brokerName
+      // }
 
       const formatBoxNumber = (boxNumber: string) => {
         return boxNumber.length > 10 ? boxNumber.slice(-10) : boxNumber
       }
-
+      const formatDate = (date: string) => {
+        const months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ]
+        if (!date) return ''
+        const [dateStr] = date.split(' ') // Split at space to remove time
+        const [year, month, day] = dateStr.split('-')
+        return `${day}-${months[parseInt(month) - 1]}-${year}`
+      }
+      const formatRcd = (rcd: boolean) => {
+        return rcd === true ? 'Y' : 'N'
+      }
       const tableData: TableRowData[] = tabulatorRef.current
         .getData()
         .map((row: any) => {
@@ -86,19 +109,21 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             'Box Number': formatBoxNumber(row.box_number || ''),
             'Sale/Blend Date': '16/04/2024',
             'Sale No': '2024/IM/0003',
-            Rcd: 'Y',
-            'Last Ammend Date': '31/10/2024',
-            Broker: formatBrokerName(row.broker || ''),
+            Rcd: formatRcd(row.rcd),
+            Broker: row.broker || '',
             'Garden Mark': row.garden_mark || '',
             Standard: row.standard || '',
             'Inv No': row.invoice_no || '',
             'Lot No': row.lot_no || '',
-            'Net Weight': row.net_weight || 0,
             Grade: row.grade || '',
             'Purchased Price': unitCost,
             'Quantity (Kg)': quantity,
             'Allocated Packages': row.quantity_packages || 0,
             'Value (Rs)': parseFloat(value.toFixed(2)),
+            'Last Ammend Date': formatDate(row.last_ammedned_date),
+            'Prop Sample': row.prop_sample_in_grams,
+            'Purchased Date': formatDate(row.purchased_date),
+            'Net Weight': row.net_weight,
           }
         })
 
@@ -116,7 +141,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Broker', dataKey: 'Broker', width: 40 },
         { title: 'Lot No', dataKey: 'Lot No', width: 40 },
         { title: 'Box/Blend\nNumber', dataKey: 'Box Number', width: 55 },
-        { title: 'Purchased\nDate', dataKey: 'Sale/Blend Date', width: 60 },
+        { title: 'Purchased\nDate', dataKey: 'Purchased Date', width: 60 },
         { title: 'Sale No', dataKey: 'Sale No', width: 40 },
         { title: 'Inv No', dataKey: 'Inv No', width: 40 },
         {
@@ -132,7 +157,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         { title: 'Price\n(Rs)', dataKey: 'Purchased Price', width: 45 },
         { title: 'Value(Rs)', dataKey: 'Value (Rs)', width: 65 },
         { title: 'Rcd', dataKey: 'Rcd', width: 30 },
-        { title: 'Prop\nSamp', dataKey: 'Purchased Price', width: 45 },
+        { title: 'Prop\nSamp', dataKey: 'Prop Sample', width: 45 },
         { title: 'Updated\nDate', dataKey: 'Last Ammend Date', width: 55 },
       ]
 
@@ -309,7 +334,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const rightColumnData = [
             {
               label: 'Blend Average',
-              value: blendInfo.averagePrice.toLocaleString(),
+              value: parseFloat(
+                blendInfo.averagePrice.toLocaleString(),
+              ).toFixed(2),
             },
             { label: 'RT No', value: blendInfo.rtNo },
             { label: 'Status', value: blendInfo.status },
@@ -400,69 +427,69 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       doc.setFont(font, 'bold')
       doc.text(
         `Grand Total of the Blend`,
-        pageWidth - margin - 240,
+        pageWidth - margin - 380,
         finalY + 35,
         { align: 'left' },
       )
-      doc.text(`${grandTotal}`, pageWidth - margin - 100, finalY + 35, {
+      doc.text(`${grandTotal}`, pageWidth - margin - 150, finalY + 35, {
         align: 'right',
       })
       doc.line(
-        pageWidth - margin - 240,
+        pageWidth - margin - 380,
         finalY + 40,
-        pageWidth - margin - 100,
+        pageWidth - margin - 65,
         finalY + 40,
       )
 
-      doc.text(`Contract Qty`, pageWidth - margin - 240, finalY + 50, {
+      doc.text(`Contract Qty`, pageWidth - margin - 380, finalY + 50, {
         align: 'left',
       })
-      doc.text(`212123`, pageWidth - margin - 100, finalY + 50, {
+      doc.text(`212123`, pageWidth - margin - 150, finalY + 50, {
         align: 'right',
       })
       doc.line(
         pageWidth - margin - 240,
         finalY + 55,
-        pageWidth - margin - 100,
+        pageWidth - margin - 65,
         finalY + 55,
       )
 
-      doc.text(
-        `Blend Balance: ${blendBalance}`,
-        pageWidth - margin - 240,
-        finalY + 65,
-        { align: 'left' },
-      )
+      doc.text(`Blend Balance: `, pageWidth - margin - 380, finalY + 65, {
+        align: 'left',
+      })
+      doc.text(`${blendBalance}`, pageWidth - margin - 150, finalY + 65, {
+        align: 'right',
+      })
       doc.line(
         pageWidth - margin - 240,
         finalY + 70,
-        pageWidth - margin - 100,
+        pageWidth - margin - 65,
         finalY + 70,
       )
 
-      doc.text(
-        `Packing Avg: ${packingAvg}`,
-        pageWidth - margin - 240,
-        finalY + 80,
-        { align: 'left' },
-      )
+      doc.text(`Packing Avg: `, pageWidth - margin - 380, finalY + 80, {
+        align: 'left',
+      })
+      doc.text(`${packingAvg}`, pageWidth - margin - 150, finalY + 85, {
+        align: 'right',
+      })
       doc.line(
         pageWidth - margin - 240,
         finalY + 85,
-        pageWidth - margin - 100,
+        pageWidth - margin - 65,
         finalY + 85,
       )
 
-      doc.text(
-        `Straight Line Avg: ${straightLineAvg}`,
-        pageWidth - margin - 240,
-        finalY + 95,
-        { align: 'left' },
-      )
+      doc.text(`Straight Line Avg: `, pageWidth - margin - 380, finalY + 95, {
+        align: 'left',
+      })
+      doc.text(`${straightLineAvg}`, pageWidth - margin - 150, finalY + 95, {
+        align: 'right',
+      })
       doc.line(
-        pageWidth - margin - 240,
+        pageWidth - margin - 380,
         finalY + 100,
-        pageWidth - margin - 100,
+        pageWidth - margin - 65,
         finalY + 100,
       )
 
@@ -732,10 +759,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     doc.text('Signature', 430 + margin, approvalY + 15)
     doc.text('Signature', pageWidth - 240 + margin, approvalY + 15)
 
-    doc.text('Date:___________Time_________', 225 + margin, approvalY + 35)
-    doc.text('Date:___________Time_________', 395 + margin, approvalY + 35)
+    doc.text('Date:___________Time___________', 225 + margin, approvalY + 35)
+    doc.text('Date:___________Time___________', 395 + margin, approvalY + 35)
     doc.text(
-      'Date:___________Time_________',
+      'Date:___________Time___________',
       pageWidth - 285 + margin,
       approvalY + 35,
     )
@@ -744,13 +771,11 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
     doc.setFontSize(9)
 
-    doc.text('Prepared By:', margin + 40, footerY)
-    doc.text('________________________', margin + 40, footerY - 20)
+    doc.text('Prepared By:', margin, footerY - 10)
+    doc.text('_________________    ', margin, footerY - 30)
 
-    doc.text('Checked By:', margin + 180, footerY, { align: 'right' })
-    doc.text('  ______________________', margin + 200, footerY - 20, {
-      align: 'right',
-    })
+    doc.text('Checked By:', margin + 120, footerY - 10, { align: 'left' })
+    doc.text('________________', margin + 120, footerY - 30)
   }
   return (
     <Button onClick={generateReport} className="bg-blue-600 text-white">
