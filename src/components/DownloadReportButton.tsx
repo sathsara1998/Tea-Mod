@@ -47,7 +47,7 @@ interface DownloadReportButtonProps {
 // Function to return head styles
 const getHeadStyles = () => ({
   textColor: [0, 0, 0] as [number, number, number],
-  fontSize: 8,
+  fontSize: 9,
   fontStyle: 'bold' as const,
   halign: 'center' as const, // Center-aligned headers
   valign: 'middle' as const, // Vertically centered
@@ -417,81 +417,58 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
       doc.setFontSize(8)
       doc.setLineWidth(0.5)
+      // Draw summary box
+      const boxStartX = pageWidth - margin - 380
+      const boxEndX = pageWidth - margin - 65
+      const lineSpacing = 25
 
-      doc.line(
-        pageWidth - margin - 240,
-        finalY + 20,
-        pageWidth - margin - 100,
-        finalY + 20,
-      )
+      // Helper function for consistent line drawing
+      const drawLine = (y: number, startX = boxStartX, endX = boxEndX) => {
+        doc.line(startX, y, endX, y)
+      }
+
+      // Helper function for consistent text alignment
+      const drawRowText = (
+        label: string,
+        value: string | number,
+        y: number,
+      ) => {
+        doc.text(label, boxStartX, y, { align: 'left' })
+        doc.text(value.toString(), boxEndX - 85, y, { align: 'right' })
+      }
+
       doc.setFont(font, 'bold')
-      doc.text(
-        `Grand Total of the Blend`,
-        pageWidth - margin - 380,
+      doc.setFontSize(8)
+
+      // Grand Total section
+      drawLine(finalY + 20, boxStartX + 140, boxEndX)
+      drawRowText(
+        'Grand Total of the Blend',
+        grandTotal.toFixed(2),
         finalY + 35,
-        { align: 'left' },
       )
-      doc.text(`${grandTotal}`, pageWidth - margin - 150, finalY + 35, {
-        align: 'right',
-      })
-      doc.line(
-        pageWidth - margin - 380,
-        finalY + 40,
-        pageWidth - margin - 65,
-        finalY + 40,
-      )
+      drawLine(finalY + 40)
 
-      doc.text(`Contract Qty`, pageWidth - margin - 380, finalY + 50, {
-        align: 'left',
-      })
-      doc.text(`212123`, pageWidth - margin - 150, finalY + 50, {
-        align: 'right',
-      })
-      doc.line(
-        pageWidth - margin - 240,
-        finalY + 55,
-        pageWidth - margin - 65,
-        finalY + 55,
-      )
+      // Contract Qty section
+      drawRowText('Contract Qty', '212123', finalY + 55)
+      drawLine(finalY + 60)
 
-      doc.text(`Blend Balance: `, pageWidth - margin - 380, finalY + 65, {
-        align: 'left',
-      })
-      doc.text(`${blendBalance}`, pageWidth - margin - 150, finalY + 65, {
-        align: 'right',
-      })
-      doc.line(
-        pageWidth - margin - 240,
-        finalY + 70,
-        pageWidth - margin - 65,
-        finalY + 70,
+      // Blend Balance section
+      const calculatedBlendBalance = grandTotal - 212123
+      drawRowText(
+        'Blend Balance',
+        calculatedBlendBalance.toFixed(2),
+        finalY + 75,
       )
+      drawLine(finalY + 80)
 
-      doc.text(`Packing Avg: `, pageWidth - margin - 380, finalY + 80, {
-        align: 'left',
-      })
-      doc.text(`${packingAvg}`, pageWidth - margin - 150, finalY + 85, {
-        align: 'right',
-      })
-      doc.line(
-        pageWidth - margin - 240,
-        finalY + 85,
-        pageWidth - margin - 65,
-        finalY + 85,
-      )
+      // Packing Average section
+      drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
+      drawLine(finalY + 100)
 
-      doc.text(`Straight Line Avg: `, pageWidth - margin - 380, finalY + 95, {
-        align: 'left',
-      })
-      doc.text(`${straightLineAvg}`, pageWidth - margin - 150, finalY + 95, {
-        align: 'right',
-      })
-      doc.line(
-        pageWidth - margin - 380,
-        finalY + 100,
-        pageWidth - margin - 65,
-        finalY + 100,
-      )
+      // Straight Line Average section
+      drawRowText('Straight Line Avg', straightLineAvg.toFixed(2), finalY + 115)
+      drawLine(finalY + 120)
 
       let contractStartY = finalY + 140
       ContractTable(doc, columns2, data, contractStartY)

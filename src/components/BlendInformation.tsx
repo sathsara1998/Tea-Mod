@@ -100,8 +100,23 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <LabelField label="Date" value={blendInfo.date} />
           <LabelField label="Blend Standard" value={blendInfo.blendStandard} />
-          <LabelField label="Prop Sample (gms)" value={blendInfo.propSample} />
+
+          <div className="rounded bg-slate-50 p-2">
+            <div className="mb-1 text-xs uppercase text-slate-600">
+              Prop Sample (gms)
+            </div>
+            <Input
+              value={blendInfo.propSample}
+              onChange={(e) =>
+                onBlendInfoChange({
+                  propSample: parseFloat(e.target.value) || 0,
+                })
+              }
+              disabled={blendInfo.status.toLowerCase() === 'done'}
+            />
+          </div>
           <LabelField label="Required Date" value={blendInfo.requiredDate} />
+
           <div className="rounded bg-slate-50 p-2">
             <div className="mb-1 text-xs uppercase text-slate-600">
               Packaging Type
@@ -111,9 +126,10 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               onValueChange={(value) =>
                 onBlendInfoChange({ packagingType: value })
               }
+              disabled={blendInfo.status.toLowerCase() === 'done'}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={blendInfo.requiredDate} />
+                <SelectValue placeholder="Select packaging type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="bulk">Bulk</SelectItem>

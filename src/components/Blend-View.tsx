@@ -20,6 +20,7 @@ const BlendView = () => {
       try {
         setIsLoading(true)
         const data = await getBlends()
+        console.log(data)
 
         if (tableContainerRef.current && !tableRef.current) {
           tableRef.current = new Tabulator(tableContainerRef.current, {
@@ -35,8 +36,32 @@ const BlendView = () => {
                 field: 'name',
                 sorter: 'string',
                 headerFilter: true,
-                widthGrow: 1,
+                widthGrow: 2,
                 headerSort: false,
+              },
+              {
+                title: 'Customer Name',
+                field: 'customer_name',
+                sorter: 'string',
+                widthGrow: 2,
+                headerSort: false,
+              },
+
+              {
+                title: 'Blend Standard',
+                field: 'product_name',
+                hozAlign: 'left',
+                sorter: 'string',
+                widthGrow: 3,
+              },
+              {
+                title: 'Average Cost',
+                field: 'average_cost',
+                hozAlign: 'right',
+                sorter: 'number',
+                formatter: 'money',
+                formatterParams: { precision: 2, thousand: ',', symbol: '' },
+                widthGrow: 1,
               },
               {
                 title: 'Allocated Quantity',
@@ -46,13 +71,6 @@ const BlendView = () => {
                 formatter: 'money',
                 formatterParams: { precision: 2, thousand: ',', symbol: '' },
                 widthGrow: 1,
-              },
-              {
-                title: 'Blend Standard',
-                field: 'product_name',
-                hozAlign: 'left',
-                sorter: 'string',
-                widthGrow: 3,
               },
               {
                 title: 'Export Quantity',
