@@ -7,6 +7,7 @@ import {
   ListCheck,
   LogOut,
   FileChartColumn,
+  Snowflake,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -15,7 +16,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { createBrowserClient } from '@/utils/supabase'
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{
+  onSnowfallToggle: (enabled: boolean) => void
+  isSnowfallEnabled: boolean
+}> = ({ onSnowfallToggle, isSnowfallEnabled }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
@@ -43,6 +47,10 @@ const Sidebar: React.FC = () => {
     } else {
       router.push('/login')
     }
+  }
+
+  const handleSnowfallToggle = () => {
+    onSnowfallToggle(!isSnowfallEnabled)
   }
 
   const menuItems = [
@@ -96,6 +104,37 @@ const Sidebar: React.FC = () => {
               </Link>
             </li>
           ))}
+
+          {/* Snowfall Toggle */}
+          <li>
+            <Button
+              variant="ghost"
+              onClick={handleSnowfallToggle}
+              className={cn(
+                'w-full justify-start rounded-lg text-left !text-white transition-colors hover:bg-gray-700',
+                isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
+                'flex items-center',
+              )}
+            >
+              <span
+                className={cn(
+                  'flex items-center',
+                  isExpanded ? 'mr-3' : 'mr-0',
+                )}
+              >
+                <Snowflake
+                  className={
+                    isSnowfallEnabled ? 'text-blue-400' : 'text-gray-500'
+                  }
+                />
+              </span>
+              {isExpanded && (
+                <span>
+                  {isSnowfallEnabled ? 'Disable Snow' : 'Enable Snow'}
+                </span>
+              )}
+            </Button>
+          </li>
         </ul>
       </nav>
 
