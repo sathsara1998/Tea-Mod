@@ -102,9 +102,8 @@ export type ConfirmedSaleOrder = {
 
 export interface BlendInfo {
   blendNo: string
-  blendRefNo: string
   broker: string
-  date: string
+  blend_date: string
   blendStandard: string
   propSample: number
   requiredDate: string
@@ -206,6 +205,7 @@ export interface TeaBlend {
   customer_name: string
   broker: string
   quantity: number
+  blend_date: string
   status: string
   export_quantity: number
   allocated_quantity: number

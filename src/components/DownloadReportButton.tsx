@@ -107,10 +107,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
           return {
             'Box Number': formatBoxNumber(row.box_number || ''),
-            'Sale/Blend Date': '16/04/2024',
-            'Sale No': '2024/IM/0003',
+            'Sale No': row.sale_code,
             Rcd: formatRcd(row.rcd),
-            Broker: row.broker || '',
+            Broker: row.broker_name || '',
             'Garden Mark': row.garden_mark || '',
             Standard: row.standard || '',
             'Inv No': row.invoice_no || '',
@@ -322,12 +321,14 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
           const leftColumnData = [
             { label: 'Blend No', value: blendInfo.blendNo },
-            { label: 'Blend Ref. No', value: blendInfo.blendRefNo },
+
             { label: 'Customer Name', value: blendInfo.customerName },
             { label: 'Blend Date', value: blendInfo.blendDate },
             {
               label: 'Total Contract Qty',
-              value: blendInfo.export_quantity.toLocaleString(),
+              value: parseFloat(
+                blendInfo.export_quantity.toLocaleString(),
+              ).toFixed(2),
             },
           ]
 

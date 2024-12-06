@@ -98,7 +98,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
           Blend Details
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <LabelField label="Date" value={blendInfo.date} />
+          <LabelField label="Date" value={blendInfo.blend_date} />
           <LabelField label="Blend Standard" value={blendInfo.blendStandard} />
 
           <div className="rounded bg-slate-50 p-2">
@@ -174,13 +174,13 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       <div className="col-span-3 rounded-lg bg-white p-4 shadow-sm">
         <div className="mb-3 border-b pb-2 text-sm font-semibold">Actions</div>
         <div className="space-y-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={onSaveTableData}
             className="w-full justify-start bg-blue-50 text-blue-700 hover:bg-blue-100"
           >
             Save data
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={onGenerateBlendSheet}

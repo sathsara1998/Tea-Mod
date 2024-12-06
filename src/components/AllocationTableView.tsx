@@ -588,9 +588,9 @@ export default function AllocationTableView() {
 
   const [blendInfo, setBlendInfo] = useState<BlendInfo>({
     blendNo: '',
-    blendRefNo: '',
+
     broker: '',
-    date: '',
+    blend_date: '',
     blendStandard: '',
     propSample: 0,
     requiredDate: '',
@@ -629,8 +629,8 @@ export default function AllocationTableView() {
 
         const teablendInfo: BlendInfo = {
           blendNo: teas.name,
-          blendRefNo: '',
-          date: '',
+
+          blend_date: teas.blend_date,
           blendStandard: teas.product_name,
           propSample: teas.propSample ?? 0,
           requiredDate: '',
@@ -799,7 +799,7 @@ export default function AllocationTableView() {
       fetchBlendData(id, true)
     }
   }, [searchParams])
-
+  console.log(blendInfo)
   // console.log('selected', selectedBlend)
   // console.log('blendinfo', blendInfo)
   return (
@@ -826,6 +826,7 @@ export default function AllocationTableView() {
                     Customer Name: {selectedBlend.customer_name}
                   </label>
                 )}
+
                 {selectedBlend && (
                   <DownloadReportButton
                     tabulatorRef={tabulatorRef}
@@ -834,7 +835,7 @@ export default function AllocationTableView() {
                       blendRefNo: '',
                       customerName: selectedBlend.customer_name,
                       status: blendInfo?.status || '',
-                      blendDate: '',
+                      blendDate: blendInfo.blend_date,
                       totalContractQty: 0,
                       blendStandard: blendInfo?.blendStandard || '',
                       blendAverage: blendInfo?.averagePrice || 0,
@@ -845,7 +846,6 @@ export default function AllocationTableView() {
                     }}
                   />
                 )}
-
                 <div className="flex gap-2">
                   <Dialog
                     open={isBlendDialogOpen}
@@ -929,31 +929,36 @@ export default function AllocationTableView() {
                     {/* <Button onClick={openSplit} className="bg-blue-600 text-white">
                 Split
               </Button> */}
-                    <Button
-                      onClick={selectAllRows}
-                      className="bg-blue-600 text-white"
-                    >
-                      Select All
-                    </Button>
-                    <Button
-                      onClick={deselectAllRows}
-                      className="bg-gray-600 text-white"
-                    >
-                      Deselect All
-                    </Button>
-                    <Button
-                      onClick={handleRemoveSelectedTeas}
-                      className="bg-red-600 text-white"
-                      disabled={selectedRowCount === 0}
-                    >
-                      Remove Selected Teas ({selectedRowCount})
-                    </Button>
-                    <Button
-                      className="bg-green-600 text-white"
-                      onClick={addTeaBtnClick}
-                    >
-                      Add Tea
-                    </Button>
+
+                    {selectedBlend && selectedBlend.status === 'draft' && (
+                      <div className="allocationBtns">
+                        <Button
+                          onClick={selectAllRows}
+                          className="bg-blue-600 text-white"
+                        >
+                          Select All
+                        </Button>
+                        <Button
+                          onClick={deselectAllRows}
+                          className="bg-gray-600 text-white"
+                        >
+                          Deselect All
+                        </Button>
+                        <Button
+                          onClick={handleRemoveSelectedTeas}
+                          className="bg-red-600 text-white"
+                          disabled={selectedRowCount === 0}
+                        >
+                          Remove Selected Teas ({selectedRowCount})
+                        </Button>
+                        <Button
+                          className="bg-green-600 text-white"
+                          onClick={addTeaBtnClick}
+                        >
+                          Add Tea
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardHeader>
