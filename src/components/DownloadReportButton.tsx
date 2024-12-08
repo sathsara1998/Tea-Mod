@@ -335,9 +335,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const rightColumnData = [
             {
               label: 'Blend Average',
-              value: parseFloat(
-                blendInfo.averagePrice.toLocaleString(),
-              ).toFixed(2),
+              value: blendInfo.averagePrice.toFixed(3)
+
             },
             { label: 'RT No', value: blendInfo.rtNo },
             { label: 'Status', value: blendInfo.status },
