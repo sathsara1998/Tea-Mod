@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className="text-foreground">
         {isTestEnvironment && (
           <div className="w-full bg-orange-600 text-white text-center py-2 font-medium">
-            Connected to Staging Instance : tt-dev-staging.odoo.com
+            Connected to Staging Instance : {process.env.NEXT_PUBLIC_API_BASE_URL}
           </div>
         )}
         {isSnowfallEnabled && <Snowfall snowflakeCount={50} />}
