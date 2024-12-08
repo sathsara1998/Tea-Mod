@@ -102,8 +102,8 @@ export type ConfirmedSaleOrder = {
 
 export interface BlendInfo {
   blendNo: string
-  blendRefNo: string
-  date: string
+  broker: string
+  blend_date: string
   blendStandard: string
   propSample: number
   requiredDate: string
@@ -152,6 +152,7 @@ export interface ManufacturingAllocation {
   quantity_packages: number
   net_weight: number
   unit_cost: number
+  last_amend_date: string
 }
 
 export interface ManufacturingAllocationTableData {
@@ -202,7 +203,9 @@ export interface TeaBlend {
   product_name: string
   customer_id: number
   customer_name: string
+  broker: string
   quantity: number
+  blend_date: string
   status: string
   export_quantity: number
   allocated_quantity: number

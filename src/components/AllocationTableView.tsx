@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -49,6 +50,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
 import TeaBlendReportButton from './TeaBlendReportButton'
 import DownloadReportButton from './DownloadReportButton'
+import TeaViewDialog from './TeaViewDialog'
 
 interface Allocation {
   teaId: string
@@ -86,6 +88,8 @@ export default function AllocationTableView() {
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false)
   const [blendDetails, setBlendDetails] = useState<StockLot>()
   const [isOpenPlit, setIsOpenPlit] = useState(false)
+  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
 
   const {
     getBlendById,
@@ -93,7 +97,7 @@ export default function AllocationTableView() {
     getLotInfoById,
     deleteManufactureAllocs,
     editPackageAllocation,
-    blendConfirm
+    blendConfirm,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -252,6 +256,14 @@ export default function AllocationTableView() {
             row.getElement().style.backgroundColor = '#eda18a'
           }
         },
+      })
+
+      tabulatorRef.current.on('cellClick', (e, cell) => {
+        if (cell.getColumn().getField() === 'box_number') {
+          // Only trigger for the "name" column
+          setCellData(cell.getValue())
+          setIsTeaDialogOpen(true)
+        }
       })
 
       tabulatorRef.current.on(
@@ -439,7 +451,7 @@ export default function AllocationTableView() {
           id: allocations.length + index + 1,
           lot_id: Number(tea.id),
           box_number: tea.box_number,
-          broker: tea.box_number || '',
+          broker: tea.broker || '',
           garden_mark: tea.garden_mark,
           standard: tea.standard,
           invoice_no: tea.invoice_no,
@@ -576,8 +588,9 @@ export default function AllocationTableView() {
 
   const [blendInfo, setBlendInfo] = useState<BlendInfo>({
     blendNo: '',
-    blendRefNo: '',
-    date: '',
+
+    broker: '',
+    blend_date: '',
     blendStandard: '',
     propSample: 0,
     requiredDate: '',
@@ -598,10 +611,6 @@ export default function AllocationTableView() {
     setBlendInfo((prev) => ({ ...prev, ...info }))
   }, [])
 
-
-
-
-
   // Get blend data by blendid
   const fetchBlendData = useCallback(
     async (
@@ -620,8 +629,8 @@ export default function AllocationTableView() {
 
         const teablendInfo: BlendInfo = {
           blendNo: teas.name,
-          blendRefNo: '',
-          date: '',
+
+          blend_date: teas.blend_date,
           blendStandard: teas.product_name,
           propSample: teas.propSample ?? 0,
           requiredDate: '',
@@ -636,6 +645,7 @@ export default function AllocationTableView() {
           teaCost: teas.average_cost,
           export_quantity: teas.export_quantity,
           allocations: [],
+          broker: teas.broker,
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
@@ -669,12 +679,12 @@ export default function AllocationTableView() {
         ...blendInfo,
         allocations: allocations,
       }
-  
+
       const blendName = { blend_name: blendAllocation.blendNo }
       setIsGenerateConfirmOpen(false)
-  
+
       const success = await blendConfirm(blendName)
-  
+
       if (success) {
         console.log('Blend sheet generated successfully')
         toast({
@@ -682,7 +692,7 @@ export default function AllocationTableView() {
           description: 'Blend sheet generated successfully',
           variant: 'default',
         })
-  
+
         // Fetch updated data only if selectedBlend exists
         if (selectedBlend) {
           await fetchBlendData(selectedBlend.name)
@@ -699,17 +709,27 @@ export default function AllocationTableView() {
       console.error('Error generating blend sheet:', error)
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to generate blend sheet',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate blend sheet',
         variant: 'destructive',
       })
     }
-  }, [blendInfo, allocations, selectedBlend, blendConfirm, fetchBlendData, toast])
- 
+  }, [
+    blendInfo,
+    allocations,
+    selectedBlend,
+    blendConfirm,
+    fetchBlendData,
+    toast,
+  ])
+
   useEffect(() => {
     if (selectedBlend) {
       fetchBlendData(selectedBlend.name)
     }
-  }, [selectedBlend,fetchBlendData ])
+  }, [selectedBlend, fetchBlendData])
 
   const saveTableData = async () => {
     const updatingObjs = updatedRows.current
@@ -779,7 +799,7 @@ export default function AllocationTableView() {
       fetchBlendData(id, true)
     }
   }, [searchParams])
-
+  console.log(blendInfo)
   // console.log('selected', selectedBlend)
   // console.log('blendinfo', blendInfo)
   return (
@@ -806,6 +826,7 @@ export default function AllocationTableView() {
                     Customer Name: {selectedBlend.customer_name}
                   </label>
                 )}
+
                 {selectedBlend && (
                   <DownloadReportButton
                     tabulatorRef={tabulatorRef}
@@ -814,17 +835,17 @@ export default function AllocationTableView() {
                       blendRefNo: '',
                       customerName: selectedBlend.customer_name,
                       status: blendInfo?.status || '',
-                      blendDate: '',
+                      blendDate: blendInfo.blend_date,
                       totalContractQty: 0,
                       blendStandard: blendInfo?.blendStandard || '',
                       blendAverage: blendInfo?.averagePrice || 0,
                       rtNo: '',
+                      broker: blendInfo?.broker || '',
                       export_quantity: blendInfo?.export_quantity || 0,
                       averagePrice: blendInfo?.averagePrice || 0,
                     }}
                   />
                 )}
-
                 <div className="flex gap-2">
                   <Dialog
                     open={isBlendDialogOpen}
@@ -853,6 +874,11 @@ export default function AllocationTableView() {
                 />
                 {/* <div ref={blendsTableRef}></div> */}
               </CardContent>
+              <TeaViewDialog
+                isTeaDialogOpen={isTeaDialogOpen}
+                setIsTeaDialogOpen={setIsTeaDialogOpen}
+                cellData={cellData}
+              />
             </Card>
             <Card>
               <CardHeader className="sticky top-0 z-10 flex flex-row items-center justify-between">
@@ -903,31 +929,36 @@ export default function AllocationTableView() {
                     {/* <Button onClick={openSplit} className="bg-blue-600 text-white">
                 Split
               </Button> */}
-                    <Button
-                      onClick={selectAllRows}
-                      className="bg-blue-600 text-white"
-                    >
-                      Select All
-                    </Button>
-                    <Button
-                      onClick={deselectAllRows}
-                      className="bg-gray-600 text-white"
-                    >
-                      Deselect All
-                    </Button>
-                    <Button
-                      onClick={handleRemoveSelectedTeas}
-                      className="bg-red-600 text-white"
-                      disabled={selectedRowCount === 0}
-                    >
-                      Remove Selected Teas ({selectedRowCount})
-                    </Button>
-                    <Button
-                      className="bg-green-600 text-white"
-                      onClick={addTeaBtnClick}
-                    >
-                      Add Tea
-                    </Button>
+
+                    {selectedBlend && selectedBlend.status === 'draft' && (
+                      <div className="allocationBtns">
+                        <Button
+                          onClick={selectAllRows}
+                          className="bg-blue-600 text-white"
+                        >
+                          Select All
+                        </Button>
+                        <Button
+                          onClick={deselectAllRows}
+                          className="bg-gray-600 text-white"
+                        >
+                          Deselect All
+                        </Button>
+                        <Button
+                          onClick={handleRemoveSelectedTeas}
+                          className="bg-red-600 text-white"
+                          disabled={selectedRowCount === 0}
+                        >
+                          Remove Selected Teas ({selectedRowCount})
+                        </Button>
+                        <Button
+                          className="bg-green-600 text-white"
+                          onClick={addTeaBtnClick}
+                        >
+                          Add Tea
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardHeader>

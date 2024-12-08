@@ -1,45 +1,76 @@
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import { Badge, badgeVariants } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
+import { Badge, badgeVariants } from '@/components/ui/badge'
 import { BlendInfo, StockLot } from './types'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from './ui/dropdown-menu'
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 
 interface BlendInformationSectionProps {
-    blendInfo: BlendInfo;
-    onBlendInfoChange: (info: Partial<BlendInfo>) => void;
-    onGenerateBlendSheet: () => void;
-    onSaveTableData: () => void;
-    lotDetails: StockLot | undefined;
+  blendInfo: BlendInfo
+  onBlendInfoChange: (info: Partial<BlendInfo>) => void
+  onGenerateBlendSheet: () => void
+  onSaveTableData: () => void
+  lotDetails: StockLot | undefined
 }
 
-const LabelField: React.FC<{ label: string; value: string | number }> = ({ label, value }) => {
-  const isStatus = label.toLowerCase() === 'status';
-  
+const LabelField: React.FC<{ label: string; value: string | number }> = ({
+  label,
+  value,
+}) => {
+  const isStatus = label.toLowerCase() === 'status'
+
   return (
-    <div className="bg-slate-50 p-2 rounded">
-      <div className="text-xs text-slate-600 uppercase mb-1">{label}</div>
+    <div className="rounded bg-slate-50 p-2">
+      <div className="mb-1 text-xs uppercase text-slate-600">{label}</div>
       {isStatus ? (
         <div>
-          <Badge 
-            variant={value.toString().toLowerCase() === 'active' ? 'default' : 
-                    value.toString().toLowerCase() === 'pending' ? 'secondary' :
-                    value.toString().toLowerCase() === 'completed' ? 'outline' : 'destructive'}>
-            {value.toString().charAt(0).toUpperCase() + value.toString().slice(1).toLowerCase()}
+          <Badge
+            variant={
+              value.toString().toLowerCase() === 'active'
+                ? 'default'
+                : value.toString().toLowerCase() === 'pending'
+                  ? 'secondary'
+                  : value.toString().toLowerCase() === 'completed'
+                    ? 'outline'
+                    : 'destructive'
+            }
+          >
+            {value.toString().charAt(0).toUpperCase() +
+              value.toString().slice(1).toLowerCase()}
           </Badge>
         </div>
       ) : (
         <div className="text-sm font-medium">{value || '-'}</div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export const FormField: React.FC<{ label: string; value: string | number; onChange?: (value: string) => void; type?: string; readOnly?: boolean }> = ({label, value, onChange, type = "text", readOnly = false}) => (
+export const FormField: React.FC<{
+  label: string
+  value: string | number
+  onChange?: (value: string) => void
+  type?: string
+  readOnly?: boolean
+}> = ({ label, value, onChange, type = 'text', readOnly = false }) => (
   <div className="space-y-2">
     <Label htmlFor={label}>{label}</Label>
     <Input
@@ -48,7 +79,7 @@ export const FormField: React.FC<{ label: string; value: string | number; onChan
       value={value}
       onChange={(e) => onChange && onChange(e.target.value)}
       readOnly={readOnly}
-      className={readOnly ? "bg-gray-100 dark:bg-background" : ""}
+      className={readOnly ? 'bg-gray-100 dark:bg-background' : ''}
     />
   </div>
 )
@@ -58,52 +89,116 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   onBlendInfoChange,
   onGenerateBlendSheet,
   onSaveTableData,
-  lotDetails
+  lotDetails,
 }) => {
   return (
-    <div className="grid grid-cols-12 gap-4 bg-slate-100 p-4 rounded-lg mb-4">
-      <div className="col-span-4 bg-white p-4 rounded-lg shadow-sm">
-        <div className="text-sm font-semibold mb-3 pb-2 border-b">Blend Details</div>
+    <div className="mb-4 grid grid-cols-12 gap-4 rounded-lg bg-slate-100 p-4">
+      <div className="col-span-4 rounded-lg bg-white p-4 shadow-sm">
+        <div className="mb-3 border-b pb-2 text-sm font-semibold">
+          Blend Details
+        </div>
         <div className="grid grid-cols-2 gap-3">
-          <LabelField label="Date" value={blendInfo.date} />
+          <LabelField label="Date" value={blendInfo.blend_date} />
           <LabelField label="Blend Standard" value={blendInfo.blendStandard} />
-          <LabelField label="Prop Sample (gms)" value={blendInfo.propSample} />
+
+          <div className="rounded bg-slate-50 p-2">
+            <div className="mb-1 text-xs uppercase text-slate-600">
+              Prop Sample (gms)
+            </div>
+            <Input
+              value={blendInfo.propSample}
+              onChange={(e) =>
+                onBlendInfoChange({
+                  propSample: parseFloat(e.target.value) || 0,
+                })
+              }
+              disabled={blendInfo.status.toLowerCase() === 'done'}
+            />
+          </div>
           <LabelField label="Required Date" value={blendInfo.requiredDate} />
-          <LabelField label="Packaging Type" value={blendInfo.packagingType} />
+
+          <div className="rounded bg-slate-50 p-2">
+            <div className="mb-1 text-xs uppercase text-slate-600">
+              Packaging Type
+            </div>
+            <Select
+              value={blendInfo.packagingType}
+              onValueChange={(value) =>
+                onBlendInfoChange({ packagingType: value })
+              }
+              disabled={blendInfo.status.toLowerCase() === 'done'}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select packaging type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bulk">Bulk</SelectItem>
+                <SelectItem value="bags">Bags</SelectItem>
+                <SelectItem value="carton">Carton</SelectItem>
+                <SelectItem value="container">Container</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <LabelField label="Status" value={blendInfo.status} />
         </div>
       </div>
 
-      <div className="col-span-5 bg-white p-4 rounded-lg shadow-sm">
-        <div className="text-sm font-semibold mb-3 pb-2 border-b">Cost Analysis</div>
+      <div className="col-span-5 rounded-lg bg-white p-4 shadow-sm">
+        <div className="mb-3 border-b pb-2 text-sm font-semibold">
+          Cost Analysis
+        </div>
         <div className="grid grid-cols-2 gap-3">
-          <LabelField label="Total Allocated" value={blendInfo.totalAllocated} />
+          <LabelField
+            label="Total Allocated"
+            value={blendInfo.totalAllocated}
+          />
           <LabelField label="Average Price" value={blendInfo.averagePrice} />
-          <LabelField label="Avg Cost to Allocate" value={blendInfo.averageCostToAllocate} />
-          <LabelField label="Balance to Allocate" value={blendInfo.balanceToAllocate} />
+          <LabelField
+            label="Avg Cost to Allocate"
+            value={blendInfo.averageCostToAllocate}
+          />
+          <LabelField
+            label="Balance to Allocate"
+            value={blendInfo.balanceToAllocate}
+          />
           <LabelField label="Tea Cost" value={blendInfo.teaCost} />
-          {blendInfo.export_quantity !== undefined &&
-            <LabelField label="Export Quantity" value={blendInfo.export_quantity?.toString()} />
-          }
+          {blendInfo.export_quantity !== undefined && (
+            <LabelField
+              label="Export Quantity"
+              value={blendInfo.export_quantity?.toString()}
+            />
+          )}
         </div>
       </div>
 
-      <div className="col-span-3 bg-white p-4 rounded-lg shadow-sm">
-        <div className="text-sm font-semibold mb-3 pb-2 border-b">Actions</div>
+      <div className="col-span-3 rounded-lg bg-white p-4 shadow-sm">
+        <div className="mb-3 border-b pb-2 text-sm font-semibold">Actions</div>
         <div className="space-y-2">
-          <Button variant="outline" onClick={onSaveTableData}
-            className="w-full justify-start bg-blue-50 hover:bg-blue-100 text-blue-700">
+          {/* <Button
+            variant="outline"
+            onClick={onSaveTableData}
+            className="w-full justify-start bg-blue-50 text-blue-700 hover:bg-blue-100"
+          >
             Save data
-          </Button>
-          <Button variant="outline" onClick={onGenerateBlendSheet}
-            className="w-full justify-start bg-green-50 hover:bg-green-100 text-green-700">
+          </Button> */}
+          <Button
+            variant="outline"
+            onClick={onGenerateBlendSheet}
+            className="w-full justify-start bg-green-50 text-green-700 hover:bg-green-100"
+          >
             Generate Blend Sheet
           </Button>
-          
+          <Button
+            variant="outline"
+            onClick={onGenerateBlendSheet}
+            className="w-full justify-start bg-orange-50 text-orange-600 hover:bg-orange-100"
+          >
+            Reset
+          </Button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BlendInformationSection;
+export default BlendInformationSection
