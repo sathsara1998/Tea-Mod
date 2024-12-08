@@ -18,6 +18,7 @@ export default function RootLayout({
 }) {
   const pathname = usePathname()
   const [isSnowfallEnabled, setIsSnowfallEnabled] = useState(true)
+  const isTestEnvironment = process.env.NEXT_PUBLIC_API_BASE_URL === 'https://tt-dev-staging.odoo.com/api'
 
   const handleSnowfallToggle = (enabled: boolean) => {
     setIsSnowfallEnabled(enabled)
@@ -26,8 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={GeistSans.className}>
       <body className="text-foreground">
+        {isTestEnvironment && (
+          <div className="w-full bg-orange-600 text-white text-center py-2 font-medium">
+            Connected to Staging Instance : tt-dev-staging.odoo.com
+          </div>
+        )}
         {isSnowfallEnabled && <Snowfall snowflakeCount={50} />}
-
+        
         <NextTopLoader showSpinner={false} height={2} color="#2acf80" />
         <ThemeProvider
           attribute="class"
