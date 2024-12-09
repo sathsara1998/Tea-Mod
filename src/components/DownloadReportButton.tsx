@@ -115,10 +115,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             'Inv No': row.invoice_no || '',
             'Lot No': row.lot_no || '',
             Grade: row.grade || '',
-            'Purchased Price': unitCost,
+            'Purchased Price': unitCost.toFixed(2),
             'Quantity (Kg)': quantity,
             'Allocated Packages': row.quantity_packages || 0,
-            'Value (Rs)': parseFloat(value.toFixed(2)),
+            'Value (Rs)': value.toFixed(2),
             'Last Ammend Date': formatDate(row.last_ammedned_date),
             'Prop Sample': row.prop_sample_in_grams,
             'Purchased Date': formatDate(row.purchased_date),
@@ -253,7 +253,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         0,
       )
       const totalValue = tableData.reduce(
-        (sum, row) => sum + (row['Value (Rs)'] || 0),
+        (sum, row) => sum + parseFloat(row['Value (Rs)'].toString()),
         0,
       )
 
@@ -522,7 +522,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
     // Calculate the grand total of the blend
     const grandTotal =
-      tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
+      tableData.length > 0
+        ? parseFloat(tableData[tableData.length - 1]['Value (Rs)'].toString())
+        : 0
 
     // Calculate the blend balance
     const blendBalance =
