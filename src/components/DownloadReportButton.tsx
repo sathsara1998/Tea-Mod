@@ -21,10 +21,9 @@ interface TableRowData {
   'Net Weight': number
   'Lot No': string
   Grade: string
-
   'Quantity (Kg)': number
   'Allocated Packages': number
-  'Value (Rs)': number
+  'Value (Rs)': string
 }
 
 interface DownloadReportButtonProps {
@@ -98,6 +97,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       const formatRcd = (rcd: boolean) => {
         return rcd === true ? 'Y' : 'N'
       }
+      const formatValueWithCommas = (value: number) => {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      }
       const tableData: TableRowData[] = tabulatorRef.current
         .getData()
         .map((row: any) => {
@@ -115,10 +117,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             'Inv No': row.invoice_no || '',
             'Lot No': row.lot_no || '',
             Grade: row.grade || '',
-            'Purchased Price': unitCost.toFixed(2),
+            'Purchased Price': formatValueWithCommas(unitCost.toFixed(2)),
             'Quantity (Kg)': quantity,
             'Allocated Packages': row.quantity_packages || 0,
-            'Value (Rs)': value.toFixed(2),
+            'Value (Rs)': formatValueWithCommas(parseFloat(value.toFixed(2))),
             'Last Ammend Date': formatDate(row.last_ammedned_date),
             'Prop Sample': row.prop_sample_in_grams,
             'Purchased Date': formatDate(row.purchased_date),
@@ -253,7 +255,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         0,
       )
       const totalValue = tableData.reduce(
-        (sum, row) => sum + parseFloat(row['Value (Rs)'].toString()),
+        (sum, row) => sum + parseFloat(row['Value (Rs)'].replace(/,/g, '')),
         0,
       )
 
@@ -268,7 +270,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         'Allocated Packages': totalPackages,
         'Net Weight': parseFloat(totalWeight.toFixed(2)),
         'Quantity (Kg)': parseFloat(totalKgs.toFixed(2)),
-        'Value (Rs)': parseFloat(totalValue.toFixed(2)),
+        'Value (Rs)': formatValueWithCommas(parseFloat(totalValue.toFixed(2))),
       }
 
       tableData.push(totalsRow)
@@ -335,8 +337,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const rightColumnData = [
             {
               label: 'Blend Average',
-              value: blendInfo.averagePrice.toFixed(3)
-
+              value: blendInfo.averagePrice.toFixed(3),
             },
             { label: 'RT No', value: blendInfo.rtNo },
             { label: 'Status', value: blendInfo.status },
@@ -433,6 +434,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         value: string | number,
         y: number,
       ) => {
+        const totalValue = tableData.reduce(
+          (sum, row) => sum + parseFloat(row['Value (Rs)'].replace(/,/g, '')),
+          0,
+        )
         doc.text(label, boxStartX, y, { align: 'left' })
         doc.text(value.toString(), boxEndX - 85, y, { align: 'right' })
       }
@@ -450,7 +455,13 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       drawLine(finalY + 40)
 
       // Contract Qty section
-      drawRowText('Contract Qty', '212123', finalY + 55)
+      drawRowText(
+        'Contract Qty',
+        parseFloat(blendInfo?.export_quantity?.toLocaleString() || '0').toFixed(
+          2,
+        ),
+        finalY + 55,
+      )
       drawLine(finalY + 60)
 
       // Blend Balance section
@@ -470,20 +481,20 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       drawRowText('Straight Line Avg', straightLineAvg.toFixed(2), finalY + 115)
       drawLine(finalY + 120)
 
-      let contractStartY = finalY + 140
-      ContractTable(doc, columns2, data, contractStartY)
-      const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
+      // let contractStartY = finalY + 140
+      // ContractTable(doc, columns2, data, contractStartY)
+      // const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
 
-      const spaceNeededForSignatures = 200
-      const currentY = summaryTableFinalY
-      const remainingSpace = pageHeight - currentY
+      // const spaceNeededForSignatures = 200
+      // const currentY = summaryTableFinalY
+      // const remainingSpace = pageHeight - currentY
 
-      if (remainingSpace < spaceNeededForSignatures) {
-        doc.addPage()
-        finalSignatures(doc, 50, 40)
-      } else {
-        finalSignatures(doc, currentY, 40)
-      }
+      // if (remainingSpace < spaceNeededForSignatures) {
+      //   doc.addPage()
+      //   finalSignatures(doc, 50, 40)
+      // } else {
+      //   finalSignatures(doc, currentY, 40)
+      // }
 
       const totalPages = doc.getNumberOfPages()
       for (let i = 1; i <= totalPages; i++) {
@@ -519,11 +530,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         columns.reduce((sum, col) => sum + (col.width || 0), 0),
     }))
 
-    // Calculate the grand total of the blend
-    const grandTotal =
-      tableData.length > 0
-        ? parseFloat(tableData[tableData.length - 1]['Value (Rs)'].toString())
-        : 0
+    // Calculate the total value
+    const grandTotal = tableData.reduce(
+      (sum, row) =>
+        sum + (parseFloat(row['Value (Rs)'].replace(/,/g, '')) || 0),
+      0,
+    )
 
     // Calculate the blend balance
     const blendBalance =
