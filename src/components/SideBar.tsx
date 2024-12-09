@@ -8,6 +8,7 @@ import {
   LogOut,
   FileChartColumn,
   Snowflake,
+  LeafIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -58,6 +59,7 @@ const Sidebar: React.FC<{
     { name: 'Purchasing', icon: <ShoppingCart />, route: '/purchase' },
     { name: 'Blend Creation', icon: <FileText />, route: '/create' },
     { name: 'Allocation', icon: <ListCheck />, route: '/allocate' },
+    { name: 'Tea', icon: <LeafIcon />, route: '/tea-info' },
     {
       name: 'Blends',
       icon: <FileChartColumn />,

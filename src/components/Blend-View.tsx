@@ -12,7 +12,7 @@ const BlendView = () => {
   const { getBlends } = useApiMethods()
   const tableRef = useRef<Tabulator | null>(null)
   const tableContainerRef = useRef<HTMLDivElement | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -36,6 +36,7 @@ const BlendView = () => {
                 field: 'name',
                 sorter: 'string',
                 headerFilter: true,
+                headerFilterPlaceholder: 'Find By Blend Name',
                 widthGrow: 2,
                 headerSort: false,
               },
