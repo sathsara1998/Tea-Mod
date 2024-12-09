@@ -406,80 +406,81 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         width: col.width * scaleFactor,
       }))
 
-      const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
-        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      // const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
+      BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
 
-      let finalY = (doc as any).autoTable.previous.finalY || 30
-      const requiredSpace = 120
-      if (finalY + requiredSpace > pageHeight - margin) {
-        doc.addPage()
-        finalY = margin + 20
-      }
+      // let finalY = (doc as any).autoTable.previous.finalY || 30
+      // const requiredSpace = 120
+      // if (finalY + requiredSpace > pageHeight - margin) {
+      //   doc.addPage()
+      //   finalY = margin + 20
+      // }
 
-      doc.setFontSize(8)
-      doc.setLineWidth(0.5)
-      // Draw summary box
-      const boxStartX = pageWidth - margin - 380
-      const boxEndX = pageWidth - margin - 65
-      const lineSpacing = 25
+      // doc.setFontSize(8)
+      // doc.setLineWidth(0.5)
+      // // Draw summary box
+      // const boxStartX = pageWidth - margin - 380
+      // const boxEndX = pageWidth - margin - 65
+      // const lineSpacing = 25
 
-      // Helper function for consistent line drawing
-      const drawLine = (y: number, startX = boxStartX, endX = boxEndX) => {
-        doc.line(startX, y, endX, y)
-      }
+      // // Helper function for consistent line drawing
+      // const drawLine = (y: number, startX = boxStartX, endX = boxEndX) => {
+      //   doc.line(startX, y, endX, y)
+      // }
 
-      // Helper function for consistent text alignment
-      const drawRowText = (
-        label: string,
-        value: string | number,
-        y: number,
-      ) => {
-        const totalValue = tableData.reduce(
-          (sum, row) => sum + parseFloat(row['Value (Rs)'].replace(/,/g, '')),
-          0,
-        )
-        doc.text(label, boxStartX, y, { align: 'left' })
-        doc.text(value.toString(), boxEndX - 85, y, { align: 'right' })
-      }
+      // // Helper function for consistent text alignment
+      // const drawRowText = (
+      //   label: string,
+      //   value: string | number,
+      //   y: number,
+      // ) => {
+      //   const totalValue = tableData.reduce(
+      //     (sum, row) => sum + parseFloat(row['Value (Rs)'].replace(/,/g, '')),
+      //     0,
+      //   )
+      //   doc.text(label, boxStartX, y, { align: 'left' })
+      //   doc.text(value.toString(), boxEndX - 85, y, { align: 'right' })
+      // }
 
-      doc.setFont(font, 'bold')
-      doc.setFontSize(8)
+      // doc.setFont(font, 'bold')
+      // doc.setFontSize(8)
 
-      // Grand Total section
-      drawLine(finalY + 20, boxStartX + 140, boxEndX)
-      drawRowText(
-        'Grand Total of the Blend',
-        grandTotal.toFixed(2),
-        finalY + 35,
-      )
-      drawLine(finalY + 40)
+      // // Grand Total section
+      // drawLine(finalY + 20, boxStartX + 140, boxEndX)
+      // drawRowText(
+      //   'Grand Total of the Blend',
+      //   grandTotal.toFixed(2),
+      //   finalY + 35,
+      // )
+      // drawLine(finalY + 40)
 
-      // Contract Qty section
-      drawRowText(
-        'Contract Qty',
-        parseFloat(blendInfo?.export_quantity?.toLocaleString() || '0').toFixed(
-          2,
-        ),
-        finalY + 55,
-      )
-      drawLine(finalY + 60)
+      // // Contract Qty section
+      // drawRowText(
+      //   'Contract Qty',
+      //   parseFloat(blendInfo?.export_quantity?.toLocaleString() || '0').toFixed(
+      //     2,
+      //   ),
+      //   finalY + 55,
+      // )
+      // drawLine(finalY + 60)
 
-      // Blend Balance section
-      const calculatedBlendBalance = grandTotal - 212123
-      drawRowText(
-        'Blend Balance',
-        calculatedBlendBalance.toFixed(2),
-        finalY + 75,
-      )
-      drawLine(finalY + 80)
+      // // Blend Balance section
+      // const calculatedBlendBalance =
+      //   grandTotal - parseFloat((blendInfo?.export_quantity || 0).toString())
+      // drawRowText(
+      //   'Blend Balance',
+      //   calculatedBlendBalance.toFixed(2),
+      //   finalY + 75,
+      // )
+      // drawLine(finalY + 80)
 
-      // Packing Average section
-      drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
-      drawLine(finalY + 100)
+      // // Packing Average section
+      // drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
+      // drawLine(finalY + 100)
 
-      // Straight Line Average section
-      drawRowText('Straight Line Avg', straightLineAvg.toFixed(2), finalY + 115)
-      drawLine(finalY + 120)
+      // // Straight Line Average section
+      // drawRowText('Straight Line Avg', straightLineAvg.toFixed(2), finalY + 115)
+      // drawLine(finalY + 120)
 
       // let contractStartY = finalY + 140
       // ContractTable(doc, columns2, data, contractStartY)
@@ -532,11 +533,11 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
     // Calculate the total value
     const grandTotal = tableData.reduce(
-      (sum, row) =>
+      (sum = 0, row) =>
         sum + (parseFloat(row['Value (Rs)'].replace(/,/g, '')) || 0),
       0,
     )
-
+    console.log(grandTotal)
     // Calculate the blend balance
     const blendBalance =
       tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
