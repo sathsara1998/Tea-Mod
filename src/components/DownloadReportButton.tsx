@@ -541,7 +541,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       ),
       theme: 'plain', // Clean layout
 
-      startY: 150,
+      startY: 170,
       tableWidth: pageWidth - 3 * margin,
       margin: { left: margin, right: margin },
 
