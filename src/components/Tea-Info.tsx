@@ -1,16 +1,20 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator.min.css'
 import { TeaAllocation } from '@/components/types'
 import { useToast } from '@/components/ui/use-toast'
 import { useApiMethods } from '@/hooks/useApiMethods'
+import TeaViewDialog from './TeaViewDialog'
 
 const TeaInfoTable: React.FC = () => {
   const tableRef = React.useRef<Tabulator | null>(null)
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+
   const { toast } = useToast()
   const apiMethods = useApiMethods()
 
@@ -147,7 +151,13 @@ const TeaInfoTable: React.FC = () => {
               element.style.borderBottom = ''
             },
           })
-
+          tableRef.current?.on('cellClick', (e, cell) => {
+            if (cell.getColumn().getField() === 'box_number') {
+              // Only trigger for the "name" column
+              setCellData(cell.getValue())
+              setIsTeaDialogOpen(true)
+            }
+          })
           const headerElement = tableContainerRef.current.querySelector(
             '.tabulator-header',
           ) as HTMLElement
@@ -181,7 +191,14 @@ const TeaInfoTable: React.FC = () => {
   }, [apiMethods.getAllAuctionData, toast])
 
   return (
-    <div ref={tableContainerRef} className="tea-info-table h-full w-full" />
+    <>
+      <TeaViewDialog
+        isTeaDialogOpen={isTeaDialogOpen}
+        setIsTeaDialogOpen={setIsTeaDialogOpen}
+        cellData={cellData}
+      />
+      <div ref={tableContainerRef} className="tea-info-table h-full w-full" />
+    </>
   )
 }
 
