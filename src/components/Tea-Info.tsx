@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import 'tabulator-tables/dist/css/tabulator.min.css'
+import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 import { TeaAllocation } from '@/components/types'
 import { useToast } from '@/components/ui/use-toast'
 import { useApiMethods } from '@/hooks/useApiMethods'
@@ -42,6 +42,7 @@ const TeaInfoTable: React.FC = () => {
                 headerFilter: true,
                 frozen: true,
                 widthGrow: 1,
+                headerFilterPlaceholder: 'Find By Box Number',
               },
               {
                 title: 'Standard',
@@ -49,13 +50,16 @@ const TeaInfoTable: React.FC = () => {
                 headerFilter: true,
                 frozen: true,
                 widthGrow: 1,
+                headerFilterPlaceholder: 'Find By Standard',
               },
               {
                 title: 'Blend Standard ID',
                 field: 'blend_standard_id',
                 headerFilter: true,
                 frozen: true,
+                hozAlign: 'right',
                 widthGrow: 1,
+                headerFilterPlaceholder: 'Find By Blend Standard ID',
               },
 
               {
@@ -69,6 +73,7 @@ const TeaInfoTable: React.FC = () => {
                 title: 'Free Packages',
                 field: 'free_packages',
                 headerFilter: true,
+                hozAlign: 'right',
                 widthGrow: 0.5,
               },
               {
@@ -76,6 +81,7 @@ const TeaInfoTable: React.FC = () => {
                 field: 'free_quantity',
                 headerFilter: true,
                 widthGrow: 0.5,
+                hozAlign: 'right',
               },
               // {
               //   title: 'Status',
@@ -117,6 +123,7 @@ const TeaInfoTable: React.FC = () => {
                 field: 'lot_no',
                 headerFilter: true,
                 widthGrow: 1,
+                hozAlign: 'right',
               },
               {
                 title: 'Category',

@@ -407,27 +407,44 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         width: col.width * scaleFactor,
       }))
 
-      // const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
-      // BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
-      const isLineTypeS = tableData.some((row) => row['Line Type'] === 'B')
+      // Check if we have both 'B' and 'S' line types
+      const hasTypeB = tableData.some((row) => row['Line Type'] === 'B')
+      const hasTypeS = tableData.some((row) => row['Line Type'] === 'S')
 
-      if (isLineTypeS) {
-        // Generate standard Blend Table
-        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
-      } else {
-        // Create Blend Balance Information table
+      // Filter data for each type
+      const typeB_Data = tableData.filter((row) => row['Line Type'] === 'B')
+      const typeS_Data = tableData.filter((row) => row['Line Type'] === 'S')
+
+      let currentY = 170
+
+      // Generate Blend Balance table if type 'B' exists
+      if (hasTypeB) {
+        const bTotalWeight = typeB_Data.reduce(
+          (sum, row) => sum + (row['Net Weight'] || 0),
+          0,
+        )
+        const bTotalValue = typeB_Data.reduce(
+          (sum, row) =>
+            sum + parseFloat((row['Value (Rs)'] || '0').replace(/,/g, '')),
+          0,
+        )
+        const bTotalKgs = typeB_Data.reduce(
+          (sum, row) => sum + (row['Quantity (Kg)'] || 0),
+          0,
+        )
+
         doc.autoTable({
           head: [['Description', 'Weight (Kg)', 'Value (Rs)']],
           body: [
             [
               'Initial Blend Balance',
-              totalWeight.toFixed(2),
-              formatValueWithCommas(totalValue),
+              bTotalWeight.toFixed(2),
+              formatValueWithCommas(bTotalValue),
             ],
-            ['Current Blend Weight', totalKgs.toFixed(2), ''],
-            ['Balance Weight', (totalWeight - totalKgs).toFixed(2), ''],
+            ['Current Blend Weight', bTotalKgs.toFixed(2), ''],
+            ['Balance Weight', (bTotalWeight - bTotalKgs).toFixed(2), ''],
           ],
-          startY: 170,
+          startY: currentY,
           theme: 'plain',
           styles: {
             fontSize: 8,
@@ -444,6 +461,22 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             2: { cellWidth: 100, halign: 'right' },
           },
         })
+
+        currentY = (doc as any).autoTable.previous.finalY + 20
+      }
+
+      // Generate standard Blend Table if type 'S' exists
+      if (hasTypeS) {
+        const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
+          BlendTable(
+            doc,
+            tableData,
+            scaledColumns,
+            pageWidth,
+            margin,
+            pageHeight,
+          )
+        currentY = (doc as any).autoTable.previous.finalY + 20
       }
       // let finalY = (doc as any).autoTable.previous.finalY || 30
       // const requiredSpace = 120
