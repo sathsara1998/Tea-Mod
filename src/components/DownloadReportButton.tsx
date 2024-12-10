@@ -24,6 +24,7 @@ interface TableRowData {
   'Quantity (Kg)': number
   'Allocated Packages': number
   'Value (Rs)': string
+  'Line Type'?: string
 }
 
 interface DownloadReportButtonProps {
@@ -47,7 +48,6 @@ interface DownloadReportButtonProps {
 const getHeadStyles = () => ({
   textColor: [0, 0, 0] as [number, number, number],
   fontSize: 9,
-  fontStyle: 'bold' as const,
   halign: 'center' as const, // Center-aligned headers
   valign: 'middle' as const, // Vertically centered
   cellPadding: { top: 6, right: 8, bottom: 6, left: 8 },
@@ -125,6 +125,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             'Prop Sample': row.prop_sample_in_grams,
             'Purchased Date': formatDate(row.purchased_date),
             'Net Weight': row.net_weight,
+            'Line Type': 'S',
           }
         })
 
@@ -407,8 +408,43 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       }))
 
       // const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
-      BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      // BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      const isLineTypeS = tableData.some((row) => row['Line Type'] === 'B')
 
+      if (isLineTypeS) {
+        // Generate standard Blend Table
+        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      } else {
+        // Create Blend Balance Information table
+        doc.autoTable({
+          head: [['Description', 'Weight (Kg)', 'Value (Rs)']],
+          body: [
+            [
+              'Initial Blend Balance',
+              totalWeight.toFixed(2),
+              formatValueWithCommas(totalValue),
+            ],
+            ['Current Blend Weight', totalKgs.toFixed(2), ''],
+            ['Balance Weight', (totalWeight - totalKgs).toFixed(2), ''],
+          ],
+          startY: 170,
+          theme: 'plain',
+          styles: {
+            fontSize: 8,
+            font: font,
+            cellPadding: 5,
+          },
+          headStyles: {
+            ...getHeadStyles(),
+            fontStyle: 'bold',
+          },
+          columnStyles: {
+            0: { cellWidth: 150 },
+            1: { cellWidth: 100, halign: 'right' },
+            2: { cellWidth: 100, halign: 'right' },
+          },
+        })
+      }
       // let finalY = (doc as any).autoTable.previous.finalY || 30
       // const requiredSpace = 120
       // if (finalY + requiredSpace > pageHeight - margin) {
@@ -551,7 +587,9 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     doc.autoTable({
       head: [scaledColumns.map((col) => col.title)],
       body: tableData.map((row) =>
-        scaledColumns.map((col) => row[col.dataKey as keyof TableRowData]),
+        scaledColumns.map(
+          (col) => row[col.dataKey as keyof TableRowData] ?? '',
+        ),
       ),
       theme: 'plain', // Clean layout
 
