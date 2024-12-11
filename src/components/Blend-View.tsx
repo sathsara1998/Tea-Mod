@@ -7,6 +7,7 @@ import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 import { ArrowRight } from 'lucide-react'
 import { useApiMethods } from '@/hooks/useApiMethods'
+import LoadingSpinner from './LoadingSpinner'
 
 const BlendView = () => {
   const { getBlends } = useApiMethods()
@@ -179,7 +180,7 @@ const BlendView = () => {
         <CardTitle>Blend Overview</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading && <div>Loading...</div>}
+        {isLoading && <LoadingSpinner />}
         {error && <div>{error}</div>}
         <div ref={tableContainerRef} />
       </CardContent>

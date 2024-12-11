@@ -51,6 +51,7 @@ import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
 import TeaBlendReportButton from './TeaBlendReportButton'
 import DownloadReportButton from './DownloadReportButton'
 import TeaViewDialog from './TeaViewDialog'
+import LoadingSpinner from './LoadingSpinner'
 
 interface Allocation {
   teaId: string
@@ -90,6 +91,7 @@ export default function AllocationTableView() {
   const [isOpenPlit, setIsOpenPlit] = useState(false)
   const [cellData, setCellData] = useState(null) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const {
     getBlendById,
@@ -444,6 +446,7 @@ export default function AllocationTableView() {
       init_quantity: tea.init_quantity,
 */
   const addSelectedTeasToBlend = (selectedTeas: any[]) => {
+    setIsLoading(true)
     if (selectedBlend && tabulatorRef.current) {
       //* Transform selected teas into the format needed for the allocation table
       const newAllocations: ManufacturingAllocationTableData[] =
@@ -963,6 +966,7 @@ export default function AllocationTableView() {
                 )}
               </CardHeader>
               <CardContent className="w-100">
+                {isLoading && <LoadingSpinner />}
                 <div ref={allocationsTableRef}></div>
               </CardContent>
             </Card>

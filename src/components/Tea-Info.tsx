@@ -6,6 +6,7 @@ import { TeaAllocation } from '@/components/types'
 import { useToast } from '@/components/ui/use-toast'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import TeaViewDialog from './TeaViewDialog'
+import LoadingSpinner from './LoadingSpinner'
 
 const TeaInfoTable: React.FC = () => {
   const tableRef = React.useRef<Tabulator | null>(null)
@@ -199,6 +200,7 @@ const TeaInfoTable: React.FC = () => {
 
   return (
     <>
+      {isLoading && <LoadingSpinner />}
       <TeaViewDialog
         isTeaDialogOpen={isTeaDialogOpen}
         setIsTeaDialogOpen={setIsTeaDialogOpen}
