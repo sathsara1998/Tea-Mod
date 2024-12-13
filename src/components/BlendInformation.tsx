@@ -115,7 +115,20 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               disabled={blendInfo.status.toLowerCase() === 'done'}
             />
           </div>
-          <LabelField label="Required Date" value={blendInfo.requiredDate} />
+          <div className="rounded bg-slate-50 p-2">
+            <div className="mb-1 text-xs uppercase text-slate-600">
+              Required Date
+            </div>
+            <Input
+              type="date"
+              value={blendInfo.requiredDate}
+              onChange={(e) =>
+                onBlendInfoChange({ requiredDate: e.target.value })
+              }
+              min={new Date().toISOString().split('T')[0]}
+              disabled={blendInfo.status.toLowerCase() === 'done'}
+            />
+          </div>
 
           <div className="rounded bg-slate-50 p-2">
             <div className="mb-1 text-xs uppercase text-slate-600">

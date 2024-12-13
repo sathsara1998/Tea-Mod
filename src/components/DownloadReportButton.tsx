@@ -106,25 +106,25 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const quantity = row.quantity_kgs || 0
           const unitCost = row.unit_cost || 0
           const value = quantity * unitCost
-          console.log('Row Data:', {
-            boxNumber: row.box_number,
-            saleCode: row.sale_code,
-            rcd: row.rcd,
-            brokerName: row.broker_name,
-            gardenMark: row.garden_mark,
-            standard: row.standard,
-            invoiceNo: row.invoice_no,
-            lotNo: row.lot_no,
-            grade: row.grade,
-            unitCost: row.unit_cost,
-            quantityKgs: row.quantity_kgs,
-            quantityPackages: row.quantity_packages,
-            value: value,
-            lastAmendDate: row.last_ammedned_date,
-            propSample: row.prop_sample_in_grams,
-            purchasedDate: row.purchased_date,
-            netWeight: row.net_weight,
-          })
+          // console.log('Row Data:', {
+          //   boxNumber: row.box_number,
+          //   saleCode: row.sale_code,
+          //   rcd: row.rcd,
+          //   brokerName: row.broker_name,
+          //   gardenMark: row.garden_mark,
+          //   standard: row.standard,
+          //   invoiceNo: row.invoice_no,
+          //   lotNo: row.lot_no,
+          //   grade: row.grade,
+          //   unitCost: row.unit_cost,
+          //   quantityKgs: row.quantity_kgs,
+          //   quantityPackages: row.quantity_packages,
+          //   value: value,
+          //   lastAmendDate: row.last_ammedned_date,
+          //   propSample: row.prop_sample_in_grams,
+          //   purchasedDate: row.purchased_date,
+          //   netWeight: row.net_weight,
+          // })
           return {
             'Box Number': formatBoxNumber(row.box_number || ''),
             'Sale No': row.sale_code,
@@ -561,7 +561,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       // )
       // drawLine(finalY + 80)
 
-      // // Packing Average section
+      // // Packing Average sectionv 
       // drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
       // drawLine(finalY + 100)
 
