@@ -70,7 +70,7 @@ const Sidebar: React.FC<{
   return (
     <div
       className={cn(
-        'duration-20 flex h-full flex-col bg-gray-800 text-white transition-all ease-in-out',
+        'duration-20 flex h-full flex-col bg-gray-100 text-gray-800 transition-all ease-in-out',
         isExpanded ? 'w-64' : 'w-16',
       )}
       onMouseEnter={() => handleExpand(true)}
@@ -87,10 +87,10 @@ const Sidebar: React.FC<{
                 <Button
                   variant="ghost"
                   className={cn(
-                    'w-full justify-start rounded-lg text-left !text-white transition-colors hover:bg-gray-700',
+                    'w-full justify-start rounded-lg text-left !text-gray-800 transition-colors hover:bg-gray-200',
                     isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
                     'flex items-center',
-                    pathname === item.route && 'bg-gray-700',
+                    pathname === item.route && 'bg-gray-200',
                   )}
                 >
                   <span
@@ -113,7 +113,7 @@ const Sidebar: React.FC<{
               variant="ghost"
               onClick={handleSnowfallToggle}
               className={cn(
-                'w-full justify-start rounded-lg text-left !text-white transition-colors hover:bg-gray-700',
+                'w-full justify-start rounded-lg text-left !text-gray-800 transition-colors hover:bg-gray-200',
                 isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
                 'flex items-center',
               )}
@@ -126,7 +126,7 @@ const Sidebar: React.FC<{
               >
                 <Snowflake
                   className={
-                    isSnowfallEnabled ? 'text-blue-400' : 'text-gray-500'
+                    isSnowfallEnabled ? 'text-blue-400' : 'text-gray-400'
                   }
                 />
               </span>
@@ -154,11 +154,11 @@ const Sidebar: React.FC<{
         </Avatar>
         {isExpanded && (
           <>
-            <span className="mb-2 text-sm text-gray-300">
+            <span className="mb-2 text-sm text-gray-600">
               {user?.email || 'Loading...'}
             </span>
             <Button
-              className="mt-2 flex w-full items-center justify-center rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              className="mt-2 flex w-full items-center justify-center rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
               onClick={handleSignOut}
             >
               <LogOut className="mr-2" size={16} />
