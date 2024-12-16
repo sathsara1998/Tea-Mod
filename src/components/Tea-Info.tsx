@@ -15,7 +15,8 @@ import {
   CardTitle,
 } from './ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import StraightLineTable from './UtilizationOf StraightLine'
+
+import BlendGainTable from './UtilizationTables'
 
 const TeaInfoTable: React.FC = () => {
   // To store data from the clicked cell
@@ -23,7 +24,7 @@ const TeaInfoTable: React.FC = () => {
 
   const { toast } = useToast()
   const apiMethods = useApiMethods()
-
+  const value1: string = 'blend_gain'
   return (
     <>
       <Card>
@@ -55,13 +56,13 @@ const TeaInfoTable: React.FC = () => {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="straightline">
-              <StraightLineTable />
+              <BlendGainTable value={'straight_line'} />
             </TabsContent>
             <TabsContent value="blendbalance">
-              Blend Balance Data should be here
+              <BlendGainTable value={'blend_balance'} />
             </TabsContent>
             <TabsContent value="blendgain">
-              Blend Gain Data should be here
+              <BlendGainTable value={'blend_gain'} />
             </TabsContent>
           </Tabs>
         </CardContent>

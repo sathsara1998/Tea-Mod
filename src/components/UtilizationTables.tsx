@@ -6,7 +6,11 @@ import { useApiMethods } from '@/hooks/useApiMethods'
 import LoadingSpinner from './LoadingSpinner'
 import TeaViewDialog from './TeaViewDialog'
 
-function StraightLineTable() {
+type BlendGainTableProps = {
+  value: string
+}
+
+function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
   const tableRef = React.useRef<Tabulator | null>(null)
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -21,16 +25,19 @@ function StraightLineTable() {
       try {
         setIsLoading(true)
         const data = await apiMethods.getAllAuctionData()
-        console.log(data)
+        const straightLineData = data.filter(
+          (item: { type: string }) => item.type === value,
+        )
 
         if (tableContainerRef.current && !tableRef.current) {
           tableRef.current = new Tabulator(tableContainerRef.current, {
             height: 'auto',
             layout: 'fitData', // Changed to fitData to fit content
-            data,
+            data: straightLineData,
             // Changed to hide to prevent collapse
             pagination: true,
             paginationSize: 20,
+            groupBy: 'type',
             scrollToRowIfVisible: false,
             layoutColumnsOnNewData: true, // Adjusts columns based on new data
             columns: [
@@ -50,15 +57,6 @@ function StraightLineTable() {
                 widthGrow: 1,
                 headerFilterPlaceholder: 'Find By Standard',
               },
-              {
-                title: 'Blend Standard ID',
-                field: 'blend_standard_id',
-                headerFilter: true,
-                frozen: true,
-                hozAlign: 'right',
-                widthGrow: 1,
-                headerFilterPlaceholder: 'Find By Blend Standard ID',
-              },
 
               {
                 title: 'Net Weight',
@@ -66,6 +64,7 @@ function StraightLineTable() {
                 hozAlign: 'right',
                 headerFilter: true,
                 widthGrow: 1,
+                headerFilterPlaceholder: 'Find By NetWieght',
               },
               {
                 title: 'Free Packages',
@@ -90,6 +89,12 @@ function StraightLineTable() {
               {
                 title: 'Garden Mark',
                 field: 'garden_mark',
+                headerFilter: true,
+                widthGrow: 1,
+              },
+              {
+                title: 'Type',
+                field: 'type',
                 headerFilter: true,
                 widthGrow: 1,
               },
@@ -208,4 +213,4 @@ function StraightLineTable() {
   )
 }
 
-export default StraightLineTable
+export default BlendGainTable

@@ -143,7 +143,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             'Prop Sample': row.prop_sample_in_grams,
             'Purchased Date': formatDate(row.purchased_date),
             'Net Weight': row.net_weight,
-            'Line Type': 'B',
+            'Line Type': row.type,
           }
         })
 
@@ -424,18 +424,26 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         ...col,
         width: col.width * scaleFactor,
       }))
+      const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
+        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+
+      // Get the Y position after the blend table
+      let currentY = (doc as any).autoTable.previous.finalY + 20
 
       // Check if we have both 'B' and 'S' line types
-      const hasTypeB = tableData.some((row) => row['Line Type'] === 'B')
-      const hasTypeS = tableData.some((row) => row['Line Type'] === 'S')
+      const hasTypeB = tableData.some(
+        (row) => row['Line Type'] === 'blend_balance',
+      )
+      const hasTypeS = tableData.some(
+        (row) => row['Line Type'] === 'straight_line',
+      )
 
       // Filter data for each type
-      const typeB_Data = tableData.filter((row) => row['Line Type'] === 'B')
-      const typeS_Data = tableData.filter((row) => row['Line Type'] === 'S')
+      const typeB_Data = tableData.filter(
+        (row) => row['Line Type'] === 'blend_balance',
+      )
 
-      let currentY = 170
-
-      // Generate Blend Balance table if type 'B' exists
+      // Generate Initial Blend Balance table after the main blend table
       if (hasTypeB) {
         const bTotalWeight = typeB_Data.reduce(
           (sum, row) => sum + (row['Net Weight'] || 0),
@@ -450,7 +458,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           (sum, row) => sum + (row['Quantity (Kg)'] || 0),
           0,
         )
-
+        doc.text('Blend-Balance', margin, currentY + 15)
         doc.autoTable({
           head: [['Description', 'Weight (Kg)', 'Value (Rs)']],
           body: [
@@ -462,8 +470,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             ['Current Blend Weight', bTotalKgs.toFixed(2), ''],
             ['Balance Weight', (bTotalWeight - bTotalKgs).toFixed(2), ''],
           ],
-          startY: currentY,
+          startY: currentY + 25,
           theme: 'plain',
+          tableWidth: pageWidth - 3 * margin,
+          margin: { left: margin, right: margin },
           styles: {
             fontSize: 8,
             font: font,
@@ -479,22 +489,6 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             2: { cellWidth: 100, halign: 'right' },
           },
         })
-
-        currentY = (doc as any).autoTable.previous.finalY + 20
-      }
-
-      // Generate standard Blend Table if type 'S' exists
-      if (hasTypeS) {
-        const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
-          BlendTable(
-            doc,
-            tableData,
-            scaledColumns,
-            pageWidth,
-            margin,
-            pageHeight,
-          )
-        currentY = (doc as any).autoTable.previous.finalY + 20
       }
       // let finalY = (doc as any).autoTable.previous.finalY || 30
       // const requiredSpace = 120
@@ -561,7 +555,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       // )
       // drawLine(finalY + 80)
 
-      // // Packing Average sectionv 
+      // // Packing Average sectionv
       // drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
       // drawLine(finalY + 100)
 
@@ -624,7 +618,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         sum + (parseFloat(row['Value (Rs)'].replace(/,/g, '')) || 0),
       0,
     )
-    console.log(grandTotal)
+    // console.log(grandTotal)
     // Calculate the blend balance
     const blendBalance =
       tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
@@ -643,7 +637,6 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         ),
       ),
       theme: 'plain', // Clean layout
-
       startY: 170,
       tableWidth: pageWidth - 3 * margin,
       margin: { left: margin, right: margin },
@@ -859,7 +852,10 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     doc.text('________________', margin + 120, footerY - 30)
   }
   return (
-    <Button onClick={generateReport} className="bg-blue-600 text-white">
+    <Button
+      onClick={generateReport}
+      className="mr-2 border border-gray-200 bg-gray-100 text-gray-700 shadow-sm hover:bg-gray-200 sm:w-auto sm:text-base"
+    >
       Download Report
     </Button>
   )
