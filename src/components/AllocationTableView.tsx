@@ -813,22 +813,28 @@ export default function AllocationTableView() {
           <div className="col-span-6">
             <Card className="mb-5">
               <CardHeader className="top-0 z-10 flex flex-row items-center justify-between pb-4">
-                <CardTitle>
-                  Selected Blend
-                  <label className="text-md ms-5">
+                <CardTitle className="flex items-center gap-2">
+                  <span>Selected Blend:</span>
+                  <span className="mr-6 font-medium">
                     {selectedBlend ? selectedBlend.name : '-'}
-                  </label>
+                  </span>
+                  {selectedBlend && (
+                    <span className="flex items-center">
+                      <span className="">Blend Standard:</span>
+                      <span className="ml-1 font-medium text-gray-600">
+                        {blendInfo?.blendStandard}
+                      </span>
+                    </span>
+                  )}
+                  {selectedBlend && (
+                    <span className="ml-4 flex items-center">
+                      <span className="">Customer:</span>
+                      <span className="font-small ml-1 text-gray-600">
+                        {selectedBlend.customer_name}
+                      </span>
+                    </span>
+                  )}
                 </CardTitle>
-                {selectedBlend && (
-                  <label className="text-md">
-                    Blend Standard: {blendInfo?.blendStandard}
-                  </label>
-                )}
-                {selectedBlend && (
-                  <label className="text-md">
-                    Customer Name: {selectedBlend.customer_name}
-                  </label>
-                )}
 
                 {selectedBlend && (
                   <DownloadReportButton
@@ -855,7 +861,7 @@ export default function AllocationTableView() {
                     onOpenChange={setIsBlendDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button className="bg-green-600 text-white">
+                      <Button className="border border-gray-200 bg-gray-100 text-gray-700 shadow-sm hover:bg-gray-200 sm:w-auto sm:text-base">
                         Select Blend
                       </Button>
                     </DialogTrigger>
@@ -892,8 +898,9 @@ export default function AllocationTableView() {
                     {selectedBlend && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button className="bg-blue-600 text-white">
+                          <Button className="inline-flex items-center gap-2 border border-gray-200 bg-gray-50 text-gray-700 shadow-sm hover:bg-gray-100">
                             View Order Lines
+                            <Info className="h-4 w-4" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-80">
