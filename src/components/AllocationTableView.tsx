@@ -203,12 +203,18 @@ export default function AllocationTableView() {
             hozAlign: 'right',
             editable: (cell) => cell.getRow().getData().allocation_type == 'w',
             editor: 'number',
+            editorParams: {
+              min: 1,
+            },
             frozen: true,
           },
           {
             title: 'Packages',
             field: 'quantity_packages',
             editor: 'number',
+            editorParams: {
+              min: 1,
+            },
             formatter: function (cell) {
               const value = cell.getValue()
               const element = cell.getElement()
@@ -463,8 +469,9 @@ export default function AllocationTableView() {
           grade: tea.grade || '',
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
-          quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
-          quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
+          quantity_kgs:
+            tea.allocation_type === 'w' ? tea.net_weight : tea.net_weight,
+          quantity_packages: tea.allocation_type === 'p' ? 1 : 1,
           init_quantity: tea.init_quantity,
           allocation_type: tea.allocation_type,
           package_diff: 0,
@@ -942,31 +949,62 @@ export default function AllocationTableView() {
 
                     {selectedBlend && selectedBlend.status === 'draft' && (
                       <div className="allocationBtns">
-                        <Button
-                          onClick={selectAllRows}
-                          className="bg-blue-600 text-white"
-                        >
-                          Select All
-                        </Button>
-                        <Button
-                          onClick={deselectAllRows}
-                          className="bg-gray-600 text-white"
-                        >
-                          Deselect All
-                        </Button>
-                        <Button
-                          onClick={handleRemoveSelectedTeas}
-                          className="bg-red-600 text-white"
-                          disabled={selectedRowCount === 0}
-                        >
-                          Remove Selected Teas ({selectedRowCount})
-                        </Button>
-                        <Button
-                          className="bg-green-600 text-white"
-                          onClick={addTeaBtnClick}
-                        >
-                          Add Tea
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            onClick={selectAllRows}
+                            variant="outline"
+                            className="inline-flex items-center border border-blue-200 px-3 py-2 text-blue-700 transition-colors hover:bg-blue-50"
+                          >
+                            <span className="mr-1">Select All</span>
+                          </Button>
+
+                          <Button
+                            onClick={deselectAllRows}
+                            variant="outline"
+                            className="inline-flex items-center border border-gray-200 px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                          >
+                            <span className="mr-1">Deselect All</span>
+                          </Button>
+
+                          <Button
+                            onClick={handleRemoveSelectedTeas}
+                            variant="outline"
+                            disabled={selectedRowCount === 0}
+                            className={`inline-flex items-center border px-3 py-2 transition-colors
+                              ${
+                                selectedRowCount === 0
+                                  ? 'cursor-not-allowed border-gray-200 text-gray-400'
+                                  : 'border-red-200 text-red-700 hover:bg-red-50'
+                              }`}
+                          >
+                            <span className="mr-1">Remove Selected</span>
+                            {selectedRowCount > 0 && (
+                              <span className="inline-flex items-center justify-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800">
+                                {selectedRowCount}
+                              </span>
+                            )}
+                          </Button>
+
+                          <Button
+                            onClick={addTeaBtnClick}
+                            className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-green-700"
+                          >
+                            <svg
+                              className="mr-2 h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                              />
+                            </svg>
+                            Add Tea
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
