@@ -38,27 +38,37 @@ const LabelField: React.FC<{ label: string; value: string | number }> = ({
   const isStatus = label.toLowerCase() === 'status'
 
   return (
-    <div className="rounded bg-slate-50 p-2">
-      <div className="mb-1 text-xs uppercase text-slate-600">{label}</div>
+    <div className="rounded bg-slate-50/50 p-2.5 transition-all hover:bg-slate-50">
+      <div className="mb-1.5 text-xs font-medium uppercase text-slate-600">
+        {label}
+      </div>
       {isStatus ? (
         <div>
           <Badge
             variant={
-              value.toString().toLowerCase() === 'active'
-                ? 'default'
-                : value.toString().toLowerCase() === 'pending'
-                  ? 'secondary'
+              value.toString().toLowerCase() === 'draft'
+                ? 'secondary'
+                : value.toString().toLowerCase() === 'confirmed'
+                  ? 'default'
                   : value.toString().toLowerCase() === 'completed'
                     ? 'outline'
                     : 'destructive'
             }
+            className={`
+          ${value.toString().toLowerCase() === 'draft' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}
+          ${value.toString().toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}
+          ${value.toString().toLowerCase() === 'completed' ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}
+          ${value.toString().toLowerCase() === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : ''}
+        `}
           >
             {value.toString().charAt(0).toUpperCase() +
               value.toString().slice(1).toLowerCase()}
           </Badge>
         </div>
       ) : (
-        <div className="text-sm font-medium">{value || '-'}</div>
+        <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          {value || '—'}
+        </div>
       )}
     </div>
   )
@@ -197,14 +207,15 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
           <Button
             variant="outline"
             onClick={onGenerateBlendSheet}
-            className="w-full justify-start bg-green-50 text-green-700 hover:bg-green-100"
+            className="w-full justify-start bg-green-50 text-xs text-green-700 hover:bg-green-100 sm:text-sm"
           >
-            Generate Blend Sheet
+            <span className="hidden sm:inline">Generate Blend Sheet</span>
+            <span className="sm:hidden">Gen. Sheet</span>
           </Button>
           <Button
             variant="outline"
             onClick={onGenerateBlendSheet}
-            className="w-full justify-start bg-orange-50 text-orange-600 hover:bg-orange-100"
+            className="w-full justify-start bg-orange-50 text-xs text-orange-600 hover:bg-orange-100 sm:text-sm"
           >
             Reset
           </Button>
