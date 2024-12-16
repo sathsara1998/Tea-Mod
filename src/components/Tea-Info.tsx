@@ -17,6 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 
 import BlendGainTable from './UtilizationTables'
+import BlendBalanceTable from './UtilizationBlendGainAndBalance'
 
 const TeaInfoTable: React.FC = () => {
   // To store data from the clicked cell
@@ -59,10 +60,10 @@ const TeaInfoTable: React.FC = () => {
               <BlendGainTable value={'straight_line'} />
             </TabsContent>
             <TabsContent value="blendbalance">
-              <BlendGainTable value={'blend_balance'} />
+              <BlendBalanceTable value={'blend_balance'} />
             </TabsContent>
             <TabsContent value="blendgain">
-              <BlendGainTable value={'blend_gain'} />
+              <BlendBalanceTable value={'blend_gain'} />
             </TabsContent>
           </Tabs>
         </CardContent>

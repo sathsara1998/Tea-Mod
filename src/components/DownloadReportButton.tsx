@@ -424,56 +424,66 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         ...col,
         width: col.width * scaleFactor,
       }))
-      const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
-        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+      // First, filter and create separate data sets
+      const blendBalanceData = tableData.filter(
+        (row) => row['Line Type'] === 'blend_balance',
+      )
+      const straightLineData = tableData.filter(
+        (row) => row['Line Type'] !== 'blend_balance',
+      )
 
-      // Get the Y position after the blend table
+      // Generate main table with straight line data first
+      const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
+        BlendTable(
+          doc,
+          straightLineData,
+          scaledColumns,
+          pageWidth,
+          margin,
+          pageHeight,
+        )
+
+      // Get the Y position after the straight line table
       let currentY = (doc as any).autoTable.previous.finalY + 20
 
-      // Check if we have both 'B' and 'S' line types
-      const hasTypeB = tableData.some(
-        (row) => row['Line Type'] === 'blend_balance',
-      )
-      const hasTypeS = tableData.some(
-        (row) => row['Line Type'] === 'straight_line',
-      )
+      // If we have blend balance data, add it to a new page or current page based on space
+      if (blendBalanceData.length > 0) {
+        const remainingSpace = pageHeight - currentY - 50 // 200 is buffer space
+        const estimatedRowHeight = 30 // Approximate height per row
+        const estimatedTableHeight =
+          blendBalanceData.length * estimatedRowHeight + 50 // 50 for header
 
-      // Filter data for each type
-      const typeB_Data = tableData.filter(
-        (row) => row['Line Type'] === 'blend_balance',
-      )
+        // Add new page if not enough space
+        if (estimatedTableHeight > remainingSpace) {
+          doc.addPage()
+          currentY = 50 // Reset Y position on new page
+        }
 
-      // Generate Initial Blend Balance table after the main blend table
-      if (hasTypeB) {
-        const bTotalWeight = typeB_Data.reduce(
-          (sum, row) => sum + (row['Net Weight'] || 0),
-          0,
-        )
-        const bTotalValue = typeB_Data.reduce(
-          (sum, row) =>
-            sum + parseFloat((row['Value (Rs)'] || '0').replace(/,/g, '')),
-          0,
-        )
-        const bTotalKgs = typeB_Data.reduce(
-          (sum, row) => sum + (row['Quantity (Kg)'] || 0),
-          0,
-        )
-        doc.text('Blend-Balance', margin, currentY + 15)
+        const tableColumns = [
+          { title: 'Box Number', dataKey: 'Box Number', width: 60 },
+          { title: 'Purchased Date', dataKey: 'Purchased Date', width: 60 },
+          { title: 'Garden Mark', dataKey: 'Garden Mark', width: 80 },
+          { title: 'Net Qty (Kg)', dataKey: 'Quantity (Kg)', width: 60 },
+          { title: 'Rcd', dataKey: 'Rcd', width: 30 },
+          { title: 'Prop Sample', dataKey: 'Prop Sample', width: 50 },
+          { title: 'Last Ammend Date', dataKey: 'Last Ammend Date', width: 60 },
+        ]
+
+        // Add blend balance table header
+        doc.setFont(font, 'bold')
+        doc.setFontSize(12)
+        doc.text('Blend Balance Details', margin, currentY)
+
         doc.autoTable({
-          head: [['Description', 'Weight (Kg)', 'Value (Rs)']],
-          body: [
-            [
-              'Initial Blend Balance',
-              bTotalWeight.toFixed(2),
-              formatValueWithCommas(bTotalValue),
-            ],
-            ['Current Blend Weight', bTotalKgs.toFixed(2), ''],
-            ['Balance Weight', (bTotalWeight - bTotalKgs).toFixed(2), ''],
-          ],
-          startY: currentY + 25,
+          head: [tableColumns.map((col) => col.title)],
+          body: blendBalanceData.map((row) =>
+            tableColumns.map(
+              (col) => row[col.dataKey as keyof TableRowData] ?? '',
+            ),
+          ),
+          startY: currentY + 20,
           theme: 'plain',
-          tableWidth: pageWidth - 3 * margin,
-          margin: { left: margin, right: margin },
+          margin: { left: margin },
           styles: {
             fontSize: 8,
             font: font,
@@ -484,99 +494,16 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             fontStyle: 'bold',
           },
           columnStyles: {
-            0: { cellWidth: 150 },
-            1: { cellWidth: 100, halign: 'right' },
-            2: { cellWidth: 100, halign: 'right' },
+            0: { cellWidth: 60 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 80 },
+            3: { cellWidth: 60, halign: 'right' },
+            4: { cellWidth: 30, halign: 'center' },
+            5: { cellWidth: 50, halign: 'right' },
+            6: { cellWidth: 60 },
           },
         })
       }
-      // let finalY = (doc as any).autoTable.previous.finalY || 30
-      // const requiredSpace = 120
-      // if (finalY + requiredSpace > pageHeight - margin) {
-      //   doc.addPage()
-      //   finalY = margin + 20
-      // }
-
-      // doc.setFontSize(8)
-      // doc.setLineWidth(0.5)
-      // // Draw summary box
-      // const boxStartX = pageWidth - margin - 380
-      // const boxEndX = pageWidth - margin - 65
-      // const lineSpacing = 25
-
-      // // Helper function for consistent line drawing
-      // const drawLine = (y: number, startX = boxStartX, endX = boxEndX) => {
-      //   doc.line(startX, y, endX, y)
-      // }
-
-      // // Helper function for consistent text alignment
-      // const drawRowText = (
-      //   label: string,
-      //   value: string | number,
-      //   y: number,
-      // ) => {
-      //   const totalValue = tableData.reduce(
-      //     (sum, row) => sum + parseFloat(row['Value (Rs)'].replace(/,/g, '')),
-      //     0,
-      //   )
-      //   doc.text(label, boxStartX, y, { align: 'left' })
-      //   doc.text(value.toString(), boxEndX - 85, y, { align: 'right' })
-      // }
-
-      // doc.setFont(font, 'bold')
-      // doc.setFontSize(8)
-
-      // // Grand Total section
-      // drawLine(finalY + 20, boxStartX + 140, boxEndX)
-      // drawRowText(
-      //   'Grand Total of the Blend',
-      //   grandTotal.toFixed(2),
-      //   finalY + 35,
-      // )
-      // drawLine(finalY + 40)
-
-      // // Contract Qty section
-      // drawRowText(
-      //   'Contract Qty',
-      //   parseFloat(blendInfo?.export_quantity?.toLocaleString() || '0').toFixed(
-      //     2,
-      //   ),
-      //   finalY + 55,
-      // )
-      // drawLine(finalY + 60)
-
-      // // Blend Balance section
-      // const calculatedBlendBalance =
-      //   grandTotal - parseFloat((blendInfo?.export_quantity || 0).toString())
-      // drawRowText(
-      //   'Blend Balance',
-      //   calculatedBlendBalance.toFixed(2),
-      //   finalY + 75,
-      // )
-      // drawLine(finalY + 80)
-
-      // // Packing Average sectionv
-      // drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
-      // drawLine(finalY + 100)
-
-      // // Straight Line Average section
-      // drawRowText('Straight Line Avg', straightLineAvg.toFixed(2), finalY + 115)
-      // drawLine(finalY + 120)
-
-      // let contractStartY = finalY + 140
-      // ContractTable(doc, columns2, data, contractStartY)
-      // const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
-
-      // const spaceNeededForSignatures = 200
-      // const currentY = summaryTableFinalY
-      // const remainingSpace = pageHeight - currentY
-
-      // if (remainingSpace < spaceNeededForSignatures) {
-      //   doc.addPage()
-      //   finalSignatures(doc, 50, 40)
-      // } else {
-      //   finalSignatures(doc, currentY, 40)
-      // }
 
       const totalPages = doc.getNumberOfPages()
       for (let i = 1; i <= totalPages; i++) {
