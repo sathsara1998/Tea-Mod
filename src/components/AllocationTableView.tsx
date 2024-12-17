@@ -207,6 +207,15 @@ export default function AllocationTableView() {
               min: 1,
             },
             frozen: true,
+            cellEditCancelled: function (cell) {
+              const rowData = cell.getRow().getData()
+              if (rowData.allocation_type === 'p' && rowData.net_weight) {
+                const newQuantityKgs = cell.getValue() * rowData.net_weight
+                cell.getRow().update({
+                  quantity_kgs: newQuantityKgs,
+                })
+              }
+            },
           },
           {
             title: 'Packages',
@@ -285,13 +294,24 @@ export default function AllocationTableView() {
       tabulatorRef.current.on('cellEdited', function (cell: any) {
         const row = cell.getRow()
         const rowData = row.getData()
-        updatedRows.current = [...updatedRows.current, rowData.id]
 
-        // if (cell.getOldValue() < cell.getValue()) {
-        //   row.getElement().style.backgroundColor = '#8aedb8'
-        // } else if (cell.getOldValue() > cell.getValue()) {
-        //   row.getElement().style.backgroundColor = '#eda18a'
-        // }
+        // If packages column is edited and it's a package allocation type
+        if (
+          cell.getColumn().getField() === 'quantity_packages' &&
+          rowData.allocation_type === 'p' &&
+          rowData.net_weight
+        ) {
+          // Recalculate quantity in kg
+          const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+
+          // Update the row with new quantity in kg
+          row.update({
+            quantity_kgs: newQuantityKgs,
+            quantity_packages: rowData.quantity_packages,
+          })
+        }
+
+        updatedRows.current = [...updatedRows.current, rowData.id]
 
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
