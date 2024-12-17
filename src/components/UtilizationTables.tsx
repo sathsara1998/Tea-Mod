@@ -203,6 +203,52 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
   return (
     <div>
       {isLoading && <LoadingSpinner />}
+      <div className="mb-4 flex justify-center">
+        <div className="relative flex w-96 items-center space-x-2">
+          <input
+            type="text"
+            placeholder="Search by box number..."
+            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 
+        text-sm shadow-sm transition-all duration-200 
+        placeholder:text-gray-400
+        focus:border-gray-300 focus:outline-none focus:ring-1 
+        focus:ring-gray-200"
+            onChange={(e) => {
+              if (tableRef.current) {
+                tableRef.current.setFilter([
+                  {
+                    field: 'box_number',
+                    type: 'like',
+                    value: e.target.value,
+                  },
+                ])
+              }
+            }}
+          />
+          <button
+            className="inline-flex items-center rounded-md bg-gray-100 px-4 py-2
+        text-sm font-medium text-gray-700 transition-all duration-200
+        hover:bg-gray-200 focus:outline-none focus:ring-1 
+        focus:ring-gray-200 active:bg-gray-300"
+            onClick={() => {
+              const searchInput = document.querySelector(
+                'input[type="text"]',
+              ) as HTMLInputElement
+              if (tableRef.current && searchInput) {
+                tableRef.current.setFilter([
+                  {
+                    field: 'box_number',
+                    type: 'like',
+                    value: searchInput.value,
+                  },
+                ])
+              }
+            }}
+          >
+            Search
+          </button>
+        </div>
+      </div>
       <div ref={tableContainerRef} className="tea-info-table h-full w-full" />
       <TeaViewDialog
         isTeaDialogOpen={isTeaDialogOpen}

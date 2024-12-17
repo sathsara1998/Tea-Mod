@@ -76,8 +76,20 @@ const Sidebar: React.FC<{
       onMouseEnter={() => handleExpand(true)}
       onMouseLeave={() => handleExpand(false)}
     >
-      <div className="mb-8 flex h-16 items-center p-4 text-xl font-bold">
-        <span className="truncate">{isExpanded ? 'Tea Management' : 'TM'}</span>
+      <div className="mb-8 flex flex-col items-center p-4">
+        <img
+          src="/Tea_Tang_-_HighRes_Logo2.png"
+          alt="Logo"
+          className={cn('mb-2', isExpanded ? 'h-12 w-auto' : 'h-8 w-auto')}
+        />
+        <span
+          className={cn(
+            'font-semibold text-gray-800 transition-all',
+            isExpanded ? 'text-lg' : 'text-s',
+          )}
+        >
+          {isExpanded ? 'Tea Management' : 'TM'}
+        </span>
       </div>
       <nav className="flex-1 px-2">
         <ul className="space-y-2">

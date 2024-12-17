@@ -1,10 +1,12 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import { useToast } from '@/components/ui/use-toast'
+import jsPDF from 'jspdf'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import LoadingSpinner from './LoadingSpinner'
 import TeaViewDialog from './TeaViewDialog'
+import { Button } from './ui/button'
 type BlendGainTableProps = {
   value: string
 }
@@ -16,6 +18,8 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
   const [error, setError] = React.useState<string | null>(null)
   const [cellData, setCellData] = useState(null) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+
+  const downloadButtonRef = useRef<HTMLButtonElement>(null)
 
   const { toast } = useToast()
   const apiMethods = useApiMethods()
@@ -154,6 +158,7 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
               setIsTeaDialogOpen(true)
             }
           })
+
           const headerElement = tableContainerRef.current.querySelector(
             '.tabulator-header',
           ) as HTMLElement
@@ -188,7 +193,54 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
 
   return (
     <div>
+      <div className="mb-4 flex justify-center">
+        <div className="relative flex w-96 items-center space-x-2">
+          <input
+            type="text"
+            placeholder="Search by box number..."
+            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 
+        text-sm shadow-sm transition-all duration-200 
+        placeholder:text-gray-400
+        focus:border-gray-300 focus:outline-none focus:ring-1 
+        focus:ring-gray-200"
+            onChange={(e) => {
+              if (tableRef.current) {
+                tableRef.current.setFilter([
+                  {
+                    field: 'box_number',
+                    type: 'like',
+                    value: e.target.value,
+                  },
+                ])
+              }
+            }}
+          />
+          <button
+            className="inline-flex items-center rounded-md bg-gray-100 px-4 py-2
+        text-sm font-medium text-gray-700 transition-all duration-200
+        hover:bg-gray-200 focus:outline-none focus:ring-1 
+        focus:ring-gray-200 active:bg-gray-300"
+            onClick={() => {
+              const searchInput = document.querySelector(
+                'input[type="text"]',
+              ) as HTMLInputElement
+              if (tableRef.current && searchInput) {
+                tableRef.current.setFilter([
+                  {
+                    field: 'box_number',
+                    type: 'like',
+                    value: searchInput.value,
+                  },
+                ])
+              }
+            }}
+          >
+            Search
+          </button>
+        </div>
+      </div>
       {isLoading && <LoadingSpinner />}
+
       <div ref={tableContainerRef} className="tea-info-table h-full w-full" />
       <TeaViewDialog
         isTeaDialogOpen={isTeaDialogOpen}

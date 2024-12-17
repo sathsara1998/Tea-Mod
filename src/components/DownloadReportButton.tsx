@@ -48,9 +48,10 @@ interface DownloadReportButtonProps {
 const getHeadStyles = () => ({
   textColor: [0, 0, 0] as [number, number, number],
   fontSize: 9,
+  fontStyle: 'italic' as const,
   halign: 'center' as const, // Center-aligned headers
   valign: 'middle' as const, // Vertically centered
-  cellPadding: { top: 6, right: 8, bottom: 6, left: 8 },
+  cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
   lineWidth: 1,
   lineColor: [0, 0, 0] as [number, number, number], // Subtle border for headers
 })
@@ -471,8 +472,8 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
 
         // Add blend balance table header
         doc.setFont(font, 'bold')
-        doc.setFontSize(12)
-        doc.text('Blend Balance Details', margin, currentY)
+        doc.setFontSize(10)
+        doc.text('Blend Balance Details', margin, currentY + 10)
 
         doc.autoTable({
           head: [tableColumns.map((col) => col.title)],
@@ -487,11 +488,11 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           styles: {
             fontSize: 8,
             font: font,
-            cellPadding: 5,
+            cellPadding: 2,
+            fontStyle: 'bold',
           },
           headStyles: {
             ...getHeadStyles(),
-            fontStyle: 'bold',
           },
           columnStyles: {
             0: { cellWidth: 60 },
@@ -574,7 +575,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         lineWidth: 0, // No body row lines
         font: font,
       },
-      headStyles: getHeadStyles(),
+      headStyles: { ...getHeadStyles() },
       bodyStyles: {
         fillColor: false, // White background for a clean look
         textColor: [0, 0, 0],
@@ -781,9 +782,18 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
   return (
     <Button
       onClick={generateReport}
-      className="mr-2 border border-gray-200 bg-gray-100 text-gray-700 shadow-sm hover:bg-gray-200 sm:w-auto sm:text-base"
+      aria-label="Download Report as PDF"
+      className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-gray-100 disabled:opacity-50 sm:px-4 sm:py-2 sm:text-sm"
     >
-      Download Report
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-3 w-3 sm:h-4 sm:w-4"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
+      </svg>
+      <span className="text-xs sm:text-sm">Download Report</span>
     </Button>
   )
 }

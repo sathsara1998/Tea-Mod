@@ -196,28 +196,78 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
 
       <div className="col-span-3 rounded-lg bg-white p-4 shadow-sm">
         <div className="mb-3 border-b pb-2 text-sm font-semibold">Actions</div>
-        <div className="space-y-2">
-          {/* <Button
-            variant="outline"
-            onClick={onSaveTableData}
-            className="w-full justify-start bg-blue-50 text-blue-700 hover:bg-blue-100"
-          >
-            Save data
-          </Button> */}
+        <div className="flex flex-col gap-3">
           <Button
             variant="outline"
             onClick={onGenerateBlendSheet}
-            className="w-full justify-start bg-green-50 text-xs text-green-700 hover:bg-green-100 sm:text-sm"
+            className="group relative flex w-full max-w-full items-center justify-between rounded-md border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-all hover:bg-green-100 hover:shadow-sm md:px-3 md:py-1"
           >
-            <span className="hidden sm:inline">Generate Blend Sheet</span>
-            <span className="sm:hidden">Gen. Sheet</span>
+            <span className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <span className="hidden md:block">Generate Blend Sheet</span>
+              <span className="md:hidden">Generate</span>
+            </span>
+            <svg
+              className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
           </Button>
+
           <Button
             variant="outline"
             onClick={onGenerateBlendSheet}
-            className="w-full justify-start bg-orange-50 text-xs text-orange-600 hover:bg-orange-100 sm:text-sm"
+            className="group relative flex w-full items-center justify-between rounded-md border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 transition-all hover:bg-orange-100 hover:shadow-sm"
           >
-            Reset
+            <span className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              Reset
+            </span>
+            <svg
+              className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </Button>
         </div>
       </div>

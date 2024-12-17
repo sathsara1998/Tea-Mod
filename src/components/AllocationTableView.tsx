@@ -820,56 +820,82 @@ export default function AllocationTableView() {
           <div className="col-span-6">
             <Card className="mb-5">
               <CardHeader className="top-0 z-10 flex flex-row items-center justify-between pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <span>Selected Blend:</span>
-                  <span className="mr-6 font-medium">
-                    {selectedBlend ? selectedBlend.name : '-'}
-                  </span>
-                  {selectedBlend && (
-                    <span className="flex items-center">
-                      <span className="">Blend Standard:</span>
-                      <span className="ml-1 font-medium text-gray-600">
-                        {blendInfo?.blendStandard}
+                <CardTitle className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-2">
+                  {/* Blend Info Section */}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-1">
+                      <span className="text-m">Selected Blend:</span>
+                      <span className="text-sm font-medium text-gray-600">
+                        {selectedBlend ? selectedBlend.name : '-'}
                       </span>
-                    </span>
-                  )}
-                  {selectedBlend && (
-                    <span className="ml-4 flex items-center">
-                      <span className="">Customer:</span>
-                      <span className="font-small ml-1 text-gray-600">
-                        {selectedBlend.customer_name}
-                      </span>
-                    </span>
-                  )}
+                    </div>
+
+                    {selectedBlend && (
+                      <div className="ml-2 flex flex-wrap gap-4">
+                        <div className="flex items-center">
+                          <span className="text-m">Blend Standard:</span>
+                          <span className="ml-1 text-sm font-medium text-gray-600">
+                            {blendInfo?.blendStandard}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center">
+                          <span className="text-m">Customer:</span>
+                          <span className="ml-1 text-sm font-medium text-gray-600">
+                            {selectedBlend.customer_name}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </CardTitle>
 
-                {selectedBlend && (
-                  <DownloadReportButton
-                    tabulatorRef={tabulatorRef}
-                    blendInfo={{
-                      blendNo: selectedBlend.name,
-                      blendRefNo: '',
-                      customerName: selectedBlend.customer_name,
-                      status: blendInfo?.status || '',
-                      blendDate: blendInfo.blend_date,
-                      totalContractQty: 0,
-                      blendStandard: blendInfo?.blendStandard || '',
-                      blendAverage: blendInfo?.averagePrice || 0,
-                      rtNo: '',
-                      broker: blendInfo?.broker || '',
-                      export_quantity: blendInfo?.export_quantity || 0,
-                      averagePrice: blendInfo?.averagePrice || 0,
-                    }}
-                  />
-                )}
-                <div className="flex gap-2">
+                {/* Actions Section */}
+                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                  {selectedBlend && (
+                    <DownloadReportButton
+                      tabulatorRef={tabulatorRef}
+                      blendInfo={{
+                        blendNo: selectedBlend.name,
+                        blendRefNo: '',
+                        customerName: selectedBlend.customer_name,
+                        status: blendInfo?.status || '',
+                        blendDate: blendInfo.blend_date,
+                        totalContractQty: 0,
+                        blendStandard: blendInfo?.blendStandard || '',
+                        blendAverage: blendInfo?.averagePrice || 0,
+                        rtNo: '',
+                        broker: blendInfo?.broker || '',
+                        export_quantity: blendInfo?.export_quantity || 0,
+                        averagePrice: blendInfo?.averagePrice || 0,
+                      }}
+                    />
+                  )}
+
                   <Dialog
                     open={isBlendDialogOpen}
                     onOpenChange={setIsBlendDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button className="border border-gray-200 bg-gray-100 text-gray-700 shadow-sm hover:bg-gray-200 sm:w-auto sm:text-base">
-                        Select Blend
+                      <Button
+                        className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
+                        variant="default"
+                      >
+                        <span className="hidden sm:inline">Select Blend</span>
+                        <span className="sm:hidden">Blend</span>
+                        <svg
+                          className="ml-1 h-3 w-3 sm:h-4 sm:w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                          />
+                        </svg>
                       </Button>
                     </DialogTrigger>
                     <SelectBlendsDialog
