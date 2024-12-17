@@ -1,14 +1,25 @@
 import React from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Plus, Minus, X } from "lucide-react"
-import { Tea, BlendAllocation } from "./types"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Plus, Minus, X } from 'lucide-react'
+import { Tea, BlendAllocation } from './types'
 
 interface AllocationTableProps {
   newBlend: any
   availableTeas: Tea[]
-  handleQuantityChange: (teaId: string, quantity: number, packages: number) => void
+  handleQuantityChange: (
+    teaId: string,
+    quantity: number,
+    packages: number,
+  ) => void
   removeTeaFromBlend: (teaId: string) => void
   isReadOnly: boolean
 }
@@ -18,7 +29,7 @@ export default function AllocationTable({
   availableTeas,
   handleQuantityChange,
   removeTeaFromBlend,
-  isReadOnly
+  isReadOnly,
 }: AllocationTableProps) {
   return (
     <Table>
@@ -32,7 +43,7 @@ export default function AllocationTable({
       </TableHeader>
       <TableBody>
         {newBlend.allocations.map((allocation: any) => {
-          const tea = availableTeas.find(t => t.id === allocation.teaId)!
+          const tea = availableTeas.find((t) => t.id === allocation.teaId)!
           return (
             <TableRow key={allocation.teaId}>
               <TableCell>{tea.name}</TableCell>
@@ -57,11 +68,19 @@ export default function AllocationTable({
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      const newQuantity = allocation.quantity + tea.packageWeight
+                      const newQuantity =
+                        allocation.quantity + tea.packageWeight
                       const newPackages = allocation.packages + 1
-                      handleQuantityChange(allocation.teaId, newQuantity, newPackages)
+                      handleQuantityChange(
+                        allocation.teaId,
+                        newQuantity,
+                        newPackages,
+                      )
                     }}
-                    disabled={isReadOnly || allocation.quantity + tea.packageWeight > tea.freeQuantity}
+                    disabled={
+                      isReadOnly ||
+                      allocation.quantity + tea.packageWeight > tea.freeQuantity
+                    }
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -69,9 +88,14 @@ export default function AllocationTable({
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      const newQuantity = allocation.quantity - tea.packageWeight
+                      const newQuantity =
+                        allocation.quantity - tea.packageWeight
                       const newPackages = allocation.packages - 1
-                      handleQuantityChange(allocation.teaId, newQuantity, newPackages)
+                      handleQuantityChange(
+                        allocation.teaId,
+                        newQuantity,
+                        newPackages,
+                      )
                     }}
                     disabled={isReadOnly || allocation.packages <= 0}
                   >

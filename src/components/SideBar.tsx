@@ -7,6 +7,8 @@ import {
   ListCheck,
   LogOut,
   FileChartColumn,
+  Snowflake,
+  LeafIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -15,7 +17,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { createBrowserClient } from '@/utils/supabase'
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{
+  onSnowfallToggle: (enabled: boolean) => void
+  isSnowfallEnabled: boolean
+}> = ({ onSnowfallToggle, isSnowfallEnabled }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
@@ -45,25 +50,46 @@ const Sidebar: React.FC = () => {
     }
   }
 
+  const handleSnowfallToggle = () => {
+    onSnowfallToggle(!isSnowfallEnabled)
+  }
+
   const menuItems = [
     { name: 'Dashboard', icon: <PieChart />, route: '/dashboard' },
     { name: 'Purchasing', icon: <ShoppingCart />, route: '/purchase' },
     { name: 'Blend Creation', icon: <FileText />, route: '/create' },
     { name: 'Allocation', icon: <ListCheck />, route: '/allocate' },
-    { name: 'Allocation-List', icon: <FileChartColumn />, route: '/allocate' },
+    { name: 'Tea', icon: <LeafIcon />, route: '/tea-info' },
+    {
+      name: 'Blends',
+      icon: <FileChartColumn />,
+      route: '/blend-view',
+    },
   ]
 
   return (
     <div
       className={cn(
-        'duration-20 flex h-full flex-col bg-gray-800 text-white transition-all ease-in-out',
+        'duration-20 flex h-full flex-col bg-gray-100 text-gray-800 transition-all ease-in-out',
         isExpanded ? 'w-64' : 'w-16',
       )}
       onMouseEnter={() => handleExpand(true)}
       onMouseLeave={() => handleExpand(false)}
     >
-      <div className="mb-8 flex h-16 items-center p-4 text-xl font-bold">
-        <span className="truncate">{isExpanded ? 'Tea Management' : 'TM'}</span>
+      <div className="mb-8 flex flex-col items-center p-4">
+        <img
+          src="/Tea_Tang_-_HighRes_Logo2.png"
+          alt="Logo"
+          className={cn('mb-2', isExpanded ? 'h-12 w-auto' : 'h-8 w-auto')}
+        />
+        <span
+          className={cn(
+            'font-semibold text-gray-800 transition-all',
+            isExpanded ? 'text-lg' : 'text-s',
+          )}
+        >
+          {isExpanded ? 'Tea Management' : 'TM'}
+        </span>
       </div>
       <nav className="flex-1 px-2">
         <ul className="space-y-2">
@@ -73,10 +99,10 @@ const Sidebar: React.FC = () => {
                 <Button
                   variant="ghost"
                   className={cn(
-                    'w-full justify-start rounded-lg text-left !text-white transition-colors hover:bg-gray-700',
+                    'w-full justify-start rounded-lg text-left !text-gray-800 transition-colors hover:bg-gray-200',
                     isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
                     'flex items-center',
-                    pathname === item.route && 'bg-gray-700',
+                    pathname === item.route && 'bg-gray-200',
                   )}
                 >
                   <span
@@ -92,6 +118,37 @@ const Sidebar: React.FC = () => {
               </Link>
             </li>
           ))}
+
+          {/* Snowfall Toggle */}
+          <li>
+            <Button
+              variant="ghost"
+              onClick={handleSnowfallToggle}
+              className={cn(
+                'w-full justify-start rounded-lg text-left !text-gray-800 transition-colors hover:bg-gray-200',
+                isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
+                'flex items-center',
+              )}
+            >
+              <span
+                className={cn(
+                  'flex items-center',
+                  isExpanded ? 'mr-3' : 'mr-0',
+                )}
+              >
+                <Snowflake
+                  className={
+                    isSnowfallEnabled ? 'text-blue-400' : 'text-gray-400'
+                  }
+                />
+              </span>
+              {isExpanded && (
+                <span>
+                  {isSnowfallEnabled ? 'Disable Snow' : 'Enable Snow'}
+                </span>
+              )}
+            </Button>
+          </li>
         </ul>
       </nav>
 
@@ -109,11 +166,11 @@ const Sidebar: React.FC = () => {
         </Avatar>
         {isExpanded && (
           <>
-            <span className="mb-2 text-sm text-gray-300">
+            <span className="mb-2 text-sm text-gray-600">
               {user?.email || 'Loading...'}
             </span>
             <Button
-              className="mt-2 flex w-full items-center justify-center rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              className="mt-2 flex w-full items-center justify-center rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
               onClick={handleSignOut}
             >
               <LogOut className="mr-2" size={16} />

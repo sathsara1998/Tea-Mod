@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from 'react'
 // import BlendForm from "./BlendForm"
-import { Tea, BlendAllocation } from "./types"
-import BlendsList from "./BlendHeaderCreationViewComponents/BlendsList"
-import { Blend } from "./types"
-import { AlertTriangle, Loader2, RefreshCw } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "./ui/button"
+import { Tea, BlendAllocation } from './types'
+import BlendsList from './BlendHeaderCreationViewComponents/BlendsList'
+import { Blend } from './types'
+import { AlertTriangle, Loader2, RefreshCw } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from './ui/button'
 import { useApiMethods } from '@/hooks/useApiMethods'
-import AllocationTableView from "./AllocationTableView"
-
+import AllocationTableView from './AllocationTableView'
 
 interface AllocationViewProps {
   availableTeas: Tea[]
@@ -29,15 +28,15 @@ export default function AllocationView({
   blendNameSequence,
   setBlendNameSequence,
   blendNumberSequence,
-  setBlendNumberSequence
+  setBlendNumberSequence,
 }: AllocationViewProps) {
   const [editingBlendId, setEditingBlendId] = useState<string | null>(null)
-  // const [newBlend, setNewBlend] = useState<BlendAllocation>({ 
-  //   id: "", 
-  //   name: "", 
-  //   blendNo: "", 
-  //   allocations: [], 
-  //   totalQuantity: 0, 
+  // const [newBlend, setNewBlend] = useState<BlendAllocation>({
+  //   id: "",
+  //   name: "",
+  //   blendNo: "",
+  //   allocations: [],
+  //   totalQuantity: 0,
   //   toAllocate: 0,
   //   balance: 0,
   //   status: 'draft',
@@ -46,7 +45,7 @@ export default function AllocationView({
   const [isLoading, setIsLoading] = useState(false)
   const [blends, setBlends] = useState<Blend[]>([])
   const [error, setError] = useState<string | null>(null)
-  const { getBlends } = useApiMethods();
+  const { getBlends } = useApiMethods()
 
   const fetchBlends = useCallback(async () => {
     setIsLoading(true)
@@ -55,14 +54,16 @@ export default function AllocationView({
       const data = await getBlends()
       // Transform the data to match our Blend type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const transformedBlends: Blend[] = Object.values(data).map((blend: any) => ({
-        id: blend.id,
-        name: blend.name,
-        blendName: blend.blendName,
-        quantity: blend.quantity,
-        status: blend.status,
-        allocations: blend.allocations
-      }));
+      const transformedBlends: Blend[] = Object.values(data).map(
+        (blend: any) => ({
+          id: blend.id,
+          name: blend.name,
+          blendName: blend.blendName,
+          quantity: blend.quantity,
+          status: blend.status,
+          allocations: blend.allocations,
+        }),
+      )
       setBlends(transformedBlends)
     } catch (err) {
       setError('Error fetching blends. Please try again.')
@@ -78,12 +79,12 @@ export default function AllocationView({
       // Assume some API call here to get the tea cost for a blend
       // const response = await fetch(`/api/teaCost?blendId=${blendId}`);
       // const data = await response.json();
-      return 23;
+      return 23
     } catch (error) {
-      console.error("Error fetching tea cost:", error);
-      return 0; // Fallback cost
+      console.error('Error fetching tea cost:', error)
+      return 0 // Fallback cost
     }
-  };
+  }
 
   // useEffect(() => {
   //   fetchBlends()
@@ -91,7 +92,7 @@ export default function AllocationView({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
@@ -99,7 +100,7 @@ export default function AllocationView({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
+      <div className="flex h-screen flex-col items-center justify-center">
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -112,9 +113,9 @@ export default function AllocationView({
       </div>
     )
   }
-  
+
   return (
-    <div className="flex-1 flex">
+    <div className="flex-1 ">
       {/* <div className="p-4">
       <BlendsList blends={blends} fetchBlends={fetchBlends}/>
       </div> */}
