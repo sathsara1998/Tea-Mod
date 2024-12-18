@@ -89,7 +89,7 @@ export default function AllocationTableView() {
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false)
   const [blendDetails, setBlendDetails] = useState<StockLot>()
   const [isOpenPlit, setIsOpenPlit] = useState(false)
-  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [cellData, setCellData] = useState<{ id?: number; type?: string }>({}) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   // const [isLoading, setIsLoading] = useState(false)
 
@@ -278,7 +278,8 @@ export default function AllocationTableView() {
       tabulatorRef.current.on('cellClick', (e, cell) => {
         if (cell.getColumn().getField() === 'box_number') {
           // Only trigger for the "name" column
-          setCellData(cell.getValue())
+          const rowData = cell.getRow().getData()
+          setCellData({ id: rowData.id, type: rowData.type })
           setIsTeaDialogOpen(true)
         }
       })

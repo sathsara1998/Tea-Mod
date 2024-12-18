@@ -18,7 +18,7 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
-  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [cellData, setCellData] = useState<{ id?: number; type?: string }>({}) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
 
@@ -62,14 +62,6 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
                 frozen: true,
                 widthGrow: 1,
                 headerFilterPlaceholder: 'Find By Standard',
-              },
-
-              {
-                title: 'NET WEIGHT',
-                field: 'net_weight',
-                hozAlign: 'right',
-                headerFilter: true,
-                widthGrow: 1,
               },
 
               {
@@ -117,7 +109,8 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
           tableRef.current?.on('cellClick', (e, cell) => {
             if (cell.getColumn().getField() === 'box_number') {
               // Only trigger for the "name" column
-              setCellData(cell.getValue())
+              const rowData = cell.getRow().getData()
+              setCellData({ id: rowData.id, type: rowData.type })
               setIsTeaDialogOpen(true)
             }
           })

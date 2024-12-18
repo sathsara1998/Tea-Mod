@@ -9,6 +9,10 @@ import {
   FileChartColumn,
   Snowflake,
   LeafIcon,
+  ChevronLeft,
+  ChevronRight,
+  PanelRightClose,
+  PanelRightOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -73,9 +77,23 @@ const Sidebar: React.FC<{
         'duration-20 flex h-full flex-col bg-gray-100 text-gray-800 transition-all ease-in-out',
         isExpanded ? 'w-64' : 'w-16',
       )}
-      onMouseEnter={() => handleExpand(true)}
-      onMouseLeave={() => handleExpand(false)}
+      // onMouseEnter={() => handleExpand(true)}
+      // onMouseLeave={() => handleExpand(false)}
     >
+      <div className="flex justify-center p-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleExpand(!isExpanded)}
+          className="h-6 w-6 rounded-full hover:bg-gray-200"
+        >
+          {isExpanded ? (
+            <ChevronLeft className="h-8 w-8" />
+          ) : (
+            <ChevronRight className="h-8 w-8" />
+          )}
+        </Button>
+      </div>
       <div className="mb-8 flex flex-col items-center p-4">
         <img
           src="/Tea_Tang_-_HighRes_Logo2.png"

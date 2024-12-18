@@ -30,14 +30,18 @@ function TeaViewDialog({
     <Dialog open={isTeaDialogOpen} onOpenChange={setIsTeaDialogOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Tea Details : {cellData}</DialogTitle>
+          <DialogTitle>
+            Tea Details : {cellData.id} {cellData.type}
+          </DialogTitle>
         </DialogHeader>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Blends</TableHead>
-              <TableHead>Bags</TableHead>
-              <TableHead>Kgs</TableHead>
+              <TableHead>BLEND NO</TableHead>
+              <TableHead>BLEND STATUS</TableHead>
+              <TableHead>NO OF BAGS</TableHead>
+              <TableHead>TEA QTY</TableHead>
+              <TableHead>BLEND DATE</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -45,6 +49,8 @@ function TeaViewDialog({
               <TableRow key={index}>
                 <TableCell>{row.blends}</TableCell>
                 <TableCell>{row.bags}</TableCell>
+                <TableCell>{row.kgs}</TableCell>
+                <TableCell>{row.kgs}</TableCell>
                 <TableCell>{row.kgs}</TableCell>
               </TableRow>
             ))}
