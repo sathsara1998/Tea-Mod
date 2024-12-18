@@ -197,7 +197,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       <div className="col-span-3 rounded-lg bg-white p-4 shadow-sm">
         <div className="mb-3 border-b pb-2 text-sm font-semibold">Actions</div>
         <div className="flex flex-col gap-3">
-          {!(blendInfo.status === 'confirmed') && (
+          {blendInfo.status === 'draft' && (
             <Button
               variant="outline"
               onClick={onGenerateBlendSheet}

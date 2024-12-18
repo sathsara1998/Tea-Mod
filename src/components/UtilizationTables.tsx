@@ -239,7 +239,6 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
 
   return (
     <div>
-      {isLoading && <LoadingSpinner />}
       <div className="mb-4 flex justify-center">
         <div className="relative flex w-96 items-center space-x-2">
           {/* Input Field */}
@@ -283,6 +282,7 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
           </div>
         </div>
       </div>
+      {isLoading && <LoadingSpinner />}
       <div ref={tableContainerRef} className="tea-info-table h-full w-full" />
       <TeaViewDialog
         isTeaDialogOpen={isTeaDialogOpen}

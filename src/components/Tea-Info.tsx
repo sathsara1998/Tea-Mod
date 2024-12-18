@@ -58,13 +58,13 @@ const TeaInfoTable: React.FC = () => {
                 Blend Gain
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="straightline">
+            <TabsContent value="straightline" className="mt-4">
               <BlendGainTable value={'straight_line'} />
             </TabsContent>
-            <TabsContent value="blendbalance">
+            <TabsContent value="blendbalance" className="mt-4">
               <BlendBalanceTable value={'blend_balance'} />
             </TabsContent>
-            <TabsContent value="blendgain">
+            <TabsContent value="blendgain" className="mt-4">
               <BlendBalanceTable value={'blend_gain'} />
             </TabsContent>
           </Tabs>
