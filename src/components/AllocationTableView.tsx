@@ -1074,18 +1074,22 @@ export default function AllocationTableView() {
               Are you sure you want to remove the selected teas from the blend?
             </p>
             <DialogFooter>
-              <Button
-                onClick={() => setIsConfirmDialogOpen(false)}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={confirmRemoveSelectedTeas}
-                className="bg-red-600 text-white"
-              >
-                Confirm
-              </Button>
+              {selectedBlend && selectedBlend.status === 'draft' && (
+                <>
+                  <Button
+                    onClick={() => setIsConfirmDialogOpen(false)}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={confirmRemoveSelectedTeas}
+                    className="bg-red-600 text-white"
+                  >
+                    Confirm
+                  </Button>
+                </>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

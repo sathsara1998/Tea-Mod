@@ -5,18 +5,22 @@ import { useToast } from '@/components/ui/use-toast'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import LoadingSpinner from './LoadingSpinner'
 import TeaViewDialog from './TeaViewDialog'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
+import { Checkbox } from './ui/checkbox'
 
 type BlendGainTableProps = {
   value: string
 }
 
-function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
+function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
   const tableRef = React.useRef<Tabulator | null>(null)
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [cellData, setCellData] = useState(null) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+  const [isChecked, setIsChecked] = useState(false)
 
   const { toast } = useToast()
   const apiMethods = useApiMethods()
@@ -37,12 +41,12 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
             // Changed to hide to prevent collapse
             pagination: true,
             paginationSize: 20,
-            groupBy: 'type',
+
             scrollToRowIfVisible: false,
             layoutColumnsOnNewData: true, // Adjusts columns based on new data
             columns: [
               {
-                title: 'Box Number',
+                title: 'BOX NUMBER',
                 field: 'box_number',
                 headerFilter: true,
                 frozen: true,
@@ -50,7 +54,7 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
                 headerFilterPlaceholder: 'Find By Box Number',
               },
               {
-                title: 'Standard',
+                title: 'STANDARD',
                 field: 'standard',
                 headerFilter: true,
                 frozen: true,
@@ -59,26 +63,16 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
               },
 
               {
-                title: 'Net Weight',
-                field: 'net_weight',
-                hozAlign: 'right',
-                headerFilter: true,
-                widthGrow: 1,
-                headerFilterPlaceholder: 'Find By NetWieght',
-              },
-              {
-                title: 'Free Packages',
+                title: 'FREE PKGS',
                 field: 'free_packages',
                 headerFilter: true,
-                hozAlign: 'right',
-                widthGrow: 0.5,
+                hozAlign: 'center',
               },
               {
-                title: 'Free Quantity',
+                title: 'FREE QTY',
                 field: 'free_quantity',
                 headerFilter: true,
-                widthGrow: 0.5,
-                hozAlign: 'right',
+                hozAlign: 'center',
               },
               // {
               //   title: 'Status',
@@ -86,68 +80,86 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
               //   headerFilter: true,
               //   widthGrow: 1,
               // },
+
               {
-                title: 'Garden Mark',
-                field: 'garden_mark',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Type',
-                field: 'type',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Grade',
-                field: 'grade',
-                headerFilter: true,
-              },
-              {
-                title: 'Purchased Price',
-                field: 'purchased_price',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Break',
-                field: 'break',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Broker Name',
-                field: 'broker_name',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Lot NO',
+                title: 'LOT NO',
                 field: 'lot_no',
                 headerFilter: true,
                 widthGrow: 1,
                 hozAlign: 'right',
               },
               {
-                title: 'Category',
+                title: 'INVOICE NUMBER',
+                field: 'invoice_no',
+                headerFilter: true,
+                widthGrow: 1,
+                hozAlign: 'right',
+              },
+              {
+                title: 'SALE CODE',
+                field: 'sale_code',
+                headerFilter: true,
+                widthGrow: 1,
+                hozAlign: 'center',
+              },
+              {
+                title: 'NET WEIGHT',
+                field: 'net_weight',
+                hozAlign: 'center',
+                headerFilter: true,
+                widthGrow: 1,
+              },
+              {
+                title: 'GRADE',
+                field: 'grade',
+                headerFilter: true,
+              },
+              {
+                title: 'GARDEN MARK',
+                field: 'garden_mark',
+                headerFilter: true,
+                widthGrow: 1,
+              },
+              {
+                title: 'PURCHASED PRICE',
+                field: 'purchased_price',
+                headerFilter: true,
+                widthGrow: 1,
+                hozAlign: 'right',
+              },
+              {
+                title: 'BREAK',
+                field: 'break',
+                headerFilter: true,
+                widthGrow: 1,
+              },
+              {
+                title: 'BROKER NAME',
+                field: 'broker_name',
+                headerFilter: true,
+                widthGrow: 1,
+              },
+
+              {
+                title: 'CATEGORY',
                 field: 'category',
                 headerFilter: true,
                 widthGrow: 1,
               },
               {
-                title: 'Auction Type',
+                title: 'AUCTION TYPE',
                 field: 'auction_type',
                 headerFilter: true,
                 widthGrow: 1,
+                hozAlign: 'center',
+                formatter: function (cell) {
+                  // Get the cell value and convert it to uppercase
+                  return cell.getValue()?.toUpperCase()
+                },
               },
+
               {
-                title: 'Sale Code',
-                field: 'sale_code',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Buyer',
+                title: 'BUYER',
                 field: 'buyer',
                 headerFilter: true,
                 widthGrow: 1,
@@ -200,53 +212,75 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
     }
   }, [apiMethods.getAllAuctionData, toast])
 
+  const handleSearch = (field: string, value: string) => {
+    if (tableRef.current) {
+      tableRef.current.setFilter([
+        {
+          field: field,
+          type: 'like',
+          value: value,
+        },
+      ])
+    }
+  }
+
+  const handleFreePackagesFilter = (checked: boolean) => {
+    setIsChecked(checked)
+    if (tableRef.current) {
+      tableRef.current.setFilter([
+        {
+          field: 'freepackages',
+          type: checked ? '=' : '!=',
+          value: '0',
+        },
+      ])
+    }
+  }
+
   return (
     <div>
       {isLoading && <LoadingSpinner />}
       <div className="mb-4 flex justify-center">
         <div className="relative flex w-96 items-center space-x-2">
-          <input
+          {/* Input Field */}
+          <Input
             type="text"
             placeholder="Search by box number..."
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 
-        text-sm shadow-sm transition-all duration-200 
-        placeholder:text-gray-400
-        focus:border-gray-300 focus:outline-none focus:ring-1 
-        focus:ring-gray-200"
-            onChange={(e) => {
-              if (tableRef.current) {
-                tableRef.current.setFilter([
-                  {
-                    field: 'box_number',
-                    type: 'like',
-                    value: e.target.value,
-                  },
-                ])
-              }
-            }}
+            className="w-full"
+            onChange={(e) => handleSearch('box_number', e.target.value)}
           />
-          <button
-            className="inline-flex items-center rounded-md bg-gray-100 px-4 py-2
-        text-sm font-medium text-gray-700 transition-all duration-200
-        hover:bg-gray-200 focus:outline-none focus:ring-1 
-        focus:ring-gray-200 active:bg-gray-300"
+
+          {/* Search Button */}
+          <Button
+            variant="outline"
             onClick={() => {
               const searchInput = document.querySelector(
                 'input[type="text"]',
               ) as HTMLInputElement
-              if (tableRef.current && searchInput) {
-                tableRef.current.setFilter([
-                  {
-                    field: 'box_number',
-                    type: 'like',
-                    value: searchInput.value,
-                  },
-                ])
+              if (searchInput) {
+                handleSearch('box_number', searchInput.value)
               }
             }}
           >
             Search
-          </button>
+          </Button>
+
+          {/* Free Packages Filter Button */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="freepackages-checkbox"
+              checked={isChecked}
+              onCheckedChange={(checked) =>
+                handleFreePackagesFilter(checked as boolean)
+              }
+            />
+            <label
+              htmlFor="freepackages-checkbox"
+              className="text-sm font-medium"
+            >
+              Free Pkgs(0)
+            </label>
+          </div>
         </div>
       </div>
       <div ref={tableContainerRef} className="tea-info-table h-full w-full" />
@@ -259,4 +293,4 @@ function BlendGainTable({ value }: BlendGainTableProps): React.JSX.Element {
   )
 }
 
-export default BlendGainTable
+export default StraightLineTable
