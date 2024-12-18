@@ -489,9 +489,8 @@ export default function AllocationTableView() {
           grade: tea.grade || '',
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
-          quantity_kgs:
-            tea.allocation_type === 'w' ? tea.net_weight : tea.net_weight,
-          quantity_packages: tea.allocation_type === 'p' ? 1 : 1,
+          quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
+          quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,
           allocation_type: tea.allocation_type,
           package_diff: 0,
