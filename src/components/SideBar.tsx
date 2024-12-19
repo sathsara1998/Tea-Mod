@@ -23,6 +23,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { createBrowserClient } from '@/utils/supabase'
 import { motion } from 'framer-motion'
+import ThemeToggle from './ThemeToggle'
 
 const Sidebar: React.FC<{
   onSnowfallToggle: (enabled: boolean) => void
@@ -76,7 +77,7 @@ const Sidebar: React.FC<{
 
   return (
     <motion.div
-      initial={{ width: isExpanded ? 64 : 16 }} // Initial sidebar width
+      initial={{ width: isExpanded ? 64 : 18 }} // Initial sidebar width
       animate={{ width: isExpanded ? 256 : 64 }} // Animates width
       transition={{ type: 'spring', stiffness: 150, damping: 15 }} // Smooth animation
       className={cn(
@@ -85,41 +86,44 @@ const Sidebar: React.FC<{
     >
       <div
         className={cn(
-          'duration-20 flex h-full flex-col bg-gray-100 text-gray-800 transition-all ease-in-out',
+          'flex h-full flex-col border-r transition-all duration-200 ease-in-out',
+          'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900',
           isExpanded ? 'w-64' : 'w-16',
         )}
-        // onMouseEnter={() => handleExpand(true)}
-        // onMouseLeave={() => handleExpand(false)}
       >
-        <div className="flex justify-center p-2">
+        <div className="flex justify-center">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => handleExpand(!isExpanded)}
-            className="h-10 w-10  hover:bg-gray-200"
+            className="h-10 w-10 hover:bg-slate-200 dark:hover:bg-slate-800"
           >
             {isExpanded ? (
-              <IndentDecrease className="h-8 w-8" />
+              <IndentDecrease className="h-8 w-8 text-slate-600 dark:text-slate-400" />
             ) : (
-              <Menu className="h-8 w-8" />
+              <Menu className="h-8 w-8 text-slate-600 dark:text-slate-400" />
             )}
           </Button>
         </div>
+
         <div className="mb-8 flex flex-col items-center p-4">
-          <img
-            src="/Tea_Tang_-_HighRes_Logo2.png"
-            alt="Logo"
-            className={cn('mb-2', isExpanded ? 'h-12 w-auto' : 'h-8 w-auto')}
-          />
-          <span
+          <motion.span
             className={cn(
-              'font-semibold text-gray-800 transition-all',
-              isExpanded ? 'text-lg' : 'text-s',
+              'font-bold tracking-wide transition-all duration-300',
+              'text-slate-800 dark:text-slate-200',
+              isExpanded ? 'text-xl' : 'text-sm opacity-80',
             )}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
             {isExpanded ? 'Tea Management' : 'TM'}
-          </span>
+          </motion.span>
+          <div className="mt-4">
+            <ThemeToggle />
+          </div>
         </div>
+
         <nav className="flex-1 px-2">
           <ul className="space-y-2">
             {menuItems.map((item) => (
@@ -128,10 +132,13 @@ const Sidebar: React.FC<{
                   <Button
                     variant="ghost"
                     className={cn(
-                      'w-full justify-start rounded-lg text-left !text-gray-800 transition-colors hover:bg-gray-200',
+                      'w-full justify-start rounded-lg text-left transition-colors',
+                      'hover:bg-slate-200 dark:hover:bg-slate-800',
+                      'text-slate-800 dark:text-slate-200',
                       isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
                       'flex items-center',
-                      pathname === item.route && 'bg-gray-200',
+                      pathname === item.route &&
+                        'bg-slate-200 dark:bg-slate-800',
                     )}
                   >
                     <span
@@ -148,13 +155,14 @@ const Sidebar: React.FC<{
               </li>
             ))}
 
-            {/* Snowfall Toggle */}
             <li>
               <Button
                 variant="ghost"
                 onClick={handleSnowfallToggle}
                 className={cn(
-                  'w-full justify-start rounded-lg text-left !text-gray-800 transition-colors hover:bg-gray-200',
+                  'w-full justify-start rounded-lg text-left transition-colors',
+                  'hover:bg-slate-200 dark:hover:bg-slate-800',
+                  'text-slate-800 dark:text-slate-200',
                   isExpanded ? 'my-5 px-2 py-7' : 'my-5 px-2 py-7',
                   'flex items-center',
                 )}
@@ -167,7 +175,9 @@ const Sidebar: React.FC<{
                 >
                   <Snowflake
                     className={
-                      isSnowfallEnabled ? 'text-blue-400' : 'text-gray-400'
+                      isSnowfallEnabled
+                        ? 'text-blue-400'
+                        : 'text-slate-400 dark:text-slate-600'
                     }
                   />
                 </span>
@@ -181,7 +191,7 @@ const Sidebar: React.FC<{
           </ul>
         </nav>
 
-        <div className="flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center justify-center ">
           <Avatar className="mb-2 h-10 w-10">
             <AvatarImage
               src={
@@ -196,11 +206,12 @@ const Sidebar: React.FC<{
           </Avatar>
           {isExpanded && (
             <>
-              <span className="mb-2 text-sm text-gray-600">
+              <span className="mb-2 text-sm text-slate-600 dark:text-slate-400">
                 {user?.email || 'Loading...'}
               </span>
               <Button
-                className="mt-2 flex w-full items-center justify-center rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                variant="destructive"
+                className="mt-2 flex w-full items-center justify-center bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
                 onClick={handleSignOut}
               >
                 <LogOut className="mr-2" size={16} />

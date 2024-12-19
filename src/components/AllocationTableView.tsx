@@ -28,7 +28,10 @@ import {
   TableRow,
 } from './ui/table'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
+import { useTheme } from 'next-themes'
+
+import 'tabulator-tables/dist/css/tabulator_midnight.min.css'
+
 import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection from './BlendInformation'
 import BlendList from './BlendList'
