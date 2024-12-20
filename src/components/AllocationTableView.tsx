@@ -285,7 +285,7 @@ export default function AllocationTableView() {
         if (cell.getColumn().getField() === 'box_number') {
           // Only trigger for the "name" column
           const rowData = cell.getRow().getData()
-          setCellData({ id: rowData.id, type: rowData.type })
+          setCellData({ id: rowData.lot_id, type: rowData.type })
           setIsTeaDialogOpen(true)
         }
       })

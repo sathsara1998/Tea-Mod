@@ -56,9 +56,7 @@ function TeaViewDialog({
     <Dialog open={isTeaDialogOpen} onOpenChange={setIsTeaDialogOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Tea Details : {cellData.id} {cellData.type}
-          </DialogTitle>
+          <DialogTitle>Allocated Blend Details</DialogTitle>
         </DialogHeader>
         <Table>
           <TableHeader>
@@ -73,8 +71,8 @@ function TeaViewDialog({
             {tableData.length > 0 ? (
               tableData.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell>{row.id || 0}</TableCell>
                   <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.state}</TableCell>
                   <TableCell>{row.allocated_bags}</TableCell>
                   <TableCell>{row.allocated_quantity}</TableCell>
                 </TableRow>
@@ -82,7 +80,7 @@ function TeaViewDialog({
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
-                  No data available
+                  No Blends Assigned
                 </TableCell>
               </TableRow>
             )}
