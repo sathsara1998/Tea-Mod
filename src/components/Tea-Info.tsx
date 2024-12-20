@@ -31,7 +31,7 @@ const TeaInfoTable: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle>
-            <p className="md:auto text-center text-xl font-extrabold text-neutral-600 ">
+            <p className="md:auto text-center text-xl font-extrabold ">
               Utilization of Straight line | Blend Balance | Blend Gain
             </p>
           </CardTitle>

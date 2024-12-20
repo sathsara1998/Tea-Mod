@@ -79,7 +79,7 @@ const Sidebar: React.FC<{
     <motion.div
       initial={{ width: isExpanded ? 64 : 18 }} // Initial sidebar width
       animate={{ width: isExpanded ? 256 : 64 }} // Animates width
-      transition={{ duration: 0.25, type: 'tween' }} // Smooth animation
+      transition={{ duration: 0.1, type: 'tween' }} // Smooth animation
       className={cn(
         'duration-20 flex h-full flex-col bg-gray-100 text-gray-800',
       )}

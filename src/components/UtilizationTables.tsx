@@ -55,6 +55,17 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
                 frozen: true,
                 widthGrow: 1,
                 headerFilterPlaceholder: 'Find By Box Number',
+                formatter: (cell) => {
+                  const boxNumber = cell.getValue()
+
+                  // Format the box number to ensure a maximum length of 10
+                  const formatBoxNumber = (number: string) => {
+                    return number.length > 10 ? number.slice(-10) : number
+                  }
+
+                  // Call the function and return the formatted box number
+                  return formatBoxNumber(boxNumber)
+                },
               },
               {
                 title: 'STANDARD',
@@ -92,7 +103,26 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
                 hozAlign: 'right',
               },
               {
-                title: 'INVOICE NUMBER',
+                title: 'GARDEN MARK',
+                field: 'garden_mark',
+                headerFilter: true,
+                widthGrow: 1,
+              },
+              {
+                title: 'GRADE',
+                field: 'grade',
+                headerFilter: true,
+              },
+
+              {
+                title: 'PURCHASED PRICE',
+                field: 'purchased_price',
+                headerFilter: true,
+                widthGrow: 1,
+                hozAlign: 'right',
+              },
+              {
+                title: 'INVOICE ',
                 field: 'invoice_no',
                 headerFilter: true,
                 widthGrow: 1,
@@ -112,24 +142,7 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
                 headerFilter: true,
                 widthGrow: 1,
               },
-              {
-                title: 'GRADE',
-                field: 'grade',
-                headerFilter: true,
-              },
-              {
-                title: 'GARDEN MARK',
-                field: 'garden_mark',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'PURCHASED PRICE',
-                field: 'purchased_price',
-                headerFilter: true,
-                widthGrow: 1,
-                hozAlign: 'right',
-              },
+
               {
                 title: 'BREAK',
                 field: 'break',
