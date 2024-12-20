@@ -211,6 +211,7 @@ export default function AllocationTableView() {
             editor: 'number',
             editorParams: {
               min: 1,
+              selectContents: true,
             },
             frozen: true,
             cellEditCancelled: function (cell) {
@@ -229,6 +230,7 @@ export default function AllocationTableView() {
             editor: 'number',
             editorParams: {
               min: 1,
+              selectContents: true,
             },
             formatter: function (cell) {
               const value = cell.getValue()
