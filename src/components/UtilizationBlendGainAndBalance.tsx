@@ -7,6 +7,8 @@ import { useApiMethods } from '@/hooks/useApiMethods'
 import LoadingSpinner from './LoadingSpinner'
 import TeaViewDialog from './TeaViewDialog'
 import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Checkbox } from './ui/checkbox'
 type BlendGainTableProps = {
   value: string
 }
@@ -16,8 +18,12 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
-  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [cellData, setCellData] = useState<{ id: number; type: string }>({
+    id: 0,
+    type: '',
+  }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+  const [isChecked, setIsChecked] = useState(false)
 
   const downloadButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -35,8 +41,9 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
         if (tableContainerRef.current && !tableRef.current) {
           tableRef.current = new Tabulator(tableContainerRef.current, {
             height: 'auto',
-            layout: 'fitData', // Changed to fitData to fit content
+            layout: 'fitColumns',
             data: straightLineData,
+
             // Changed to hide to prevent collapse
             pagination: true,
             paginationSize: 20,
@@ -44,7 +51,7 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
             layoutColumnsOnNewData: true, // Adjusts columns based on new data
             columns: [
               {
-                title: 'Box Number',
+                title: 'BOX NUMBER',
                 field: 'box_number',
                 headerFilter: true,
                 frozen: true,
@@ -52,7 +59,7 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
                 headerFilterPlaceholder: 'Find By Box Number',
               },
               {
-                title: 'Standard',
+                title: 'STANDARD',
                 field: 'standard',
                 headerFilter: true,
                 frozen: true,
@@ -61,21 +68,7 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
               },
 
               {
-                title: 'Net Weight',
-                field: 'net_weight',
-                hozAlign: 'right',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Free Packages',
-                field: 'free_packages',
-                headerFilter: true,
-                hozAlign: 'right',
-                widthGrow: 0.5,
-              },
-              {
-                title: 'Free Quantity',
+                title: 'FREE QTY',
                 field: 'free_quantity',
                 headerFilter: true,
                 widthGrow: 0.5,
@@ -89,58 +82,23 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
               // },
 
               {
-                title: 'Purchased Price',
+                title: 'AVG PRICE',
                 field: 'purchased_price',
                 headerFilter: true,
                 widthGrow: 1,
                 hozAlign: 'right',
               },
-              {
-                title: 'Break',
-                field: 'break',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Blend Line Type',
-                field: 'blend_line_type',
-                headerFilter: true,
-                widthGrow: 1,
-              },
 
               {
-                title: 'Broker ID',
-                field: 'broker_id',
-                headerFilter: true,
-                widthGrow: 1,
-                hozAlign: 'center',
-              },
-              {
-                title: 'Broker Name',
-                field: 'broker_name',
-                headerFilter: true,
-                widthGrow: 1,
-              },
-              {
-                title: 'Lot NO',
-                field: 'lot_no',
-                headerFilter: true,
-                widthGrow: 1,
-                hozAlign: 'right',
-              },
-              {
-                title: 'Source Type',
+                title: 'SOURCE TYPE',
                 field: 'source_type',
                 headerFilter: true,
                 widthGrow: 1,
                 hozAlign: 'center',
-              },
-              {
-                title: 'Allocation Type',
-                field: 'allocation_type',
-                headerFilter: true,
-                widthGrow: 1,
-                hozAlign: 'center',
+                formatter: function (cell) {
+                  // Get the cell value and convert it to uppercase
+                  return cell.getValue()?.toUpperCase()
+                },
               },
             ],
             initialSort: [{ column: 'standard', dir: 'asc' }],
@@ -154,7 +112,8 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
           tableRef.current?.on('cellClick', (e, cell) => {
             if (cell.getColumn().getField() === 'box_number') {
               // Only trigger for the "name" column
-              setCellData(cell.getValue())
+              const rowData = cell.getRow().getData()
+              setCellData({ id: rowData.id, type: rowData.type })
               setIsTeaDialogOpen(true)
             }
           })
@@ -190,53 +149,74 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
       }
     }
   }, [apiMethods.getAllAuctionData, toast])
+  const handleSearch = (field: string, value: string) => {
+    if (tableRef.current) {
+      tableRef.current.setFilter([
+        {
+          field: field,
+          type: 'like',
+          value: value,
+        },
+      ])
+    }
+  }
+
+  const handleFreePackagesFilter = (checked: boolean) => {
+    setIsChecked(checked)
+    if (tableRef.current) {
+      tableRef.current.setFilter([
+        {
+          field: 'freepackages',
+          type: checked ? '=' : '!=',
+          value: '0',
+        },
+      ])
+    }
+  }
 
   return (
     <div>
       <div className="mb-4 flex justify-center">
         <div className="relative flex w-96 items-center space-x-2">
-          <input
+          {/* Input Field */}
+          <Input
             type="text"
             placeholder="Search by box number..."
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 
-        text-sm shadow-sm transition-all duration-200 
-        placeholder:text-gray-400
-        focus:border-gray-300 focus:outline-none focus:ring-1 
-        focus:ring-gray-200"
-            onChange={(e) => {
-              if (tableRef.current) {
-                tableRef.current.setFilter([
-                  {
-                    field: 'box_number',
-                    type: 'like',
-                    value: e.target.value,
-                  },
-                ])
-              }
-            }}
+            className="w-full"
+            onChange={(e) => handleSearch('box_number', e.target.value)}
           />
-          <button
-            className="inline-flex items-center rounded-md bg-gray-100 px-4 py-2
-        text-sm font-medium text-gray-700 transition-all duration-200
-        hover:bg-gray-200 focus:outline-none focus:ring-1 
-        focus:ring-gray-200 active:bg-gray-300"
+
+          {/* Search Button */}
+          <Button
+            variant="outline"
             onClick={() => {
               const searchInput = document.querySelector(
                 'input[type="text"]',
               ) as HTMLInputElement
-              if (tableRef.current && searchInput) {
-                tableRef.current.setFilter([
-                  {
-                    field: 'box_number',
-                    type: 'like',
-                    value: searchInput.value,
-                  },
-                ])
+              if (searchInput) {
+                handleSearch('box_number', searchInput.value)
               }
             }}
           >
             Search
-          </button>
+          </Button>
+
+          {/* Free Packages Filter Button */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="freepackages-checkbox"
+              checked={isChecked}
+              onCheckedChange={(checked) =>
+                handleFreePackagesFilter(checked as boolean)
+              }
+            />
+            <label
+              htmlFor="freepackages-checkbox"
+              className="text-sm font-medium"
+            >
+              Free Pkgs(0)
+            </label>
+          </div>
         </div>
       </div>
       {isLoading && <LoadingSpinner />}

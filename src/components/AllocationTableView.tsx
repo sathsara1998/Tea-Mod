@@ -28,7 +28,10 @@ import {
   TableRow,
 } from './ui/table'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
+import { useTheme } from 'next-themes'
+
+import 'tabulator-tables/dist/css/tabulator_midnight.min.css'
+
 import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection from './BlendInformation'
 import BlendList from './BlendList'
@@ -89,7 +92,10 @@ export default function AllocationTableView() {
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false)
   const [blendDetails, setBlendDetails] = useState<StockLot>()
   const [isOpenPlit, setIsOpenPlit] = useState(false)
-  const [cellData, setCellData] = useState(null) // To store data from the clicked cell
+  const [cellData, setCellData] = useState<{ id: number; type: string }>({
+    id: 0,
+    type: '',
+  }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   // const [isLoading, setIsLoading] = useState(false)
 
@@ -205,8 +211,18 @@ export default function AllocationTableView() {
             editor: 'number',
             editorParams: {
               min: 1,
+              selectContents: true,
             },
             frozen: true,
+            cellEditCancelled: function (cell) {
+              const rowData = cell.getRow().getData()
+              if (rowData.allocation_type === 'p' && rowData.net_weight) {
+                const newQuantityKgs = cell.getValue() * rowData.net_weight
+                cell.getRow().update({
+                  quantity_kgs: newQuantityKgs,
+                })
+              }
+            },
           },
           {
             title: 'Packages',
@@ -214,6 +230,7 @@ export default function AllocationTableView() {
             editor: 'number',
             editorParams: {
               min: 1,
+              selectContents: true,
             },
             formatter: function (cell) {
               const value = cell.getValue()
@@ -269,7 +286,8 @@ export default function AllocationTableView() {
       tabulatorRef.current.on('cellClick', (e, cell) => {
         if (cell.getColumn().getField() === 'box_number') {
           // Only trigger for the "name" column
-          setCellData(cell.getValue())
+          const rowData = cell.getRow().getData()
+          setCellData({ id: rowData.lot_id, type: rowData.type })
           setIsTeaDialogOpen(true)
         }
       })
@@ -285,13 +303,24 @@ export default function AllocationTableView() {
       tabulatorRef.current.on('cellEdited', function (cell: any) {
         const row = cell.getRow()
         const rowData = row.getData()
-        updatedRows.current = [...updatedRows.current, rowData.id]
 
-        // if (cell.getOldValue() < cell.getValue()) {
-        //   row.getElement().style.backgroundColor = '#8aedb8'
-        // } else if (cell.getOldValue() > cell.getValue()) {
-        //   row.getElement().style.backgroundColor = '#eda18a'
-        // }
+        // If packages column is edited and it's a package allocation type
+        if (
+          cell.getColumn().getField() === 'quantity_packages' &&
+          rowData.allocation_type === 'p' &&
+          rowData.net_weight
+        ) {
+          // Recalculate quantity in kg
+          const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+
+          // Update the row with new quantity in kg
+          row.update({
+            quantity_kgs: newQuantityKgs,
+            quantity_packages: rowData.quantity_packages,
+          })
+        }
+
+        updatedRows.current = [...updatedRows.current, rowData.id]
 
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
@@ -469,9 +498,8 @@ export default function AllocationTableView() {
           grade: tea.grade || '',
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
-          quantity_kgs:
-            tea.allocation_type === 'w' ? tea.net_weight : tea.net_weight,
-          quantity_packages: tea.allocation_type === 'p' ? 1 : 1,
+          quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
+          quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,
           allocation_type: tea.allocation_type,
           package_diff: 0,

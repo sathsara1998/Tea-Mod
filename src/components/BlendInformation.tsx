@@ -101,176 +101,214 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   onSaveTableData,
   lotDetails,
 }) => {
+  const cn = (...classes: string[]) => {
+    return classes.filter(Boolean).join(' ')
+  }
+
   return (
-    <div className="mb-4 grid grid-cols-12 gap-4 rounded-lg bg-slate-100 p-4">
-      <div className="col-span-4 rounded-lg bg-white p-4 shadow-sm">
-        <div className="mb-3 border-b pb-2 text-sm font-semibold">
-          Blend Details
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <LabelField label="Date" value={blendInfo.blend_date} />
-          <LabelField label="Blend Standard" value={blendInfo.blendStandard} />
-
-          <div className="rounded bg-slate-50 p-2">
-            <div className="mb-1 text-xs uppercase text-slate-600">
-              Prop Sample (gms)
-            </div>
-            <Input
-              value={blendInfo.propSample}
-              onChange={(e) =>
-                onBlendInfoChange({
-                  propSample: parseFloat(e.target.value) || 0,
-                })
-              }
-              disabled={blendInfo.status.toLowerCase() === 'done'}
-            />
-          </div>
-          <div className="rounded bg-slate-50 p-2">
-            <div className="mb-1 text-xs uppercase text-slate-600">
-              Required Date
-            </div>
-            <Input
-              type="date"
-              value={blendInfo.requiredDate}
-              onChange={(e) =>
-                onBlendInfoChange({ requiredDate: e.target.value })
-              }
-              min={new Date().toISOString().split('T')[0]}
-              disabled={blendInfo.status.toLowerCase() === 'done'}
-            />
-          </div>
-
-          <div className="rounded bg-slate-50 p-2">
-            <div className="mb-1 text-xs uppercase text-slate-600">
-              Packaging Type
-            </div>
-            <Select
-              value={blendInfo.packagingType}
-              onValueChange={(value) =>
-                onBlendInfoChange({ packagingType: value })
-              }
-              disabled={blendInfo.status.toLowerCase() === 'done'}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select packaging type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bulk">Bulk</SelectItem>
-                <SelectItem value="bags">Bags</SelectItem>
-                <SelectItem value="carton">Carton</SelectItem>
-                <SelectItem value="container">Container</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <LabelField label="Status" value={blendInfo.status} />
-        </div>
-      </div>
-
-      <div className="col-span-5 rounded-lg bg-white p-4 shadow-sm">
-        <div className="mb-3 border-b pb-2 text-sm font-semibold">
-          Cost Analysis
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <LabelField
-            label="Total Allocated"
-            value={blendInfo.totalAllocated}
-          />
-          <LabelField label="Average Price" value={blendInfo.averagePrice} />
-          <LabelField
-            label="Avg Cost to Allocate"
-            value={blendInfo.averageCostToAllocate}
-          />
-          <LabelField
-            label="Balance to Allocate"
-            value={blendInfo.balanceToAllocate}
-          />
-          <LabelField label="Tea Cost" value={blendInfo.teaCost} />
-          {blendInfo.export_quantity !== undefined && (
+    <div className="mb-4 grid grid-cols-12 gap-4 rounded-lg bg-muted/50 p-4">
+      {/* Blend Details Card */}
+      <Card className="col-span-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Blend Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            <LabelField label="Date" value={blendInfo.blend_date} />
             <LabelField
-              label="Export Quantity"
-              value={blendInfo.export_quantity?.toString()}
+              label="Blend Standard"
+              value={blendInfo.blendStandard}
             />
-          )}
-        </div>
-      </div>
 
-      <div className="col-span-3 rounded-lg bg-white p-4 shadow-sm">
-        <div className="mb-3 border-b pb-2 text-sm font-semibold">Actions</div>
-        <div className="flex flex-col gap-3">
-          <Button
-            variant="outline"
-            onClick={onGenerateBlendSheet}
-            className="group relative flex w-full max-w-full items-center justify-between rounded-md border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-all hover:bg-green-100 hover:shadow-sm md:px-3 md:py-1"
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="hidden md:block">Generate Blend Sheet</span>
-              <span className="md:hidden">Generate</span>
-            </span>
-            <svg
-              className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
+            <div className="rounded border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Prop Sample (gms)
+              </div>
+              <Input
+                value={blendInfo.propSample}
+                onChange={(e) =>
+                  onBlendInfoChange({
+                    propSample: parseFloat(e.target.value) || 0,
+                  })
+                }
+                disabled={blendInfo.status.toLowerCase() === 'done'}
+                className="bg-background"
               />
-            </svg>
-          </Button>
+            </div>
 
-          <Button
-            variant="outline"
-            onClick={onGenerateBlendSheet}
-            className="group relative flex w-full items-center justify-between rounded-md border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 transition-all hover:bg-orange-100 hover:shadow-sm"
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Reset
-            </span>
-            <svg
-              className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
+            <div className="rounded border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Required Date
+              </div>
+              <Input
+                type="date"
+                value={blendInfo.requiredDate}
+                onChange={(e) =>
+                  onBlendInfoChange({ requiredDate: e.target.value })
+                }
+                min={new Date().toISOString().split('T')[0]}
+                disabled={blendInfo.status.toLowerCase() === 'done'}
+                className="bg-background"
               />
-            </svg>
-          </Button>
-        </div>
-      </div>
+            </div>
+
+            <div className="rounded border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Packaging Type
+              </div>
+              <Select
+                value={blendInfo.packagingType}
+                onValueChange={(value) =>
+                  onBlendInfoChange({ packagingType: value })
+                }
+                disabled={blendInfo.status.toLowerCase() === 'done'}
+              >
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Select packaging type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bulk">Bulk</SelectItem>
+                  <SelectItem value="bags">Bags</SelectItem>
+                  <SelectItem value="carton">Carton</SelectItem>
+                  <SelectItem value="container">Container</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <LabelField label="Status" value={blendInfo.status} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Cost Analysis Card */}
+      <Card className="col-span-5">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Cost Analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            <LabelField
+              label="Total Allocated"
+              value={blendInfo.totalAllocated}
+            />
+            <LabelField label="Average Price" value={blendInfo.averagePrice} />
+            <LabelField
+              label="Avg Cost to Allocate"
+              value={blendInfo.averageCostToAllocate}
+            />
+            <LabelField
+              label="Balance to Allocate"
+              value={blendInfo.balanceToAllocate}
+            />
+            <LabelField label="Tea Cost" value={blendInfo.teaCost} />
+            {blendInfo.export_quantity !== undefined && (
+              <LabelField
+                label="Export Quantity"
+                value={blendInfo.export_quantity?.toString()}
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Actions Card */}
+      <Card className="col-span-3">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3">
+            {blendInfo.status === 'draft' && (
+              <Button
+                variant="outline"
+                onClick={onGenerateBlendSheet}
+                className={cn(
+                  'group relative flex w-full items-center justify-between',
+                  'border-green-200 dark:border-green-800',
+                  'bg-green-50 dark:bg-green-900/20',
+                  'text-green-700 dark:text-green-400',
+                  'hover:bg-green-100 dark:hover:bg-green-900/30',
+                  'transition-all hover:shadow-sm',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="hidden md:block">Generate Blend Sheet</span>
+                  <span className="md:hidden">Generate</span>
+                </span>
+                <svg
+                  className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Button>
+            )}
+            {blendInfo.status === 'confirmed' && (
+              <Button
+                variant="outline"
+                onClick={onGenerateBlendSheet}
+                className={cn(
+                  'group relative flex w-full items-center justify-between',
+                  'border-orange-200 dark:border-orange-800',
+                  'bg-orange-50 dark:bg-orange-900/20',
+                  'text-orange-700 dark:text-orange-400',
+                  'hover:bg-orange-100 dark:hover:bg-orange-900/30',
+                  'transition-all hover:shadow-sm',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  Reset
+                </span>
+                <svg
+                  className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

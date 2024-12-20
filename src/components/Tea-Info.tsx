@@ -31,7 +31,9 @@ const TeaInfoTable: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle>
-            <p className="h-2">Utilization of Straight line</p>
+            <p className="md:auto text-center text-xl font-extrabold ">
+              Utilization of Straight line | Blend Balance | Blend Gain
+            </p>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -56,13 +58,13 @@ const TeaInfoTable: React.FC = () => {
                 Blend Gain
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="straightline">
+            <TabsContent value="straightline" className="mt-4">
               <BlendGainTable value={'straight_line'} />
             </TabsContent>
-            <TabsContent value="blendbalance">
+            <TabsContent value="blendbalance" className="mt-4">
               <BlendBalanceTable value={'blend_balance'} />
             </TabsContent>
-            <TabsContent value="blendgain">
+            <TabsContent value="blendgain" className="mt-4">
               <BlendBalanceTable value={'blend_gain'} />
             </TabsContent>
           </Tabs>

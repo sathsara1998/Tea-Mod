@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react'
 import { Dialog } from '@radix-ui/react-dialog'
 import {
   Table,
@@ -8,6 +9,8 @@ import {
   TableRow,
 } from './ui/table'
 import { DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { useToast } from '@/components/ui/use-toast'
+import { useApiMethods } from '@/hooks/useApiMethods'
 
 interface TeaViewDialogProps {
   isTeaDialogOpen: boolean
@@ -15,39 +18,72 @@ interface TeaViewDialogProps {
   cellData: any
 }
 
-const tableData = [
-  { blends: 'English Breakfast', bags: 20, kgs: 0.04 },
-  { blends: 'Earl Grey', bags: 25, kgs: 0.05 },
-  { blends: 'Green Tea', bags: 30, kgs: 0.06 },
-]
-
 function TeaViewDialog({
   isTeaDialogOpen,
   setIsTeaDialogOpen,
   cellData,
 }: TeaViewDialogProps) {
+  const [tableData, setTableData] = useState<any[]>([])
+  const { toast } = useToast()
+  const { getSourceById } = useApiMethods()
+
+  // Fetch data when dialog is opened
+  useEffect(() => {
+    const fetchTeaDetails = async () => {
+      try {
+        if (cellData?.id) {
+          const response = await getSourceById(cellData.id, cellData.type)
+          console.log(response.blends)
+          setTableData(response.blends || []) // Assuming `blends` contains the data
+        }
+      } catch (error: any) {
+        toast({
+          title: 'Error fetching tea details',
+          description:
+            error.message ||
+            'An unexpected error occurred while fetching data.',
+          variant: 'destructive',
+        })
+      }
+    }
+
+    if (isTeaDialogOpen) {
+      fetchTeaDetails()
+    }
+  }, [isTeaDialogOpen, cellData, toast])
+
   return (
     <Dialog open={isTeaDialogOpen} onOpenChange={setIsTeaDialogOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Tea Details : {cellData}</DialogTitle>
+          <DialogTitle>Allocated Blend Details</DialogTitle>
         </DialogHeader>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Blends</TableHead>
-              <TableHead>Bags</TableHead>
-              <TableHead>Kgs</TableHead>
+              <TableHead>BLEND NO</TableHead>
+              <TableHead>BLEND STATUS</TableHead>
+              <TableHead>NO OF BAGS</TableHead>
+              <TableHead>TEA QTY</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tableData.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell>{row.blends}</TableCell>
-                <TableCell>{row.bags}</TableCell>
-                <TableCell>{row.kgs}</TableCell>
+            {tableData.length > 0 ? (
+              tableData.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.state}</TableCell>
+                  <TableCell>{row.allocated_bags}</TableCell>
+                  <TableCell>{row.allocated_quantity}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center">
+                  No Blends Assigned
+                </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </DialogContent>
