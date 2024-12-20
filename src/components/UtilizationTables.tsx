@@ -18,7 +18,10 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
   const tableContainerRef = React.useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
-  const [cellData, setCellData] = useState<{ id?: number; type?: string }>({}) // To store data from the clicked cell
+  const [cellData, setCellData] = useState<{ id: number; type: string }>({
+    id: 0,
+    type: '',
+  }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
 

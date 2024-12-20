@@ -92,7 +92,10 @@ export default function AllocationTableView() {
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false)
   const [blendDetails, setBlendDetails] = useState<StockLot>()
   const [isOpenPlit, setIsOpenPlit] = useState(false)
-  const [cellData, setCellData] = useState<{ id?: number; type?: string }>({}) // To store data from the clicked cell
+  const [cellData, setCellData] = useState<{ id: number; type: string }>({
+    id: 0,
+    type: '',
+  }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   // const [isLoading, setIsLoading] = useState(false)
 
