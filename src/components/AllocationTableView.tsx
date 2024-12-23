@@ -1144,10 +1144,7 @@ export default function AllocationTableView() {
               >
                 Cancel
               </Button>
-              <Button
-                onClick={confirmRemoveSelectedTeas}
-                className="bg-red-600 text-white"
-              >
+              <Button onClick={confirmRemoveSelectedTeas} variant="destructive">
                 Confirm
               </Button>
             </DialogFooter>
@@ -1171,10 +1168,7 @@ export default function AllocationTableView() {
               >
                 Cancel
               </Button>
-              <Button
-                onClick={handleGenerateBlendSheet}
-                className="bg-green-600 text-white"
-              >
+              <Button onClick={handleGenerateBlendSheet} variant="destructive">
                 Confirm
               </Button>
             </DialogFooter>
@@ -1194,10 +1188,7 @@ export default function AllocationTableView() {
               >
                 Cancel
               </Button>
-              <Button
-                onClick={handleResetBlendSheet}
-                className="bg-green-600 text-white"
-              >
+              <Button onClick={handleResetBlendSheet} variant="destructive">
                 Confirm
               </Button>
             </DialogFooter>

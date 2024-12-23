@@ -151,7 +151,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                   onBlendInfoChange({ requiredDate: e.target.value })
                 }
                 min={new Date().toISOString().split('T')[0]}
-                disabled={blendInfo.status.toLowerCase() === 'done'}
+                disabled
                 className="bg-background text-foreground"
               />
             </div>
