@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
@@ -9,12 +9,84 @@ import { ArrowRight } from 'lucide-react'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import LoadingSpinner from './LoadingSpinner'
 
+interface StatusType {
+  status:
+    | 'draft'
+    | 'in_progress'
+    | 'confirmed'
+    | 'done'
+    | string
+    | null
+    | undefined
+}
+
+const StatusBadge = ({ status }: { status: StatusType['status'] }) => {
+  const getStatusStyles = (status: StatusType['status']): string => {
+    switch (status?.toLowerCase()) {
+      case 'draft':
+        return 'bg-gray-200 text-gray-800'
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800'
+      case 'confirmed':
+        return 'bg-green-100 text-green-800'
+      case 'done':
+        return 'bg-purple-100 text-purple-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const formatStatus = (status: StatusType['status']): string => {
+    if (!status) return ''
+
+    if (status.toLowerCase() === 'in_progress') {
+      return 'In Progress'
+    }
+
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+  }
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusStyles(
+        status,
+      )}`}
+    >
+      {formatStatus(status)}
+    </span>
+  )
+}
+
 const BlendView = () => {
   const { getBlends } = useApiMethods()
   const tableRef = useRef<Tabulator | null>(null)
   const tableContainerRef = useRef<HTMLDivElement | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const createActionButton = (cell: any) => {
+    const container = document.createElement('div')
+    const root = createRoot(container)
+
+    const ActionButton = () => {
+      const handleClick = () => {
+        const rowData = cell.getData()
+        window.location.href = `/allocate?id=${encodeURIComponent(rowData.name)}`
+      }
+
+      return (
+        <button
+          onClick={handleClick}
+          className="transparent cursor-pointer border-none hover:bg-transparent"
+        >
+          <ArrowRight size={20} />
+        </button>
+      )
+    }
+
+    root.render(<ActionButton />)
+    return container
+  }
 
   useEffect(() => {
     const initializeTable = async () => {
@@ -48,7 +120,6 @@ const BlendView = () => {
                 widthGrow: 2,
                 headerSort: false,
               },
-
               {
                 title: 'Blend Standard',
                 field: 'product_name',
@@ -98,6 +169,12 @@ const BlendView = () => {
                   },
                 },
                 widthGrow: 1,
+                formatter: (cell) => {
+                  const container = document.createElement('div')
+                  const root = createRoot(container)
+                  root.render(<StatusBadge status={cell.getValue()} />)
+                  return container
+                },
               },
               {
                 title: 'Balance to Allocate',
@@ -110,29 +187,7 @@ const BlendView = () => {
               },
               {
                 title: 'Actions',
-                formatter: (cell) => {
-                  const container = document.createElement('div')
-                  const button = document.createElement('button')
-                  const iconContainer = document.createElement('div')
-                  button.style.backgroundColor = 'transparent'
-                  button.style.border = 'none'
-                  button.style.cursor = 'pointer'
-
-                  button.addEventListener('mouseout', () => {
-                    button.style.backgroundColor = 'transparent'
-                  })
-                  ReactDOM.render(<ArrowRight size={20} />, iconContainer)
-                  button.appendChild(iconContainer)
-                  container.appendChild(button)
-
-                  button.addEventListener('click', async () => {
-                    const rowData = cell.getData()
-
-                    window.location.href = `/allocate?id=${encodeURIComponent(rowData.name)}`
-                  })
-
-                  return container
-                },
+                formatter: createActionButton,
                 hozAlign: 'center',
                 width: 75,
               },
@@ -140,9 +195,9 @@ const BlendView = () => {
             initialSort: [{ column: 'name', dir: 'asc' }],
             rowFormatter: (row) => {
               const element = row.getElement()
-              element.style.backgroundColor = '' // Light row background
-              element.style.color = '#333' // Text color
-              element.style.borderBottom = '' // Subtle border
+              element.style.backgroundColor = ''
+              element.style.color = '#333'
+              element.style.borderBottom = ''
             },
           })
 
@@ -150,8 +205,8 @@ const BlendView = () => {
             '.tabulator-header',
           ) as HTMLElement
           if (headerElement) {
-            headerElement.style.backgroundColor = '#e8f1fe' // Darker header background
-            headerElement.style.color = '#fff' // Header text color
+            headerElement.style.backgroundColor = '#e8f1fe'
+            headerElement.style.color = '#fff'
           }
         }
 
