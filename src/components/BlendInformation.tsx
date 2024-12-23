@@ -27,6 +27,7 @@ interface BlendInformationSectionProps {
   blendInfo: BlendInfo
   onBlendInfoChange: (info: Partial<BlendInfo>) => void
   onGenerateBlendSheet: () => void
+  onResetBlendSheet: () => void
   onSaveTableData: () => void
   lotDetails: StockLot | undefined
 }
@@ -98,6 +99,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   blendInfo,
   onBlendInfoChange,
   onGenerateBlendSheet,
+  onResetBlendSheet,
   onSaveTableData,
   lotDetails,
 }) => {
@@ -271,7 +273,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
             {blendInfo.status === 'confirmed' && (
               <Button
                 variant="outline"
-                onClick={onGenerateBlendSheet}
+                onClick={onResetBlendSheet}
                 className={cn(
                   'group relative flex w-full items-center justify-between',
                   'border-orange-200 dark:border-orange-800',

@@ -1,12 +1,15 @@
 import { apiClient } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
-// Get Blend data by id
+export const dynamic = 'force-dynamic'
+
+//Reset Blend Status
 export async function POST(req: Request) {
   const data = await req.json()
+
   try {
     const response = await apiClient({
-      url: `/confirm_blend`,
+      url: `/draft_blend`,
       method: 'POST',
       data: data,
     })
@@ -14,9 +17,6 @@ export async function POST(req: Request) {
     return NextResponse.json(response.data)
   } catch (err) {
     console.log(err)
-    return NextResponse.json(
-      { error: 'An error occurred while Adding Allocations.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'An error occured While Reseting Blend' })
   }
 }

@@ -503,6 +503,24 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+  const blendReset = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: '/api/blend/resetBlend',
+        errorMessage: 'An error occurred while adding allocations.',
+        method: 'post',
+        data: data,
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error: any) {
+        throw new Error(error.response.data.error)
+      }
+    },
+    [apiClient],
+  )
 
   return {
     getConfirmedSaleOrders,
@@ -528,6 +546,7 @@ export const useApiMethods = () => {
     editPackageAllocation,
     splitPackage,
     blendConfirm,
+    blendReset,
     getSourceById,
   }
 }
