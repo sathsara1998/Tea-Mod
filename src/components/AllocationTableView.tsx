@@ -30,7 +30,7 @@ import {
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import { useTheme } from 'next-themes'
 
-import 'tabulator-tables/dist/css/tabulator_midnight.min.css'
+import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 
 import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection from './BlendInformation'
@@ -90,6 +90,7 @@ export default function AllocationTableView() {
   const [selectedBlend, setSelectedBlend] = useState<TeaBlend>()
   const [isDraftBlend, setIsDraftBlend] = useState(true)
   const [isGenerateConfirmOpen, setIsGenerateConfirmOpen] = useState(false)
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [blendDetails, setBlendDetails] = useState<StockLot>()
   const [isOpenPlit, setIsOpenPlit] = useState(false)
   const [cellData, setCellData] = useState<{ id: number; type: string }>({
@@ -106,6 +107,7 @@ export default function AllocationTableView() {
     deleteManufactureAllocs,
     editPackageAllocation,
     blendConfirm,
+    blendReset,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -762,6 +764,58 @@ export default function AllocationTableView() {
     fetchBlendData,
     toast,
   ])
+  const handleResetBlendSheet = useCallback(async () => {
+    try {
+      // Create a BlendAllocation object from blendInfo and allocations
+      const blendAllocation: any = {
+        ...blendInfo,
+        allocations: allocations,
+      }
+
+      const blendName = { blend_name: blendAllocation.blendNo }
+      setIsResetConfirmOpen(false)
+
+      const success = await blendReset(blendName)
+
+      if (success) {
+        console.log('Blend sheet Reseted successfully')
+        toast({
+          title: 'Success',
+          description: 'Blend sheet Reseted successfully',
+          variant: 'default',
+        })
+
+        // Fetch updated data only if selectedBlend exists
+        if (selectedBlend) {
+          await fetchBlendData(selectedBlend.name)
+        }
+      } else {
+        console.error('Failed to reset blend sheet')
+        toast({
+          title: 'Error',
+          description: 'Failed to reset blend sheet',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      console.error('Error generating blend sheet:', error)
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate blend sheet',
+        variant: 'destructive',
+      })
+    }
+  }, [
+    blendInfo,
+    allocations,
+    selectedBlend,
+    blendConfirm,
+    fetchBlendData,
+    toast,
+  ])
 
   useEffect(() => {
     if (selectedBlend) {
@@ -940,6 +994,7 @@ export default function AllocationTableView() {
                   lotDetails={blendDetails}
                   onBlendInfoChange={handleBlendInfoChange}
                   onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
+                  onResetBlendSheet={() => setIsResetConfirmOpen(true)}
                   onSaveTableData={() => saveTableData()}
                 />
                 {/* <div ref={blendsTableRef}></div> */}
@@ -1089,10 +1144,7 @@ export default function AllocationTableView() {
               >
                 Cancel
               </Button>
-              <Button
-                onClick={confirmRemoveSelectedTeas}
-                className="bg-red-600 text-white"
-              >
+              <Button onClick={confirmRemoveSelectedTeas} variant="destructive">
                 Confirm
               </Button>
             </DialogFooter>
@@ -1118,8 +1170,29 @@ export default function AllocationTableView() {
               </Button>
               <Button
                 onClick={handleGenerateBlendSheet}
-                className="bg-green-600 text-white"
+                variant="outline"
+                className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-green-700 hover:text-white"
               >
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Confirmation for reset button */}
+        <Dialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Reset</DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to reset the blend?</p>
+            <DialogFooter>
+              <Button
+                onClick={() => setIsResetConfirmOpen(false)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleResetBlendSheet} variant="destructive">
                 Confirm
               </Button>
             </DialogFooter>

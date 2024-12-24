@@ -1,21 +1,19 @@
 import { apiClient } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
-// Get Blend data by id
-export async function POST(req: Request) {
-  const data = await req.json()
+export const dynamic = 'force-dynamic'
+// Get All Auction data
+export async function GET() {
   try {
     const response = await apiClient({
-      url: `/confirm_blend`,
-      method: 'POST',
-      data: data,
+      url: '/tea/lot/all',
+      method: 'GET',
     })
 
     return NextResponse.json(response.data)
   } catch (err) {
-    console.log(err)
     return NextResponse.json(
-      { error: 'An error occurred while Adding Allocations.' },
+      { error: 'An error occurred while fetching data.' },
       { status: 500 },
     )
   }

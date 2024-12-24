@@ -27,6 +27,7 @@ interface BlendInformationSectionProps {
   blendInfo: BlendInfo
   onBlendInfoChange: (info: Partial<BlendInfo>) => void
   onGenerateBlendSheet: () => void
+  onResetBlendSheet: () => void
   onSaveTableData: () => void
   lotDetails: StockLot | undefined
 }
@@ -98,6 +99,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   blendInfo,
   onBlendInfoChange,
   onGenerateBlendSheet,
+  onResetBlendSheet,
   onSaveTableData,
   lotDetails,
 }) => {
@@ -108,9 +110,11 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   return (
     <div className="mb-4 grid grid-cols-12 gap-4 rounded-lg bg-muted/50 p-4">
       {/* Blend Details Card */}
-      <Card className="col-span-4">
+      <Card className="col-span-4 border border-border bg-background shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold">Blend Details</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">
+            Blend Details
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">
@@ -120,7 +124,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               value={blendInfo.blendStandard}
             />
 
-            <div className="rounded border bg-muted/30 p-2">
+            <div className="rounded border border-border bg-muted/30 p-2">
               <div className="mb-1 text-xs uppercase text-muted-foreground">
                 Prop Sample (gms)
               </div>
@@ -132,11 +136,11 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                   })
                 }
                 disabled={blendInfo.status.toLowerCase() === 'done'}
-                className="bg-background"
+                className="bg-background text-foreground"
               />
             </div>
 
-            <div className="rounded border bg-muted/30 p-2">
+            <div className="rounded border border-border bg-muted/30 p-2">
               <div className="mb-1 text-xs uppercase text-muted-foreground">
                 Required Date
               </div>
@@ -147,12 +151,12 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                   onBlendInfoChange({ requiredDate: e.target.value })
                 }
                 min={new Date().toISOString().split('T')[0]}
-                disabled={blendInfo.status.toLowerCase() === 'done'}
-                className="bg-background"
+                disabled
+                className="bg-background text-foreground"
               />
             </div>
 
-            <div className="rounded border bg-muted/30 p-2">
+            <div className="rounded border border-border bg-muted/30 p-2">
               <div className="mb-1 text-xs uppercase text-muted-foreground">
                 Packaging Type
               </div>
@@ -163,7 +167,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 }
                 disabled={blendInfo.status.toLowerCase() === 'done'}
               >
-                <SelectTrigger className="bg-background">
+                <SelectTrigger className="bg-background text-foreground">
                   <SelectValue placeholder="Select packaging type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,9 +184,11 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       </Card>
 
       {/* Cost Analysis Card */}
-      <Card className="col-span-5">
+      <Card className="col-span-5 border border-border bg-background shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold">Cost Analysis</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">
+            Cost Analysis
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">
@@ -211,9 +217,11 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       </Card>
 
       {/* Actions Card */}
-      <Card className="col-span-3">
+      <Card className="col-span-3 border border-border bg-background shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold">Actions</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">
+            Actions
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
@@ -265,7 +273,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
             {blendInfo.status === 'confirmed' && (
               <Button
                 variant="outline"
-                onClick={onGenerateBlendSheet}
+                onClick={onResetBlendSheet}
                 className={cn(
                   'group relative flex w-full items-center justify-between',
                   'border-orange-200 dark:border-orange-800',

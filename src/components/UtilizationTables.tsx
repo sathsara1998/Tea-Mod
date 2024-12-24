@@ -31,7 +31,7 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
     const initializeTable = async () => {
       try {
         setIsLoading(true)
-        const data = await apiMethods.getAllAuctionData()
+        const data = await apiMethods.getAllLotData()
         const straightLineData = data.filter(
           (item: { type: string }) => item.type === value,
         )
@@ -246,7 +246,7 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
     if (tableRef.current) {
       tableRef.current.setFilter([
         {
-          field: 'freepackages',
+          field: 'free_packages',
           type: checked ? '=' : '!=',
           value: '0',
         },

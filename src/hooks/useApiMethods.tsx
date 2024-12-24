@@ -171,6 +171,21 @@ export const useApiMethods = () => {
       throw new Error(config.errorMessage)
     }
   }, [apiClient])
+  // Get all lot data
+  const getAllLotData = useCallback(async () => {
+    const config: CustomConfig = {
+      url: '/api/auctionData/allData',
+      errorMessage: 'Error fetching data. Please try again.',
+      method: 'get',
+    }
+    try {
+      const response = await apiClient(config)
+      const data = response.data
+      return data
+    } catch (error) {
+      throw new Error(config.errorMessage)
+    }
+  }, [apiClient])
 
   // Get Blend data by id
   const getBlendById = useCallback(
@@ -503,6 +518,24 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+  const blendReset = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: '/api/blend/resetBlend',
+        errorMessage: 'An error occurred while adding allocations.',
+        method: 'post',
+        data: data,
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error: any) {
+        throw new Error(error.response.data.error)
+      }
+    },
+    [apiClient],
+  )
 
   return {
     getConfirmedSaleOrders,
@@ -528,6 +561,8 @@ export const useApiMethods = () => {
     editPackageAllocation,
     splitPackage,
     blendConfirm,
+    blendReset,
     getSourceById,
+    getAllLotData,
   }
 }
