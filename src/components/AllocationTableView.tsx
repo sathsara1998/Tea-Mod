@@ -30,7 +30,7 @@ import {
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import { useTheme } from 'next-themes'
 
-import 'tabulator-tables/dist/css/tabulator_midnight.min.css'
+import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 
 import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection from './BlendInformation'
