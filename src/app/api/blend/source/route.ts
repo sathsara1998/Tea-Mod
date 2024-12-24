@@ -20,7 +20,8 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         error:
-          err.response.data.error || 'An error occurred while fetching blends.',
+          err.response.data.error ||
+          'An error occurred while fetching blend Details.',
       },
       { status: 500 },
     )
