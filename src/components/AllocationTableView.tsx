@@ -1168,7 +1168,11 @@ export default function AllocationTableView() {
               >
                 Cancel
               </Button>
-              <Button onClick={handleGenerateBlendSheet} variant="destructive">
+              <Button
+                onClick={handleGenerateBlendSheet}
+                variant="outline"
+                className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-green-700 hover:text-white"
+              >
                 Confirm
               </Button>
             </DialogFooter>
