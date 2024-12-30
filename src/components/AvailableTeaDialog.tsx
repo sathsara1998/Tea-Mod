@@ -191,6 +191,7 @@ const AvailableTeaDialog: React.FC<AvailableTeaDialogProps> = ({
           },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Invoice No', field: 'invoice_no', hozAlign: 'left' },
+          { title: 'Net Weight', field: 'net_weight', hozAlign: 'left' },
           {
             title: 'Package Weight (kg)',
             field: 'net_weight',
