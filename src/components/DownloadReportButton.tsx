@@ -21,10 +21,10 @@ interface TableRowData {
   'Net Weight': number
   'Lot No': string
   Grade: string
-
   'Quantity (Kg)': number
   'Allocated Packages': number
-  'Value (Rs)': number
+  'Value (Rs)': string
+  'Line Type'?: string
 }
 
 interface DownloadReportButtonProps {
@@ -48,10 +48,10 @@ interface DownloadReportButtonProps {
 const getHeadStyles = () => ({
   textColor: [0, 0, 0] as [number, number, number],
   fontSize: 9,
-  fontStyle: 'bold' as const,
+  fontStyle: 'italic' as const,
   halign: 'center' as const, // Center-aligned headers
   valign: 'middle' as const, // Vertically centered
-  cellPadding: { top: 6, right: 8, bottom: 6, left: 8 },
+  cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
   lineWidth: 1,
   lineColor: [0, 0, 0] as [number, number, number], // Subtle border for headers
 })
@@ -98,13 +98,34 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
       const formatRcd = (rcd: boolean) => {
         return rcd === true ? 'Y' : 'N'
       }
+      const formatValueWithCommas = (value: number) => {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      }
       const tableData: TableRowData[] = tabulatorRef.current
         .getData()
         .map((row: any) => {
           const quantity = row.quantity_kgs || 0
           const unitCost = row.unit_cost || 0
           const value = quantity * unitCost
-
+          // console.log('Row Data:', {
+          //   boxNumber: row.box_number,
+          //   saleCode: row.sale_code,
+          //   rcd: row.rcd,
+          //   brokerName: row.broker_name,
+          //   gardenMark: row.garden_mark,
+          //   standard: row.standard,
+          //   invoiceNo: row.invoice_no,
+          //   lotNo: row.lot_no,
+          //   grade: row.grade,
+          //   unitCost: row.unit_cost,
+          //   quantityKgs: row.quantity_kgs,
+          //   quantityPackages: row.quantity_packages,
+          //   value: value,
+          //   lastAmendDate: row.last_ammedned_date,
+          //   propSample: row.prop_sample_in_grams,
+          //   purchasedDate: row.purchased_date,
+          //   netWeight: row.net_weight,
+          // })
           return {
             'Box Number': formatBoxNumber(row.box_number || ''),
             'Sale No': row.sale_code,
@@ -115,14 +136,15 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
             'Inv No': row.invoice_no || '',
             'Lot No': row.lot_no || '',
             Grade: row.grade || '',
-            'Purchased Price': unitCost,
+            'Purchased Price': formatValueWithCommas(unitCost.toFixed(2)),
             'Quantity (Kg)': quantity,
             'Allocated Packages': row.quantity_packages || 0,
-            'Value (Rs)': parseFloat(value.toFixed(2)),
+            'Value (Rs)': formatValueWithCommas(parseFloat(value.toFixed(2))),
             'Last Ammend Date': formatDate(row.last_ammedned_date),
             'Prop Sample': row.prop_sample_in_grams,
             'Purchased Date': formatDate(row.purchased_date),
             'Net Weight': row.net_weight,
+            'Line Type': row.type,
           }
         })
 
@@ -253,7 +275,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         0,
       )
       const totalValue = tableData.reduce(
-        (sum, row) => sum + (row['Value (Rs)'] || 0),
+        (sum, row) => sum + parseFloat(row['Value (Rs)'].replace(/,/g, '')),
         0,
       )
 
@@ -268,7 +290,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         'Allocated Packages': totalPackages,
         'Net Weight': parseFloat(totalWeight.toFixed(2)),
         'Quantity (Kg)': parseFloat(totalKgs.toFixed(2)),
-        'Value (Rs)': parseFloat(totalValue.toFixed(2)),
+        'Value (Rs)': formatValueWithCommas(parseFloat(totalValue.toFixed(2))),
       }
 
       tableData.push(totalsRow)
@@ -335,8 +357,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
           const rightColumnData = [
             {
               label: 'Blend Average',
-              value: blendInfo.averagePrice.toFixed(3)
-
+              value: blendInfo.averagePrice.toFixed(3),
             },
             { label: 'RT No', value: blendInfo.rtNo },
             { label: 'Status', value: blendInfo.status },
@@ -404,85 +425,85 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         ...col,
         width: col.width * scaleFactor,
       }))
+      // First, filter and create separate data sets
+      const blendBalanceData = tableData.filter(
+        (row) => row['Line Type'] === 'blend_balance',
+      )
+      const straightLineData = tableData.filter(
+        (row) => row['Line Type'] !== 'blend_balance',
+      )
 
+      // Generate main table with straight line data first
       const { grandTotal, blendBalance, packingAvg, straightLineAvg } =
-        BlendTable(doc, tableData, scaledColumns, pageWidth, margin, pageHeight)
+        BlendTable(
+          doc,
+          straightLineData,
+          scaledColumns,
+          pageWidth,
+          margin,
+          pageHeight,
+        )
 
-      let finalY = (doc as any).autoTable.previous.finalY || 30
-      const requiredSpace = 120
-      if (finalY + requiredSpace > pageHeight - margin) {
-        doc.addPage()
-        finalY = margin + 20
-      }
+      // Get the Y position after the straight line table
+      let currentY = (doc as any).autoTable.previous.finalY + 20
 
-      doc.setFontSize(8)
-      doc.setLineWidth(0.5)
-      // Draw summary box
-      const boxStartX = pageWidth - margin - 380
-      const boxEndX = pageWidth - margin - 65
-      const lineSpacing = 25
+      // If we have blend balance data, add it to a new page or current page based on space
+      if (blendBalanceData.length > 0) {
+        const remainingSpace = pageHeight - currentY - 50 // 200 is buffer space
+        const estimatedRowHeight = 30 // Approximate height per row
+        const estimatedTableHeight =
+          blendBalanceData.length * estimatedRowHeight + 50 // 50 for header
 
-      // Helper function for consistent line drawing
-      const drawLine = (y: number, startX = boxStartX, endX = boxEndX) => {
-        doc.line(startX, y, endX, y)
-      }
+        // Add new page if not enough space
+        if (estimatedTableHeight > remainingSpace) {
+          doc.addPage()
+          currentY = 50 // Reset Y position on new page
+        }
 
-      // Helper function for consistent text alignment
-      const drawRowText = (
-        label: string,
-        value: string | number,
-        y: number,
-      ) => {
-        doc.text(label, boxStartX, y, { align: 'left' })
-        doc.text(value.toString(), boxEndX - 85, y, { align: 'right' })
-      }
+        const tableColumns = [
+          { title: 'Box Number', dataKey: 'Box Number', width: 60 },
+          { title: 'Purchased Date', dataKey: 'Purchased Date', width: 60 },
+          { title: 'Garden Mark', dataKey: 'Garden Mark', width: 80 },
+          { title: 'Net Qty (Kg)', dataKey: 'Quantity (Kg)', width: 60 },
+          { title: 'Rcd', dataKey: 'Rcd', width: 30 },
+          { title: 'Prop Sample', dataKey: 'Prop Sample', width: 50 },
+          { title: 'Last Ammend Date', dataKey: 'Last Ammend Date', width: 60 },
+        ]
 
-      doc.setFont(font, 'bold')
-      doc.setFontSize(8)
+        // Add blend balance table header
+        doc.setFont(font, 'bold')
+        doc.setFontSize(10)
+        doc.text('Blend Balance Details', margin, currentY + 10)
 
-      // Grand Total section
-      drawLine(finalY + 20, boxStartX + 140, boxEndX)
-      drawRowText(
-        'Grand Total of the Blend',
-        grandTotal.toFixed(2),
-        finalY + 35,
-      )
-      drawLine(finalY + 40)
-
-      // Contract Qty section
-      drawRowText('Contract Qty', '212123', finalY + 55)
-      drawLine(finalY + 60)
-
-      // Blend Balance section
-      const calculatedBlendBalance = grandTotal - 212123
-      drawRowText(
-        'Blend Balance',
-        calculatedBlendBalance.toFixed(2),
-        finalY + 75,
-      )
-      drawLine(finalY + 80)
-
-      // Packing Average section
-      drawRowText('Packing Avg', packingAvg.toFixed(2), finalY + 95)
-      drawLine(finalY + 100)
-
-      // Straight Line Average section
-      drawRowText('Straight Line Avg', straightLineAvg.toFixed(2), finalY + 115)
-      drawLine(finalY + 120)
-
-      let contractStartY = finalY + 140
-      ContractTable(doc, columns2, data, contractStartY)
-      const summaryTableFinalY = (doc as any).autoTable.previous.finalY + 20
-
-      const spaceNeededForSignatures = 200
-      const currentY = summaryTableFinalY
-      const remainingSpace = pageHeight - currentY
-
-      if (remainingSpace < spaceNeededForSignatures) {
-        doc.addPage()
-        finalSignatures(doc, 50, 40)
-      } else {
-        finalSignatures(doc, currentY, 40)
+        doc.autoTable({
+          head: [tableColumns.map((col) => col.title)],
+          body: blendBalanceData.map((row) =>
+            tableColumns.map(
+              (col) => row[col.dataKey as keyof TableRowData] ?? '',
+            ),
+          ),
+          startY: currentY + 20,
+          theme: 'plain',
+          margin: { left: margin },
+          styles: {
+            fontSize: 8,
+            font: font,
+            cellPadding: 2,
+            fontStyle: 'bold',
+          },
+          headStyles: {
+            ...getHeadStyles(),
+          },
+          columnStyles: {
+            0: { cellWidth: 60 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 80 },
+            3: { cellWidth: 60, halign: 'right' },
+            4: { cellWidth: 30, halign: 'center' },
+            5: { cellWidth: 50, halign: 'right' },
+            6: { cellWidth: 60 },
+          },
+        })
       }
 
       const totalPages = doc.getNumberOfPages()
@@ -519,10 +540,13 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         columns.reduce((sum, col) => sum + (col.width || 0), 0),
     }))
 
-    // Calculate the grand total of the blend
-    const grandTotal =
-      tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
-
+    // Calculate the total value
+    const grandTotal = tableData.reduce(
+      (sum = 0, row) =>
+        sum + (parseFloat(row['Value (Rs)'].replace(/,/g, '')) || 0),
+      0,
+    )
+    // console.log(grandTotal)
     // Calculate the blend balance
     const blendBalance =
       tableData.length > 0 ? tableData[tableData.length - 1]['Value (Rs)'] : 0
@@ -536,11 +560,12 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     doc.autoTable({
       head: [scaledColumns.map((col) => col.title)],
       body: tableData.map((row) =>
-        scaledColumns.map((col) => row[col.dataKey as keyof TableRowData]),
+        scaledColumns.map(
+          (col) => row[col.dataKey as keyof TableRowData] ?? '',
+        ),
       ),
       theme: 'plain', // Clean layout
-
-      startY: 200,
+      startY: 170,
       tableWidth: pageWidth - 3 * margin,
       margin: { left: margin, right: margin },
 
@@ -550,7 +575,7 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
         lineWidth: 0, // No body row lines
         font: font,
       },
-      headStyles: getHeadStyles(),
+      headStyles: { ...getHeadStyles() },
       bodyStyles: {
         fillColor: false, // White background for a clean look
         textColor: [0, 0, 0],
@@ -755,8 +780,20 @@ const DownloadReportButton: React.FC<DownloadReportButtonProps> = ({
     doc.text('________________', margin + 120, footerY - 30)
   }
   return (
-    <Button onClick={generateReport} className="bg-blue-600 text-white">
-      Download Report
+    <Button
+      onClick={generateReport}
+      aria-label="Download Report as PDF"
+      className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-gray-100 disabled:opacity-50 sm:px-4 sm:py-2 sm:text-sm"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-3 w-3 sm:h-4 sm:w-4"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
+      </svg>
+      <span className="text-xs sm:text-sm">Download Report</span>
     </Button>
   )
 }

@@ -6,16 +6,16 @@ import { generateTeas } from '@/lib/utils'
 import React, { Suspense, useState } from 'react'
 
 const Page: React.FC = () => {
-
-    
   const [availableTeas, setAvailableTeas] = useState<Tea[]>(generateTeas())
-  const [blendAllocations, setBlendAllocations] = useState<BlendAllocation[]>([])
+  const [blendAllocations, setBlendAllocations] = useState<BlendAllocation[]>(
+    [],
+  )
   const [blendNameSequence, setBlendNameSequence] = useState(567)
   const [blendNumberSequence, setBlendNumberSequence] = useState(1000001)
-    return (
-        <>
-        <Suspense fallback={<div>Loading...</div>}>
-         <AllocationView
+  return (
+    <>
+      <Suspense fallback={<div>Loading...</div>}>
+        <AllocationView
           availableTeas={availableTeas}
           setAvailableTeas={setAvailableTeas}
           blendAllocations={blendAllocations}
@@ -24,11 +24,10 @@ const Page: React.FC = () => {
           setBlendNameSequence={setBlendNameSequence}
           blendNumberSequence={blendNumberSequence}
           setBlendNumberSequence={setBlendNumberSequence}
-        />   
-                <ThemeToggle />
-        </Suspense>
-        </>
-    )
+        />
+      </Suspense>
+    </>
+  )
 }
 
-export default Page;
+export default Page
