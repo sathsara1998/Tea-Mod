@@ -576,13 +576,27 @@ export const useApiMethods = () => {
     [apiClient],
   )
   // Update blend
+  // const updateNewBlend = async (blendData: any) => {
+  //   try {
+  //     const response = await fetch('/api/tea-blend/updateBlend', {
+  //       method: 'PUT',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(blendData),
+  //     })
+  //     const result = await response.json()
+  //     console.log(result)
+  //   } catch (error) {
+  //     console.error('Error updating blend:', error)
+  //   }
+  //   ;[apiClient]
+  // }
   const updateNewBlend = useCallback(
-    async (blendId: number, data: any) => {
+    async (blendData: { allocation_id: string; quantity: number }) => {
       const config: CustomConfig = {
-        url: `/api/tea-blend/updateBlend?id=${blendId}`,
-        errorMessage: 'Failed to update blends. Please try again.',
-        method: 'PUT',
-        data: data,
+        url: `/api/tea-blend/updateBlend`,
+        errorMessage: 'An error occurred while updating blend data.',
+        method: 'put',
+        data: blendData,
       }
       try {
         const response = await apiClient(config)
@@ -595,6 +609,26 @@ export const useApiMethods = () => {
     [apiClient],
   )
 
+  // Add Allocation
+  const addAllocation = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: 'api/tea-blend/addAllocation',
+        errorMessage: 'Failed to create blends. Please try again.',
+        method: 'POST',
+        data: data,
+      }
+
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -625,5 +659,6 @@ export const useApiMethods = () => {
     getCustomerBlendOrders,
     createNewBlend,
     updateNewBlend,
+    addAllocation,
   }
 }

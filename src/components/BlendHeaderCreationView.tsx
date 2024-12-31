@@ -67,6 +67,7 @@ export default function BlendAllocator() {
     getBlendByBlendNo,
     getBlendByCustomer,
     createNewBlend,
+    updateNewBlend,
   } = useApiMethods()
   const router = useRouter()
   const pathname = usePathname()
@@ -244,25 +245,26 @@ export default function BlendAllocator() {
   }
 
   const editExistingBlend = async () => {
-    let sendData: any = []
+    let sendData = {
+      allocation_id: '0',
+      quantity: 0,
+    }
 
     selectedAllocations.forEach((item, index) => {
+      console.log(item)
       if (initialSalesOrders.current.length > index) {
         if (
           initialSalesOrders.current[index].blending_qty != item.blending_qty
         ) {
-          sendData.push({
-            id: item.id,
-            quantity: item.blending_qty,
-          })
+          sendData.allocation_id = item.contract_line_no
+          sendData.quantity = item.blending_qty
         }
       }
     })
 
     try {
-      await updateSalesOrder({
-        allocations: sendData,
-      })
+      console.log(sendData)
+      await updateNewBlend(sendData)
       toast({
         title: 'Blend Updated',
         description: `Updated blend successfully`,

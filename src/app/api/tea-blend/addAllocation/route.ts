@@ -1,14 +1,14 @@
 import { apiClient } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
-// Update Allocations in sales order
-export async function PUT(req: Request) {
+// Create Blend
+export async function POST(req: Request) {
   const data = await req.json()
 
   try {
     const response = await apiClient({
-      url: `/tea_blend/update_allocation`,
-      method: 'PUT',
+      url: '/tea_blend/add_demand_line',
+      method: 'POST',
       data: data,
     })
 
@@ -17,7 +17,7 @@ export async function PUT(req: Request) {
     console.log(err)
 
     return NextResponse.json(
-      { error: 'An error occurred while updating the Allocations.' },
+      { error: 'An error occurred while Creating blend.' },
       { status: 500 },
     )
   }

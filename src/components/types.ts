@@ -238,7 +238,7 @@ export interface AddAllocationArray {
 
 export interface AddSalesAllocation {
   blend_id: number
-  sale_order_line_id: number
+  demand_line_id: number
   quantity: number
 }
 
