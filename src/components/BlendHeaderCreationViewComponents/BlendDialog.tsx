@@ -70,7 +70,7 @@ export default function BlendDialog({
   const allocationsTableRef = useRef<HTMLDivElement>(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
 
-  const { getCustomerBlendOrders, addSalesAllocationtoBlend } = useApiMethods()
+  const { getCustomerBlendOrders, addAllocation } = useApiMethods()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -260,13 +260,13 @@ export default function BlendDialog({
     const products: AddSalesAllocation[] = selectedOrderLines.map((line) => {
       return {
         blend_id: blendId ? blendId : 0,
-        sale_order_line_id: line.id,
+        demand_line_id: line.id,
         quantity: line.allocated_blend_quantity,
       }
     })
 
     try {
-      await addSalesAllocationtoBlend(products)
+      await addAllocation(products)
       toast({
         title: 'Success',
         description: 'Blend created successfully',
