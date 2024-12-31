@@ -29,6 +29,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import NewBlendDialog, { CustomerFullBlends } from './NewBlendDialog'
+import BlendDialog from './BlendDialog'
 
 interface AllocationsData {
   contract_number: string
@@ -272,7 +273,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
                   Add Allocations
                 </Button>
               </DialogTrigger>
-              <NewBlendDialog
+              <BlendDialog
                 isEdit={isEdit}
                 isOpen={isAddDialog}
                 setIsOpen={setIsAddDialog}

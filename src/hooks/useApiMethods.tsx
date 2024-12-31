@@ -575,6 +575,26 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+  // Update blend
+  const updateNewBlend = useCallback(
+    async (blendId: number, data: any) => {
+      const config: CustomConfig = {
+        url: `/api/tea-blend/updateBlend?id=${blendId}`,
+        errorMessage: 'Failed to update blends. Please try again.',
+        method: 'PUT',
+        data: data,
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
+
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -604,5 +624,6 @@ export const useApiMethods = () => {
     getAllLotData,
     getCustomerBlendOrders,
     createNewBlend,
+    updateNewBlend,
   }
 }
