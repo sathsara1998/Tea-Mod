@@ -318,10 +318,6 @@ export interface CustomerOrdersTableData {
   blending_qty: number
   standard: string
   line_id: number
-  component_name?: string,
-  quantity_needed?: number,
-  quantity_allocated?: number,
-  quantity_remaining?: number,
 }
 export interface NewCustomerOrdersTableData {
   finished_product_id: number
