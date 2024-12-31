@@ -312,6 +312,23 @@ export interface CustomerOrdersTableData {
   standard: string
   line_id: number
 }
+export interface NewCustomerOrdersTableData {
+  finished_product_id: number
+  finished_product_name: string
+  demand_id: number
+  demand_reference: null
+  sales_qty: number
+  customer_id: number
+  customer_name: string
+  sale_order: string
+  demand_line_id: number
+  component_id: number
+  component_name: string
+  quantity_needed: number
+  quantity_allocated: number
+  quantity_remaining: number
+  allocations: []
+}
 
 export interface BlendCreateReq {
   partner_id: number

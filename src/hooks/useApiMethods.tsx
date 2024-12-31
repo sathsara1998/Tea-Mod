@@ -536,6 +536,64 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+  // Get Customer sales orders
+  const getCustomerBlendOrders = useCallback(
+    async (id: number) => {
+      const config: CustomConfig = {
+        url: `/api/tea-blend/orderLines?id=${id}`,
+        errorMessage: 'An error occurred while fetching Orders.',
+        method: 'get',
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
+
+  // Create blend
+  const createNewBlend = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: 'api/tea-blend/createBlend',
+        errorMessage: 'Failed to create blends. Please try again.',
+        method: 'POST',
+        data: data,
+      }
+
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
+  // Update blend
+  const updateNewBlend = useCallback(
+    async (blendId: number, data: any) => {
+      const config: CustomConfig = {
+        url: `/api/tea-blend/updateBlend?id=${blendId}`,
+        errorMessage: 'Failed to update blends. Please try again.',
+        method: 'PUT',
+        data: data,
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
 
   return {
     getConfirmedSaleOrders,
@@ -564,5 +622,8 @@ export const useApiMethods = () => {
     blendReset,
     getSourceById,
     getAllLotData,
+    getCustomerBlendOrders,
+    createNewBlend,
+    updateNewBlend,
   }
 }
