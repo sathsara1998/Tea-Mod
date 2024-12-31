@@ -179,6 +179,13 @@ export interface ManufacturingAllocationTableData {
 }
 
 interface Allocation {
+  length: any
+  quantity_needed: number
+  component_id: string
+  quantity_allocated: number
+  component_name: any
+  demand_line_id: string
+  sale_order: string
   id: number
   sale_order_id: number
   sale_order_name: string

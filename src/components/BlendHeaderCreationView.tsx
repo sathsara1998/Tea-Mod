@@ -410,28 +410,28 @@ export default function BlendAllocator() {
 
   const setEditingData = (blend: TeaBlend) => {
     setIsEditBlend(true)
+
     const allocations: CustomerOrdersTableData[] = []
     blend.allocations.forEach((alloc) => {
       const tableData: CustomerOrdersTableData = {
-        contract_number: alloc.contract_number,
-        contract_line_no: alloc.contract_no,
-        product_internal_ref: alloc.product_internal_ref,
-        product_uom_qty: alloc.product_uom_qty,
-        product_uom: alloc.product_uom,
-        product_name: alloc.product_name,
+        contract_number: alloc.sale_order,
+        contract_line_no: alloc.demand_line_id,
+        product_internal_ref: alloc.component_id,
+        product_uom_qty: alloc.quantity_needed,
+        product_uom: 'Units',
+        product_name: alloc.component_name,
         product_blend_internal_ref: alloc.product_internal_ref,
         blend_details: '',
-        tea_weight: alloc.tea_weight,
-        allocated_blend_quantity: alloc.allocated_blend_quantity,
+        tea_weight: alloc.length?.quantity ?? 0,
+        allocated_blend_quantity: alloc.quantity_allocated,
         product_id: alloc.product_id,
         release_number: 1,
-        blending_qty: alloc.tea_weight
-          ? alloc.tea_weight - alloc.allocated_blend_quantity
-          : 0,
+        blending_qty: alloc.quantity_allocated,
         standard: '',
         line_id: 0,
         id: alloc.id,
       }
+      console.log(tableData)
       allocations.push(tableData)
     })
     setEditingBlendCustomer({
