@@ -1,5 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import AuctionExcelForm from './AuctionExcelForm'
 
 export default function PurchasingView() {
   return (
@@ -20,6 +21,8 @@ export default function PurchasingView() {
           </ul>
         </CardContent>
       </Card>
+
+      <AuctionExcelForm />
     </div>
   )
 }

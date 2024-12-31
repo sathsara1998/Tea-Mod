@@ -328,3 +328,65 @@ export interface BlendCreateReq {
     },
   ]
 }
+
+export interface AuctionReportDetail {
+  StatusName: string;
+  LotCount: number;
+  Id: number;
+  CatalogId: number;
+  StatusId: number;
+  Status: number;
+  BatchSize: number;
+  StartTimeUtc: string;
+  Name: string;
+  BiddingStartUtc: string;
+  ClosedBuffer: number;
+  PendingBuffer: number;
+  EndedTime: string;
+  PerItemTimeLimit: number;
+  BiddingStartDelay: number;
+  SellExtraTime: number;
+  BidSniperInterval: number;
+  MaxExtensions: number;
+  IdleBidInterval: number;
+  AutoCloseInterval: number;
+  AutoBidInterval: number;
+}
+
+export interface AuctionItemDetail {
+  LotNumber: number;
+  Grade: string;
+  ManufacturedDate: string;
+  Units: number;
+  PerUnitWeight: number;
+  TotalWeight: number;
+  SellingMark: string;
+  BrokerName: string;
+  AuctionName: string;
+  CategoryName: string;
+  Standard: string;
+  FinalPrice: number;
+  InvoiceNumber: number;
+  SubElevation: string;
+  RePrint: string;
+  BrokerLotNumber: number;
+}
+
+export const BuyerExcelColumns = {
+  LotNumber: "Box Number",
+  SellingMark: "Selling Mark",
+  Grade: "Grade",
+  BrokerLotNumber: "Lot No",
+  Standard: "Tea Standard",
+  BrokerName: "Trader",
+  Units: "Bags",
+  PerUnitWeight: "Net Weight",
+  TotalWeight: "Total Weight",
+  FinalPrice: "Purchased Price",
+  InvoiceNumber: "Invoice No",
+  CategoryName: "Category",
+  SubElevation: "Sub Elevation",
+  RePrint: "Reprint",
+  ManufacturedDate: "Manufactured Date",
+  AuctionName: "Auction Name",
+}

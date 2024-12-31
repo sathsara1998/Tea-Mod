@@ -537,6 +537,43 @@ export const useApiMethods = () => {
     [apiClient],
   )
 
+  const auctionsForReport = useCallback(
+    async () => {
+      const config: CustomConfig = {
+        url: '/api/auctionsForReport/auctionList',
+        errorMessage: 'An error occurred while fetching auction data',
+        method: 'get'
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error: any) {
+        throw new Error(error.response.data.error)
+      }
+    },
+    [apiClient],
+  )
+
+  const buyerReport = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: '/api/auctionsForReport/buyerReport',
+        errorMessage: 'An error occurred while fetching data',
+        method: 'post',
+        data: data,
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error: any) {
+        throw new Error(error.response.data.error)
+      }
+    },
+    [apiClient],
+  )
+
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -564,5 +601,7 @@ export const useApiMethods = () => {
     blendReset,
     getSourceById,
     getAllLotData,
+    auctionsForReport,
+    buyerReport
   }
 }
