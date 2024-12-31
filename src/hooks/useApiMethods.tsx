@@ -554,6 +554,27 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+
+  // Create blend
+  const createNewBlend = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: 'api/tea-blend/createBlend',
+        errorMessage: 'Failed to create blends. Please try again.',
+        method: 'POST',
+        data: data,
+      }
+
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -582,5 +603,6 @@ export const useApiMethods = () => {
     getSourceById,
     getAllLotData,
     getCustomerBlendOrders,
+    createNewBlend,
   }
 }

@@ -1,51 +1,73 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2, ArrowRight } from "lucide-react"
+import React, { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Loader2, ArrowRight } from 'lucide-react'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import { useApiMethods } from '@/hooks/useApiMethods'
-import { useToast } from '../ui/use-toast';
-import { SelectedBlend, ConfirmedSaleOrder, CustomerOrdersTableData } from '@/components/types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger , DialogFooter } from "@/components/ui/dialog"
-import NewBlendDialog, { CustomerFullBlends } from './NewBlendDialog';
+import { useToast } from '../ui/use-toast'
+import {
+  SelectedBlend,
+  ConfirmedSaleOrder,
+  CustomerOrdersTableData,
+} from '@/components/types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import NewBlendDialog, { CustomerFullBlends } from './NewBlendDialog'
 
 interface AllocationsData {
-  contract_number: string;
-  contract_line_no: string;
-  product_internal_ref: string;
-  product_uom_qty: number;
-  product_uom: string;
-  product_name: string;
-  product_blend_internal_ref: string;
-  blend_details: string;
-  tea_weight: number;
-  allocated_blend_quantity: number;
-  release_number: number;
-  blending_qty: number;
-  standard: string;
+  contract_number: string
+  contract_line_no: string
+  product_internal_ref: string
+  product_uom_qty: number
+  product_uom: string
+  product_name: string
+  product_blend_internal_ref: string
+  blend_details: string
+  tea_weight: number
+  allocated_blend_quantity: number
+  release_number: number
+  blending_qty: number
+  standard: string
 }
 
 type BlendCreationProps = {
-  blendItems: CustomerOrdersTableData[];
-  selectedBlends: SelectedBlend[];
-  isConfirming: boolean;
-  handleConfirm: () => void;
-  isEdit: boolean;
-  deleted: (arr: number[]) => void;
-  customerId: number;
-  blendId: number;
-  allocationsChanged: (orders: CustomerOrdersTableData[]) => void;
+  blendItems: CustomerOrdersTableData[]
+  selectedBlends: SelectedBlend[]
+  isConfirming: boolean
+  handleConfirm: (data: {
+    partner_id: number
+    quantities: number[]
+    demand_line_ids: any[]
+  }) => void
+  isEdit: boolean
+  deleted: (arr: number[]) => void
+  customerId: number
+  blendId: number
+  allocationsChanged: (orders: CustomerOrdersTableData[]) => void
   editiingInfo: BlendShowType
-};
+}
 
 export interface BlendShowType {
-  name: string;
-  customerName: string;
-  quantity: number;
-  productName: string;
+  name: string
+  customerName: string
+  quantity: number
+  productName: string
 }
 
 const BlendCreation: React.FC<BlendCreationProps> = ({
@@ -58,15 +80,15 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   customerId,
   blendId,
   allocationsChanged,
-  editiingInfo
+  editiingInfo,
 }) => {
   const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [selectedRowCount, setSelectedRowCount] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [isAddDialog, setIsAddDialog] = useState(false);
-  const [tableItems, setTableItems] = useState<CustomerOrdersTableData[]>([]);
-  const { deleteSalesAllocs } = useApiMethods();
+  const [isAddDialog, setIsAddDialog] = useState(false)
+  const [tableItems, setTableItems] = useState<CustomerOrdersTableData[]>([])
+  const { deleteSalesAllocs, createNewBlend } = useApiMethods()
   const { toast } = useToast()
 
   const allocationDataRef = useRef<HTMLDivElement>(null)
@@ -83,45 +105,75 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       tabulatorRef.current = new Tabulator(allocationDataRef.current, {
         data: blendItems,
         columns: [
-          { title: "Select", formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, width: 60 },
-          { title: "#", formatter: "rownum", width: 60, hozAlign: "center" },
-          { title: "Contract", field: "contract_number", hozAlign: "left" },
-          { title: "Line", field: "contract_line_no", hozAlign: "left" },
-          { title: "Item", field: "product_internal_ref", hozAlign: "left" },
-          { title: "Qty Orderd", field: "product_uom_qty", hozAlign: "left" },
-          { title: "UOM", field: "product_uom", hozAlign: "center" },
-          { title: "Item Desc.", field: "product_name", hozAlign: "center" },
-          { title: "Blend Standard", field: "product_name", hozAlign: "center" },
-          { title: "Tea weight (Kg)", field: "tea_weight", frozen:true ,hozAlign: "right" },
+          {
+            title: 'Select',
+            formatter: 'rowSelection',
+            titleFormatter: 'rowSelection',
+            hozAlign: 'center',
+            headerSort: false,
+            width: 60,
+          },
+          { title: '#', formatter: 'rownum', width: 60, hozAlign: 'center' },
+          { title: 'Contract', field: 'contract_number', hozAlign: 'left' },
+          { title: 'Line', field: 'contract_line_no', hozAlign: 'left' },
+          { title: 'Item', field: 'product_internal_ref', hozAlign: 'left' },
+          { title: 'Qty Orderd', field: 'product_uom_qty', hozAlign: 'left' },
+          { title: 'UOM', field: 'product_uom', hozAlign: 'center' },
+          { title: 'Item Desc.', field: 'product_name', hozAlign: 'center' },
+          {
+            title: 'Blend Standard',
+            field: 'product_name',
+            hozAlign: 'center',
+          },
+          {
+            title: 'Tea weight (Kg)',
+            field: 'tea_weight',
+            frozen: true,
+            hozAlign: 'right',
+          },
 
           // { title: "Release No", field: "release_number", hozAlign: "left" },
           {
-            title: "Blending Qty (Kg)", field: "blending_qty", hozAlign: "right", frozen:true ,editor: "number", editorParams: (cell) => {
-              const teaWeight = cell.getRow().getData().tea_weight - cell.getRow().getData().allocated_blend_quantity;
+            title: 'Blending Qty (Kg)',
+            field: 'blending_qty',
+            hozAlign: 'right',
+            frozen: true,
+            editor: 'number',
+            editorParams: (cell) => {
+              const teaWeight =
+                cell.getRow().getData().tea_weight -
+                cell.getRow().getData().allocated_blend_quantity
               return {
                 min: 0,
                 max: teaWeight,
                 step: 1,
-              };
+              }
             },
             formatter: (cell) => {
-              const value = cell.getValue();
-              const element = cell.getElement();
-              element.style.backgroundColor = "#f2de79";
-              return value;
-            }
+              const value = cell.getValue()
+              const element = cell.getElement()
+              element.style.backgroundColor = '#f2de79'
+              return value
+            },
           },
-          { title: "Blended Quantity (Kg)", field: "allocated_blend_quantity", hozAlign: "right" , frozen:true },
-        
+          {
+            title: 'Blended Quantity (Kg)',
+            field: 'allocated_blend_quantity',
+            hozAlign: 'right',
+            frozen: true,
+          },
         ],
-        height: "400px",
+        height: '400px',
         selectable: true,
         selectableRollingSelection: false,
       })
 
-      tabulatorRef.current.on("rowSelectionChanged", function(data: any, rows: any){
-        setSelectedRowCount(data.length)
-      })
+      tabulatorRef.current.on(
+        'rowSelectionChanged',
+        function (data: any, rows: any) {
+          setSelectedRowCount(data.length)
+        },
+      )
 
       return () => {
         if (tabulatorRef.current) {
@@ -144,20 +196,20 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       try {
         await deleteSalesAllocs(selectedIds)
         toast({
-          title: "Success",
-          description: "Selected allocations have been removed",
-          variant: "default",
-        });
+          title: 'Success',
+          description: 'Selected allocations have been removed',
+          variant: 'default',
+        })
         tabulatorRef.current.deselectRow()
-        deleted(selectedIds);
+        deleted(selectedIds)
         setSelectedRowCount(0)
         setIsDeleteConfirmOpen(false)
       } catch (err: any) {
         toast({
-          title: "Error",
+          title: 'Error',
           description: err.message,
-          variant: "destructive",
-        });
+          variant: 'destructive',
+        })
       } finally {
         setLoading(false)
       }
@@ -168,21 +220,56 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
     allocationsChanged([...blendItems, ...data.products])
   }
 
+  const getBlendData = () => {
+    if (!tabulatorRef.current) return null
+
+    const tableData = tabulatorRef.current.getData()
+    return {
+      partner_id: customerId,
+      quantities: tableData.map((row) => row.blending_qty),
+      demand_line_ids: tableData.map((row) => row.id),
+    }
+  }
+
+  const handleConfirmClick = () => {
+    const data = getBlendData()
+    if (data) {
+      handleConfirm(data)
+    }
+  }
   return (
     <div>
       <Card>
         <CardHeader className="top-0 z-10 flex flex-row items-center justify-between">
           <CardTitle>{isEdit ? 'Edit Blend' : 'Create Blend'}</CardTitle>
-          {isEdit && <div>
-            <div><label className="text-md">{editiingInfo.name} | {editiingInfo.productName}</label></div>
-            <div><label className="text-md">Customer: {editiingInfo.customerName ? editiingInfo.customerName: ''}</label></div>
-            <div><label className="text-md">Quantity: {editiingInfo.quantity ? editiingInfo.quantity: 0}</label></div>
-          </div>}
+          {isEdit && (
+            <div>
+              <div>
+                <label className="text-md">
+                  {editiingInfo.name} | {editiingInfo.productName}
+                </label>
+              </div>
+              <div>
+                <label className="text-md">
+                  Customer:{' '}
+                  {editiingInfo.customerName ? editiingInfo.customerName : ''}
+                </label>
+              </div>
+              <div>
+                <label className="text-md">
+                  Quantity: {editiingInfo.quantity ? editiingInfo.quantity : 0}
+                </label>
+              </div>
+            </div>
+          )}
           <div className="flex gap-2">
             <Dialog open={isAddDialog} onOpenChange={setIsAddDialog}>
               <DialogTrigger asChild>
-                <Button className="bg-green-600 text-white" onClick={() => setIsAddDialog(true)}>
-                Add Allocations
+                <Button
+                  className="bg-green-600 text-white"
+                  onClick={() => setIsAddDialog(true)}
+                >
+                  Add Allocations
                 </Button>
               </DialogTrigger>
               <NewBlendDialog
@@ -192,7 +279,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
                 onCreateBlend={handleNewAllocations}
                 customerId={customerId}
                 blendId={blendId}
-                currentBlendIds={blendItems.map(item => item.id)}
+                currentBlendIds={blendItems.map((item) => item.id)}
               />
             </Dialog>
             <Button
@@ -208,7 +295,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           <div ref={allocationDataRef} className="flex-grow"></div>
 
           <Button
-            onClick={handleConfirm}
+            onClick={handleConfirmClick}
             className="mt-4"
             disabled={isConfirming || !blendItems || blendItems.length === 0}
           >
@@ -217,8 +304,10 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Confirming
               </>
+            ) : isEdit ? (
+              'Confirm and Edit blends'
             ) : (
-              isEdit ? 'Confirm and Edit blends' : 'Confirm and Generate Blends'
+              'Confirm and Generate Blends'
             )}
           </Button>
         </CardContent>
@@ -229,20 +318,25 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           <DialogHeader>
             <DialogTitle>Confirm Removal</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to remove the selected allocations from the blend?</p>
+          <p>
+            Are you sure you want to remove the selected allocations from the
+            blend?
+          </p>
           <DialogFooter>
-            <Button onClick={() => setIsDeleteConfirmOpen(false)} variant="outline">
+            <Button
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              variant="outline"
+            >
               Cancel
             </Button>
             <Button onClick={confirmRemove} className="bg-red-600 text-white">
-              {loading ? 'Confirming': 'Confirm'}
+              {loading ? 'Confirming' : 'Confirm'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
-  );
-};
+  )
+}
 
-export default BlendCreation;
+export default BlendCreation

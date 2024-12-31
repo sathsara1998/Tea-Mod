@@ -57,6 +57,9 @@ export default function BlendDialog({
   currentBlendIds,
 }: ModernBlendDialogProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
+  const [customerOrderLines, setCustomerOrderLines] = useState<CustomerOrder[]>(
+    [],
+  )
   const [customerOrders, setCustomerOrders] = useState<
     CustomerOrdersTableData[]
   >([])
@@ -284,6 +287,7 @@ export default function BlendDialog({
       partner_id: Number(selectedCustomer),
       products: selectedOrderLines,
     }
+
     onCreateBlend(passObj)
     setIsOpen(false)
   }
