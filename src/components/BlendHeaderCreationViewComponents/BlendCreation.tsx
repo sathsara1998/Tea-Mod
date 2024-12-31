@@ -123,12 +123,12 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           { title: 'Item Desc.', field: 'product_name', hozAlign: 'center' },
           {
             title: 'Blend Standard',
-            field: 'product_name',
+            field: 'component_name',
             hozAlign: 'center',
           },
           {
             title: 'Tea weight (Kg)',
-            field: 'tea_weight',
+            field: 'quantity_needed',
             frozen: true,
             hozAlign: 'right',
           },
@@ -136,7 +136,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           // { title: "Release No", field: "release_number", hozAlign: "left" },
           {
             title: 'Blending Qty (Kg)',
-            field: 'blending_qty',
+            field: 'quantity_remaining',
             hozAlign: 'right',
             frozen: true,
             editor: 'number',
@@ -159,7 +159,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           },
           {
             title: 'Blended Quantity (Kg)',
-            field: 'allocated_blend_quantity',
+            field: 'quantity_allocated',
             hozAlign: 'right',
             frozen: true,
           },
