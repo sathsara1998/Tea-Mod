@@ -536,7 +536,24 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
-
+  // Get Customer sales orders
+  const getCustomerBlendOrders = useCallback(
+    async (id: number) => {
+      const config: CustomConfig = {
+        url: `/api/tea-blend/orderLines?id=${id}`,
+        errorMessage: 'An error occurred while fetching Orders.',
+        method: 'get',
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -564,5 +581,6 @@ export const useApiMethods = () => {
     blendReset,
     getSourceById,
     getAllLotData,
+    getCustomerBlendOrders,
   }
 }

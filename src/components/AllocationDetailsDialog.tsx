@@ -7,6 +7,7 @@ import { StockLot } from './types';
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { useToast } from './ui/use-toast'
 
+
 interface AllocationDetailsDialogProps {
     isOpen: boolean;
     onClose: () => void;
