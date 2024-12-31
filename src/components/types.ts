@@ -318,6 +318,7 @@ export interface CustomerOrdersTableData {
   blending_qty: number
   standard: string
   line_id: number
+  allocation_id:number
 }
 export interface NewCustomerOrdersTableData {
   finished_product_id: number

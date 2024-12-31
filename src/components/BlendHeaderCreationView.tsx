@@ -246,7 +246,7 @@ export default function BlendAllocator() {
 
   const editExistingBlend = async () => {
     let sendData = {
-      allocation_id: '0',
+      allocation_id: 0,
       quantity: 0,
     }
 
@@ -256,7 +256,7 @@ export default function BlendAllocator() {
         if (
           initialSalesOrders.current[index].blending_qty != item.blending_qty
         ) {
-          sendData.allocation_id = item.contract_line_no
+          sendData.allocation_id = item.allocation_id
           sendData.quantity = item.blending_qty
         }
       }
@@ -418,6 +418,7 @@ export default function BlendAllocator() {
       const tableData: CustomerOrdersTableData = {
         contract_number: alloc.sale_order,
         contract_line_no: alloc.demand_line_id,
+        allocation_id:alloc.allocation_id,
         product_internal_ref: alloc.component_id,
         product_uom_qty: alloc.quantity_needed,
         product_uom: 'Units',

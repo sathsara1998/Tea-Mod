@@ -591,7 +591,7 @@ export const useApiMethods = () => {
   //   ;[apiClient]
   // }
   const updateNewBlend = useCallback(
-    async (blendData: { allocation_id: string; quantity: number }) => {
+    async (blendData: { allocation_id: number; quantity: number }) => {
       const config: CustomConfig = {
         url: `/api/tea-blend/updateBlend`,
         errorMessage: 'An error occurred while updating blend data.',
