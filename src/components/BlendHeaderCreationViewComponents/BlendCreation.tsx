@@ -193,9 +193,9 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       setLoading(true)
       const selectedData = tabulatorRef.current.getSelectedData()
       const selectedIds = selectedData.map((row: any) => row.allocation_id)
-  
+
       try {
-        await deleteSalesAllocs(selectedIds)  // Already passing array of IDs
+        await deleteSalesAllocs(selectedIds) // Already passing array of IDs
         toast({
           title: 'Success',
           description: 'Selected allocations have been removed',
@@ -238,6 +238,9 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       handleConfirm(data)
     }
   }
+
+  //pass productname for dialog
+  const product_name = editiingInfo.productName
   return (
     <div>
       <Card>
@@ -281,6 +284,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
                 customerId={customerId}
                 blendId={blendId}
                 currentBlendIds={blendItems.map((item) => item.id)}
+                productName={product_name}
               />
             </Dialog>
             <Button

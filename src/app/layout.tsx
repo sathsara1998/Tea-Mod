@@ -30,11 +30,11 @@ export default function RootLayout({
 
   useEffect(() => {
     const img = document.createElement('img')
-    img.src = '/pngwing.com.png'
-
+    img.src = '/tea.png'
     setSnowflake2(img)
   }, [])
 
+  const images = snowflake2 ? [snowflake2] : []
   return (
     <html lang="en" className={GeistSans.className}>
       <head>
@@ -48,7 +48,12 @@ export default function RootLayout({
           </div>
         )}
         {isSnowfallEnabled && snowflake2 && (
-          <Snowfall snowflakeCount={50} color="#d4d4d4" />
+          <Snowfall
+            snowflakeCount={20}
+            color="#d4d4d4"
+            images={images}
+            radius={[15.0, 18.0]}
+          />
         )}
 
         <NextTopLoader showSpinner={false} height={2} color="#2acf80" />

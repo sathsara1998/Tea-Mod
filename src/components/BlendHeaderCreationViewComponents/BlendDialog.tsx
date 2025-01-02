@@ -44,6 +44,7 @@ interface ModernBlendDialogProps {
   setIsOpen: (open: boolean) => void
   isEdit: boolean
   blendId?: number
+  productName: string
   currentBlendIds?: number[]
 }
 
@@ -55,6 +56,7 @@ export default function BlendDialog({
   isEdit,
   blendId,
   currentBlendIds,
+  productName,
 }: ModernBlendDialogProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
   const [customerOrderLines, setCustomerOrderLines] = useState<CustomerOrder[]>(
@@ -80,7 +82,11 @@ export default function BlendDialog({
       }
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
-        data: customerOrders,
+        data: isEdit
+          ? customerOrders.filter(
+              (item) => item.product_name === `${productName}`,
+            )
+          : customerOrders,
         height: '400px',
         placeholder: 'No Order Lines Available',
         selectableRows: true,
@@ -219,7 +225,9 @@ export default function BlendDialog({
         blend_details: line.allocations.length
           ? line.allocations[0].blend_name
           : '', // Use the first blend_name from allocations
-        tea_weight: line.allocations.length ? line.allocations[0].quantity_needed : 0, // Use the quantity from the first allocation
+        tea_weight: line.allocations.length
+          ? line.allocations[0].quantity_needed
+          : 0, // Use the quantity from the first allocation
         allocated_blend_quantity: line.quantity_allocated, // Use quantity_allocated
         product_id: line.component_id, // Assuming component_id as product_id
         release_number: 1, // Hardcoded release number (update logic if needed)
