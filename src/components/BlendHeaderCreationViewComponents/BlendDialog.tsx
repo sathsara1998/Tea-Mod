@@ -47,7 +47,6 @@ interface ModernBlendDialogProps {
   productName: string
   currentBlendIds?: number[]
 }
-
 export default function BlendDialog({
   customerId,
   onCreateBlend,

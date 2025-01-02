@@ -250,22 +250,25 @@ export default function BlendAllocator() {
     try {
       // Create updates array for changed allocations
       const updates = []
-      
+
       for (const currentAlloc of selectedAllocations) {
         // Find matching initial allocation
         const initialAlloc = initialSalesOrders.current.find(
-          initial => initial.allocation_id === currentAlloc.allocation_id
+          (initial) => initial.allocation_id === currentAlloc.allocation_id,
         )
-        
+
         // Only include if quantity has changed
-        if (initialAlloc && initialAlloc.allocated_blend_quantity !== currentAlloc.blending_qty) {
+        if (
+          initialAlloc &&
+          initialAlloc.allocated_blend_quantity !== currentAlloc.blending_qty
+        ) {
           updates.push({
             allocation_id: currentAlloc.allocation_id,
-            quantity: currentAlloc.blending_qty
+            quantity: currentAlloc.quantity,
           })
         }
       }
-  
+
       // Only proceed if there are changes
       if (updates.length === 0) {
         toast({
@@ -276,22 +279,19 @@ export default function BlendAllocator() {
         setIsConfirming(false)
         return
       }
-  
+
       // Send updates as array
       await updateSalesOrder(updates)
-      
+
       toast({
         title: 'Success',
         description: `Successfully updated ${updates.length} allocation(s)`,
         variant: 'default',
       })
-  
-      // Refresh data
+      if (searchParams.get('id')) {
+        await getBlendData(searchParams.get('id')!)
+      }
       await fetchBlends()
-      setIsEditBlend(false)
-      setSelectedAllocations([])
-      router.replace(pathname)
-  
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -439,7 +439,7 @@ export default function BlendAllocator() {
       const tableData: CustomerOrdersTableData = {
         contract_number: alloc.sale_order,
         contract_line_no: alloc.demand_line_id,
-        allocation_id:alloc.allocation_id,
+        allocation_id: alloc.allocation_id,
         product_internal_ref: alloc.component_id,
         product_uom_qty: alloc.quantity_needed,
         product_uom: 'Units',
@@ -447,15 +447,16 @@ export default function BlendAllocator() {
         product_blend_internal_ref: alloc.product_internal_ref,
         blend_details: '',
         tea_weight: alloc.length?.quantity ?? 0,
-        allocated_blend_quantity: alloc.quantity_needed - alloc.quantity_remaining,
+        allocated_blend_quantity:
+          alloc.quantity_needed - alloc.quantity_remaining,
         product_id: alloc.product_id,
         release_number: 1,
-        blending_qty: alloc.quantity_remaining + alloc.quantity || 0, 
+        blending_qty: alloc.quantity_remaining + alloc.quantity || 0,
         standard: '',
         line_id: 0,
         id: alloc.id,
-        quantity_remaining:alloc.quantity_remaining,
-        quantity:alloc.quantity
+        quantity_remaining: alloc.quantity_remaining,
+        quantity: alloc.quantity,
       }
       console.log(tableData)
       allocations.push(tableData)

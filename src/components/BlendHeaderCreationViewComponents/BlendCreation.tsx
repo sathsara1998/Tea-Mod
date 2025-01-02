@@ -135,8 +135,8 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
 
           // { title: "Release No", field: "release_number", hozAlign: "left" },
           {
-            title: 'Blending Qty (Kg)',
-            field: 'blending_qty',
+            title: 'Quantity (Kg)',
+            field: 'quantity',
             hozAlign: 'right',
             frozen: true,
             editor: 'number',
@@ -156,12 +156,6 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               element.style.backgroundColor = '#f2de79'
               return value
             },
-          },
-          {
-            title: 'Blended Quantity (Kg)',
-            field: 'quantity',
-            hozAlign: 'right',
-            frozen: true,
           },
         ],
         height: '400px',
