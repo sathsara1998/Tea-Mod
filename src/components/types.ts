@@ -179,6 +179,7 @@ export interface ManufacturingAllocationTableData {
 }
 
 interface Allocation {
+  allocation_id: number
   length: any
   quantity_needed: number
   component_id: string
@@ -200,7 +201,9 @@ interface Allocation {
   product_name: string
   quantity: number
   contract_no: string
-  tea_weight: number | 0
+  tea_weight: number | 0,
+  quantity_remaining:number | 0
+  
 }
 
 export interface TeaBlend {
@@ -318,7 +321,9 @@ export interface CustomerOrdersTableData {
   blending_qty: number
   standard: string
   line_id: number
-  allocation_id:number
+  allocation_id:number,
+  quantity_remaining:number,
+  quantity:number
 }
 export interface NewCustomerOrdersTableData {
   finished_product_id: number
@@ -352,4 +357,13 @@ export interface BlendCreateReq {
       ]
     },
   ]
+}
+
+export interface AllocationUpdate {
+  allocation_id: number;
+  quantity: number;
+}
+
+export interface BatchAllocationUpdateRequest {
+  allocations: AllocationUpdate[];
 }

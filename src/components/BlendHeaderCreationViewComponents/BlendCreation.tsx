@@ -123,12 +123,12 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           { title: 'Item Desc.', field: 'product_name', hozAlign: 'center' },
           {
             title: 'Blend Standard',
-            field: 'product_name',
+            field: 'component_name',
             hozAlign: 'center',
           },
           {
             title: 'Tea weight (Kg)',
-            field: 'tea_weight',
+            field: 'quantity_needed',
             frozen: true,
             hozAlign: 'right',
           },
@@ -159,7 +159,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
           },
           {
             title: 'Blended Quantity (Kg)',
-            field: 'allocated_blend_quantity',
+            field: 'quantity',
             hozAlign: 'right',
             frozen: true,
           },
@@ -192,10 +192,10 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
     if (tabulatorRef.current && !loading) {
       setLoading(true)
       const selectedData = tabulatorRef.current.getSelectedData()
-      const selectedIds = selectedData.map((row: any) => row.id)
-
+      const selectedIds = selectedData.map((row: any) => row.allocation_id)
+  
       try {
-        await deleteSalesAllocs(selectedIds)
+        await deleteSalesAllocs(selectedIds)  // Already passing array of IDs
         toast({
           title: 'Success',
           description: 'Selected allocations have been removed',

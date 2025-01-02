@@ -219,7 +219,7 @@ export default function BlendDialog({
         blend_details: line.allocations.length
           ? line.allocations[0].blend_name
           : '', // Use the first blend_name from allocations
-        tea_weight: line.allocations.length ? line.allocations[0].quantity : 0, // Use the quantity from the first allocation
+        tea_weight: line.allocations.length ? line.allocations[0].quantity_needed : 0, // Use the quantity from the first allocation
         allocated_blend_quantity: line.quantity_allocated, // Use quantity_allocated
         product_id: line.component_id, // Assuming component_id as product_id
         release_number: 1, // Hardcoded release number (update logic if needed)

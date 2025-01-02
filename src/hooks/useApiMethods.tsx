@@ -5,6 +5,8 @@ import {
   AddAllocationArray,
   AddAllocationObject,
   AddSalesAllocation,
+  AllocationUpdate,
+  BatchAllocationUpdateRequest,
   BlendCreateReq,
   ConfirmedSaleOrder,
 } from '@/components/types'
@@ -590,25 +592,26 @@ export const useApiMethods = () => {
   //   }
   //   ;[apiClient]
   // }
-  const updateNewBlend = useCallback(
-    async (blendData: { allocation_id: number; quantity: number }) => {
-      const config: CustomConfig = {
-        url: `/api/tea-blend/updateBlend`,
-        errorMessage: 'An error occurred while updating blend data.',
-        method: 'put',
-        data: blendData,
-      }
-      try {
-        const response = await apiClient(config)
-        const data = response.data
-        return data
-      } catch (error) {
-        throw new Error(config.errorMessage)
-      }
-    },
-    [apiClient],
-  )
 
+  // In your useApiMethods.ts file
+  const updateNewBlend = async (data: BatchAllocationUpdateRequest | AllocationUpdate): Promise<any> => {
+    const response = await fetch('/api/tea_blend/update_allocation', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update allocations');
+    }
+
+    return response.json();
+  };
+
+  
   // Add Allocation
   const addAllocation = useCallback(
     async (data: any) => {

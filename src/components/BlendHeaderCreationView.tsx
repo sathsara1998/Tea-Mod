@@ -21,6 +21,8 @@ import {
   CustomerOrdersTableData,
   BlendCreateReq,
   Customer,
+  BatchAllocationUpdateRequest,
+  AllocationUpdate,
 } from './types'
 import { CustomerFullBlends } from './BlendHeaderCreationViewComponents/NewBlendDialog'
 import CustomerSelection from './BlendHeaderCreationViewComponents/CustomerSelection'
@@ -245,36 +247,55 @@ export default function BlendAllocator() {
   }
 
   const editExistingBlend = async () => {
-    let sendData = {
-      allocation_id: 0,
-      quantity: 0,
-    }
-
-    selectedAllocations.forEach((item, index) => {
-      console.log(item)
-      if (initialSalesOrders.current.length > index) {
-        if (
-          initialSalesOrders.current[index].blending_qty != item.blending_qty
-        ) {
-          sendData.allocation_id = item.allocation_id
-          sendData.quantity = item.blending_qty
+    try {
+      // Create updates array for changed allocations
+      const updates = []
+      
+      for (const currentAlloc of selectedAllocations) {
+        // Find matching initial allocation
+        const initialAlloc = initialSalesOrders.current.find(
+          initial => initial.allocation_id === currentAlloc.allocation_id
+        )
+        
+        // Only include if quantity has changed
+        if (initialAlloc && initialAlloc.allocated_blend_quantity !== currentAlloc.blending_qty) {
+          updates.push({
+            allocation_id: currentAlloc.allocation_id,
+            quantity: currentAlloc.blending_qty
+          })
         }
       }
-    })
-
-    try {
-      console.log(sendData)
-      await updateNewBlend(sendData)
+  
+      // Only proceed if there are changes
+      if (updates.length === 0) {
+        toast({
+          title: 'No Changes',
+          description: 'No changes detected in allocations',
+          variant: 'default',
+        })
+        setIsConfirming(false)
+        return
+      }
+  
+      // Send updates as array
+      await updateSalesOrder(updates)
+      
       toast({
-        title: 'Blend Updated',
-        description: `Updated blend successfully`,
+        title: 'Success',
+        description: `Successfully updated ${updates.length} allocation(s)`,
         variant: 'default',
       })
-      resetData()
+  
+      // Refresh data
+      await fetchBlends()
+      setIsEditBlend(false)
+      setSelectedAllocations([])
+      router.replace(pathname)
+  
     } catch (err: any) {
       toast({
         title: 'Error',
-        description: err.message,
+        description: err.message || 'Failed to update allocations',
         variant: 'destructive',
       })
     } finally {
@@ -426,13 +447,15 @@ export default function BlendAllocator() {
         product_blend_internal_ref: alloc.product_internal_ref,
         blend_details: '',
         tea_weight: alloc.length?.quantity ?? 0,
-        allocated_blend_quantity: alloc.quantity_allocated,
+        allocated_blend_quantity: alloc.quantity_needed - alloc.quantity_remaining,
         product_id: alloc.product_id,
         release_number: 1,
-        blending_qty: alloc.quantity_allocated,
+        blending_qty: alloc.quantity_remaining + alloc.quantity || 0, 
         standard: '',
         line_id: 0,
         id: alloc.id,
+        quantity_remaining:alloc.quantity_remaining,
+        quantity:alloc.quantity
       }
       console.log(tableData)
       allocations.push(tableData)
