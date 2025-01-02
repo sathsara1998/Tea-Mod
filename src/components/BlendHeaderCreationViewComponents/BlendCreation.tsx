@@ -200,6 +200,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         setSelectedRowCount(0)
         setIsDeleteConfirmOpen(false)
       } catch (err: any) {
+        console.error('Failed to allocation:', err)
         toast({
           title: 'Error',
           description: err.message,
@@ -219,9 +220,10 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
     if (!tabulatorRef.current) return null
 
     const tableData = tabulatorRef.current.getData()
+
     return {
       partner_id: customerId,
-      quantities: tableData.map((row) => row.blending_qty),
+      quantities: tableData.map((row) => row.quantity),
       demand_line_ids: tableData.map((row) => row.id),
     }
   }

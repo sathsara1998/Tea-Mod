@@ -82,11 +82,11 @@ export default function BlendAllocator() {
     try {
       const data = await getConfirmedSaleOrders()
       setConfirmedSaleOrders(data)
-    } catch (err) {
+    } catch (err: any) {
       setError('Error fetching confirmed sale orders. Please try again.')
       toast({
         title: 'Error',
-        description: 'Error fetching confirmed sale orders. Please try again.',
+        description: err.message,
         variant: 'destructive',
       })
     }
@@ -293,6 +293,7 @@ export default function BlendAllocator() {
       }
       await fetchBlends()
     } catch (err: any) {
+      console.error('Failed to allocation:', err)
       toast({
         title: 'Error',
         description: err.message || 'Failed to update allocations',
@@ -310,7 +311,7 @@ export default function BlendAllocator() {
 
       // Process each allocation to extract quantities and line IDs
       selectedAllocations.forEach((item) => {
-        quantities.push(item.blending_qty)
+        quantities.push(item.quantity)
         demand_line_ids.push(item.line_id)
       })
 
@@ -327,10 +328,11 @@ export default function BlendAllocator() {
         variant: 'default',
       })
       resetData()
-    } catch (err) {
+    } catch (err: any) {
       toast({
         title: 'Error',
-        description: 'Failed to create blend. Please try again.',
+        description:
+          err instanceof Error ? err.message : 'Failed to create allocation',
         variant: 'destructive',
       })
     } finally {
@@ -350,11 +352,11 @@ export default function BlendAllocator() {
         title: 'Blend Updated',
         description: `Updated blend: ${editingBlend.name}`,
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating blend:', error)
       toast({
         title: 'Error',
-        description: 'Failed to update blend. Please try again.',
+        description: error.message,
         variant: 'destructive',
       })
     }

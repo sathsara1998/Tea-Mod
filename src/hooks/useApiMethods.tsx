@@ -617,7 +617,7 @@ export const useApiMethods = () => {
     async (data: any) => {
       const config: CustomConfig = {
         url: 'api/tea-blend/addAllocation',
-        errorMessage: 'Failed to create blends. Please try again.',
+        errorMessage: 'Failed to Add Allocation. Please try again.',
         method: 'POST',
         data: data,
       }

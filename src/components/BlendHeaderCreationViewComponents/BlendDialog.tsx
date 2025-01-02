@@ -281,9 +281,11 @@ export default function BlendDialog({
       })
       createBlend()
     } catch (err: any) {
+      console.error('Failed to allocation:', err)
       toast({
         title: 'Error',
-        description: err.message,
+        description:
+          err instanceof Error ? err.message : 'Failed to create allocation',
         variant: 'destructive',
       })
     }
