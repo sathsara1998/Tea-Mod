@@ -47,14 +47,14 @@ export default function RootLayout({
             {process.env.NEXT_PUBLIC_API_BASE_URL}
           </div>
         )}
-        {isSnowfallEnabled && snowflake2 && (
+        {/* {isSnowfallEnabled && snowflake2 && (
           <Snowfall
             snowflakeCount={20}
             color="#d4d4d4"
             images={images}
             radius={[15.0, 18.0]}
           />
-        )}
+        )} */}
 
         <NextTopLoader showSpinner={false} height={2} color="#2acf80" />
         <ThemeProvider
