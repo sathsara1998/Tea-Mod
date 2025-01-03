@@ -27,6 +27,7 @@ import {
   CustomerOrder,
   CustomerOrdersTableData,
 } from '../types'
+import { Badge } from '../ui/badge'
 
 export interface EditProp {
   products: AddSalesAllocation[]
@@ -94,29 +95,34 @@ export default function BlendDialog({
           {
             title: 'D/ID',
             field: 'id',
+            headerFilter: true,
             hozAlign: 'center',
           },
-          {
-            title: 'Product Name',
-            field: 'product_name',
 
+          {
+            title: 'Finished Product Name',
+            field: 'finished_product_name',
+            headerFilterPlaceholder: 'Find By Finished Product',
+            headerFilter: 'input',
             hozAlign: 'left',
           },
           {
-            title: 'Customer Name',
-            field: 'customer_name',
-
-            hozAlign: 'center',
+            title: 'Finished Good No',
+            field: 'finished_good_code',
+            headerFilterPlaceholder: 'Find By Finished Good',
+            headerFilter: 'input',
+            hozAlign: 'left',
           },
           {
             title: 'Quantity allocated',
             field: 'quantity_allocated',
-
+            headerFilter: true,
             hozAlign: 'center',
           },
           {
-            title: 'Quantity Needed',
+            title: 'Tea Wieght',
             field: 'quantity_needed',
+            headerFilter: true,
             hozAlign: 'center',
           },
           {
@@ -124,7 +130,12 @@ export default function BlendDialog({
             field: 'quantity_remaining',
             hozAlign: 'center',
           },
-          { title: 'Contract No', field: 'contract_number', hozAlign: 'left' },
+          {
+            title: 'Contract No',
+            field: 'contract_number',
+            headerFilter: true,
+            hozAlign: 'left',
+          },
 
           {
             title: 'Sale Quantity',
@@ -134,6 +145,13 @@ export default function BlendDialog({
           {
             title: 'Blend Description',
             field: 'blend_details',
+            hozAlign: 'left',
+          },
+          {
+            title: 'Product Name',
+            field: 'product_name',
+            headerFilter: 'input',
+            headerFilterPlaceholder: 'Find By Product Name',
             hozAlign: 'left',
           },
         ],
@@ -210,11 +228,15 @@ export default function BlendDialog({
   const fetchCustomerOrders = async (cusId: number) => {
     try {
       const orders = await getCustomerBlendOrders(cusId)
-      console.log(orders.data)
-
+      if (orders?.data?.length > 0) {
+        setSelectedCustomer(orders.data[0].customer_name) // Set customer name
+      } else {
+        setSelectedCustomer(null) // Handle case where no orders are returned
+      }
       const customerData = orders.data.map((line: any) => ({
         contract_number: line.sale_order, // Map sale_order to contract_number
         contract_line_no: line.demand_line_id, // Map demand_line_id to contract_line_no
+
         customer_name: line.customer_name, // Map demand_line_id to contract_line_no
         product_internal_ref: line.component_id.toString(), // Assuming component_id as product_internal_ref
         product_uom_qty: line.quantity_needed, // quantity_needed maps to product_uom_qty
@@ -241,6 +263,8 @@ export default function BlendDialog({
         quantity_needed: line.quantity_needed,
         quantity_remaining: line.quantity_remaining,
         sales_qty: line.sales_qty,
+        finished_product_name: line.finished_product_name.en_US,
+        finished_good_code: line.fg_internal_ref,
       }))
 
       setCustomerOrders(customerData)
@@ -311,7 +335,7 @@ export default function BlendDialog({
       fetchCustomerOrders(customerId)
     }
   }, [isOpen])
-
+  console.log('customer:', selectedCustomer)
   return (
     <DialogContent
       className="max-h-[90vh] max-w-[60vw] overflow-y-auto"
@@ -325,7 +349,10 @@ export default function BlendDialog({
 
       <Card>
         <CardHeader>
-          <CardTitle>Customer Order Lines</CardTitle>
+          <CardTitle>
+            Customer Order Lines :{' '}
+            <Badge variant="outline">{selectedCustomer}</Badge>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-[55vw]">
