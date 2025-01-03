@@ -344,7 +344,7 @@ export default function BlendDialog({
         <CardHeader>
           <CardTitle>
             Customer Order Lines :{' '}
-            <Badge variant="outline">{selectedCustomer}</Badge>
+            {selectedCustomer}
           </CardTitle>
         </CardHeader>
         <CardContent>
