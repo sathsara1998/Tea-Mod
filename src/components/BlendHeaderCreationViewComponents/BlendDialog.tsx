@@ -236,7 +236,6 @@ export default function BlendDialog({
       const customerData = orders.data.map((line: any) => ({
         contract_number: line.sale_order, // Map sale_order to contract_number
         contract_line_no: line.demand_line_id, // Map demand_line_id to contract_line_no
-
         customer_name: line.customer_name, // Map demand_line_id to contract_line_no
         product_internal_ref: line.component_id.toString(), // Assuming component_id as product_internal_ref
         product_uom_qty: line.quantity_needed, // quantity_needed maps to product_uom_qty
@@ -349,10 +348,7 @@ export default function BlendDialog({
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            Customer Order Lines :{' '}
-            <Badge variant="outline">{selectedCustomer}</Badge>
-          </CardTitle>
+          <CardTitle>Customer Order Lines : {selectedCustomer}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-[55vw]">
