@@ -185,8 +185,7 @@ export default function BlendsComponent({
           isOpen={isNewOpen}
           setIsOpen={setIsNewOpen}
           onCreateBlend={handleCreateNewBlend}
-          customerId={customerId}
-        />
+          customerId={customerId} productName={''}        />
       </Dialog>
     </Card>
   )

@@ -187,7 +187,7 @@ export default function ModernBlendDialog({
 
     customerOrderLines.forEach((line) => {
       line.order_lines.forEach((item) => {
-        customerData.push({
+        return customerData.push({
           contract_number: line.contract_number,
           contract_line_no: item.contract_line_no,
           product_internal_ref: item.product_internal_ref,
@@ -213,10 +213,13 @@ export default function ModernBlendDialog({
           standard: '',
           blending_qty: item.tea_blend_details.length
             ? item.tea_blend_details[0].tea_weight -
-              item.allocated_blend_quantity
+            item.allocated_blend_quantity
             : 0,
           line_id: item.line_id,
           id: item.line_id,
+          allocation_id: 0,
+          quantity_remaining: 0,
+          quantity: 0
         })
       })
     })

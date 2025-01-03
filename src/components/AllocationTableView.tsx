@@ -911,7 +911,6 @@ export default function AllocationTableView() {
                         {selectedBlend ? selectedBlend.name : '-'}
                       </span>
                     </div>
-
                     {selectedBlend && (
                       <div className="ml-2 flex flex-wrap gap-4">
                         <div className="flex items-center">

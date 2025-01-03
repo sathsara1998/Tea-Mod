@@ -16,9 +16,6 @@ export async function POST(req: Request) {
   } catch (err) {
     console.log(err)
 
-    return NextResponse.json(
-      { error: 'An error occurred while Creating blend.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: `${err}` }, { status: 500 })
   }
 }

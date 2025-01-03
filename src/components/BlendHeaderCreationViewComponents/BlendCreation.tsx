@@ -135,8 +135,8 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
 
           // { title: "Release No", field: "release_number", hozAlign: "left" },
           {
-            title: 'Blending Qty (Kg)',
-            field: 'blending_qty',
+            title: 'Quantity (Kg)',
+            field: 'quantity',
             hozAlign: 'right',
             frozen: true,
             editor: 'number',
@@ -156,12 +156,6 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               element.style.backgroundColor = '#f2de79'
               return value
             },
-          },
-          {
-            title: 'Blended Quantity (Kg)',
-            field: 'quantity',
-            hozAlign: 'right',
-            frozen: true,
           },
         ],
         height: '400px',
@@ -193,9 +187,9 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       setLoading(true)
       const selectedData = tabulatorRef.current.getSelectedData()
       const selectedIds = selectedData.map((row: any) => row.allocation_id)
-  
+
       try {
-        await deleteSalesAllocs(selectedIds)  // Already passing array of IDs
+        await deleteSalesAllocs(selectedIds) // Already passing array of IDs
         toast({
           title: 'Success',
           description: 'Selected allocations have been removed',
@@ -206,6 +200,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
         setSelectedRowCount(0)
         setIsDeleteConfirmOpen(false)
       } catch (err: any) {
+        console.error('Failed to allocation:', err)
         toast({
           title: 'Error',
           description: err.message,
@@ -225,9 +220,10 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
     if (!tabulatorRef.current) return null
 
     const tableData = tabulatorRef.current.getData()
+
     return {
       partner_id: customerId,
-      quantities: tableData.map((row) => row.blending_qty),
+      quantities: tableData.map((row) => row.quantity),
       demand_line_ids: tableData.map((row) => row.id),
     }
   }
@@ -238,6 +234,9 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       handleConfirm(data)
     }
   }
+
+  //pass productname for dialog
+  const product_name = editiingInfo.productName
   return (
     <div>
       <Card>
@@ -281,6 +280,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
                 customerId={customerId}
                 blendId={blendId}
                 currentBlendIds={blendItems.map((item) => item.id)}
+                productName={product_name}
               />
             </Dialog>
             <Button
