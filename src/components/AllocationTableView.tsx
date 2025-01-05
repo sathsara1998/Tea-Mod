@@ -55,6 +55,7 @@ import TeaBlendReportButton from './TeaBlendReportButton'
 import DownloadReportButton from './DownloadReportButton'
 import TeaViewDialog from './TeaViewDialog'
 import LoadingSpinner from './LoadingSpinner'
+// import BlendReport from './BlendReport'
 
 interface Allocation {
   teaId: string
@@ -98,6 +99,7 @@ export default function AllocationTableView() {
     type: '',
   }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+  const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   // const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -108,6 +110,7 @@ export default function AllocationTableView() {
     editPackageAllocation,
     blendConfirm,
     blendReset,
+    getBlendReport,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -667,6 +670,12 @@ export default function AllocationTableView() {
           return
         }
 
+        if (data?.data?.length > 0) {
+          setSelectedBlendID(data.data[0].id) // Set customer name
+        } else {
+          setSelectedBlendID(null) // Handle case where no orders are returned
+        }
+
         const teablendInfo: BlendInfo = {
           blendNo: teas.name,
 
@@ -894,6 +903,45 @@ export default function AllocationTableView() {
   console.log(blendInfo)
   // console.log('selected', selectedBlend)
   // console.log('blendinfo', blendInfo)
+
+  const generateReport = async () => {
+    if (!selectedBlend?.id) {
+      toast({
+        title: 'Error',
+        description: 'No blend selected',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      console.log('Starting report generation for blend:', selectedBlend.id)
+      const blob = await getBlendReport(selectedBlend.id)
+      console.log('Received response:', blob)
+
+      if (!(blob instanceof Blob)) {
+        console.error('Response is not a Blob:', blob)
+        throw new Error('Invalid response format')
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `blend-report-${selectedBlend.id}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Report generation error:', error)
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to generate report',
+        variant: 'destructive',
+      })
+    }
+  }
   return (
     <>
       <div className="w-[100%] p-4">
@@ -933,26 +981,45 @@ export default function AllocationTableView() {
 
                 {/* Actions Section */}
                 <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                  {selectedBlend && (
-                    <DownloadReportButton
-                      tabulatorRef={tabulatorRef}
-                      blendInfo={{
-                        blendNo: selectedBlend.name,
-                        blendRefNo: '',
-                        customerName: selectedBlend.customer_name,
-                        status: blendInfo?.status || '',
-                        blendDate: blendInfo.blend_date,
-                        totalContractQty: 0,
-                        blendStandard: blendInfo?.blendStandard || '',
-                        blendAverage: blendInfo?.averagePrice || 0,
-                        rtNo: '',
-                        broker: blendInfo?.broker || '',
-                        export_quantity: blendInfo?.export_quantity || 0,
-                        averagePrice: blendInfo?.averagePrice || 0,
-                      }}
-                    />
-                  )}
-
+                  {/* {selectedBlend && (
+                    // <DownloadReportButton
+                    //   tabulatorRef={tabulatorRef}
+                    //   blendInfo={{
+                    //     blendNo: selectedBlend.name,
+                    //     blendRefNo: '',
+                    //     customerName: selectedBlend.customer_name,
+                    //     status: blendInfo?.status || '',
+                    //     blendDate: blendInfo.blend_date,
+                    //     totalContractQty: 0,
+                    //     blendStandard: blendInfo?.blendStandard || '',
+                    //     blendAverage: blendInfo?.averagePrice || 0,
+                    //     rtNo: '',
+                    //     broker: blendInfo?.broker || '',
+                    //     export_quantity: blendInfo?.export_quantity || 0,
+                    //     averagePrice: blendInfo?.averagePrice || 0,
+                    //   }}
+                    // />
+                    <BlendReport id={selectedBlend.id} />
+                  )} */}
+                  <div>
+                    <Button
+                      onClick={generateReport}
+                      aria-label="Download Report as PDF"
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-gray-100 disabled:opacity-50 sm:px-4 sm:py-2 sm:text-sm"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 sm:h-4 sm:w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
+                      </svg>
+                      <span className="text-xs sm:text-sm">
+                        Download Report
+                      </span>
+                    </Button>
+                  </div>
                   <Dialog
                     open={isBlendDialogOpen}
                     onOpenChange={setIsBlendDialogOpen}
