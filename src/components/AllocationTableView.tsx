@@ -925,7 +925,7 @@ export default function AllocationTableView() {
 
       // Check if finance report is needed
       const reportMethod =
-        reportType === 'finance' ? getBlendSalesReport : getBlendReport
+        reportType === 'finance' ? getBlendReport : getBlendSalesReport
 
       const blob = await reportMethod(selectedBlend.id)
       console.log('Received response:', blob)
@@ -1017,7 +1017,9 @@ export default function AllocationTableView() {
                   <div>
                     <ReportDownloadButton
                       onGenerateReport={onGenerateReport}
-                      selectedBlend={selectedBlend ? { id: String(selectedBlend.id) } : null}
+                      selectedBlend={
+                        selectedBlend ? { id: String(selectedBlend.id) } : null
+                      }
                       type={reportType}
                       onTypeChange={setReportType}
                       isLoading={isLoading}
