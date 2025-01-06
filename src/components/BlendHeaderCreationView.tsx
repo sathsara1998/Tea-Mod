@@ -519,6 +519,19 @@ export default function BlendAllocator() {
   //   )
   // }
 
+  const handleDelete = async (selectedIds: number[]) => {
+    await deleteSalesAllocs(selectedIds)
+    // Update the blendItems state by filtering out deleted items
+    // setBlendItems((prevItems) =>
+    //   prevItems.filter((item) => !selectedIds.includes(item.allocation_id)),
+    // )
+    if (searchParams.get('id')) {
+      await getBlendData(searchParams.get('id')!)
+    }
+    await fetchBlends()
+  }
+
+
   return (
     <div className="grid grid-cols-4 gap-4">
       {/* Left Side - Blends */}
