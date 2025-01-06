@@ -55,8 +55,6 @@ import TeaBlendReportButton from './TeaBlendReportButton'
 import DownloadReportButton from './DownloadReportButton'
 import TeaViewDialog from './TeaViewDialog'
 import LoadingSpinner from './LoadingSpinner'
-import ReportDownloadButton from './ReportDownload'
-// import BlendReport from './BlendReport'
 
 interface Allocation {
   teaId: string
@@ -100,9 +98,11 @@ export default function AllocationTableView() {
     type: '',
   }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
+
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   const [type, setType] = useState<string | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
+
   // const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -113,8 +113,6 @@ export default function AllocationTableView() {
     editPackageAllocation,
     blendConfirm,
     blendReset,
-    getBlendReport,
-    getBlendSalesReport,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -129,7 +127,6 @@ export default function AllocationTableView() {
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([])
   const isInitialAllocations = useRef(true)
   const selectedIdsRef = useRef<number[]>([])
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (allocationsTableRef.current) {
@@ -675,12 +672,6 @@ export default function AllocationTableView() {
           return
         }
 
-        if (data?.data?.length > 0) {
-          setSelectedBlendID(data.data[0].id) // Set customer name
-        } else {
-          setSelectedBlendID(null) // Handle case where no orders are returned
-        }
-
         const teablendInfo: BlendInfo = {
           blendNo: teas.name,
 
@@ -908,53 +899,6 @@ export default function AllocationTableView() {
   console.log(blendInfo)
   // console.log('selected', selectedBlend)
   // console.log('blendinfo', blendInfo)
-
-  const onGenerateReport = async () => {
-    if (!selectedBlend?.id) {
-      toast({
-        title: 'Error',
-        description: 'No blend selected',
-        variant: 'destructive',
-      })
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      console.log('Starting report generation for blend:', selectedBlend.id)
-
-      // Check if finance report is needed
-      const reportMethod =
-        reportType === 'finance' ? getBlendSalesReport : getBlendReport
-
-      const blob = await reportMethod(selectedBlend.id)
-      console.log('Received response:', blob)
-
-      if (!(blob instanceof Blob)) {
-        console.error('Response is not a Blob:', blob)
-        throw new Error('Invalid response format')
-      }
-
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `blend-${reportType === 'finance' ? 'finance' : 'standard'}-report-${selectedBlend.id}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Report generation error:', error)
-      toast({
-        title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to generate report',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
   return (
     <>
       <div className="w-[100%] p-4">
@@ -994,35 +938,26 @@ export default function AllocationTableView() {
 
                 {/* Actions Section */}
                 <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                  {/* {selectedBlend && (
-                    // <DownloadReportButton
-                    //   tabulatorRef={tabulatorRef}
-                    //   blendInfo={{
-                    //     blendNo: selectedBlend.name,
-                    //     blendRefNo: '',
-                    //     customerName: selectedBlend.customer_name,
-                    //     status: blendInfo?.status || '',
-                    //     blendDate: blendInfo.blend_date,
-                    //     totalContractQty: 0,
-                    //     blendStandard: blendInfo?.blendStandard || '',
-                    //     blendAverage: blendInfo?.averagePrice || 0,
-                    //     rtNo: '',
-                    //     broker: blendInfo?.broker || '',
-                    //     export_quantity: blendInfo?.export_quantity || 0,
-                    //     averagePrice: blendInfo?.averagePrice || 0,
-                    //   }}
-                    // />
-                    <BlendReport id={selectedBlend.id} />
-                  )} */}
-                  <div>
-                    <ReportDownloadButton
-                      onGenerateReport={onGenerateReport}
-                      selectedBlend={selectedBlend ? { id: String(selectedBlend.id) } : null}
-                      type={reportType}
-                      onTypeChange={setReportType}
-                      isLoading={isLoading}
+                  {selectedBlend && (
+                    <DownloadReportButton
+                      tabulatorRef={tabulatorRef}
+                      blendInfo={{
+                        blendNo: selectedBlend.name,
+                        blendRefNo: '',
+                        customerName: selectedBlend.customer_name,
+                        status: blendInfo?.status || '',
+                        blendDate: blendInfo.blend_date,
+                        totalContractQty: 0,
+                        blendStandard: blendInfo?.blendStandard || '',
+                        blendAverage: blendInfo?.averagePrice || 0,
+                        rtNo: '',
+                        broker: blendInfo?.broker || '',
+                        export_quantity: blendInfo?.export_quantity || 0,
+                        averagePrice: blendInfo?.averagePrice || 0,
+                      }}
                     />
-                  </div>
+                  )}
+
                   <Dialog
                     open={isBlendDialogOpen}
                     onOpenChange={setIsBlendDialogOpen}

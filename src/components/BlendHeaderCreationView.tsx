@@ -70,14 +70,13 @@ export default function BlendAllocator() {
     getBlendByCustomer,
     createNewBlend,
     updateNewBlend,
-    deleteSalesAllocs,
   } = useApiMethods()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
-  const [blendItems, setBlendItems] = useState<CustomerOrdersTableData[]>([])
+
   const fetchConfirmedSaleOrders = useCallback(async () => {
     setError(null)
     try {
@@ -328,7 +327,6 @@ export default function BlendAllocator() {
         description: `Created blend successfully`,
         variant: 'default',
       })
-
       resetData()
     } catch (err: any) {
       toast({
@@ -520,6 +518,7 @@ export default function BlendAllocator() {
   //     </div>
   //   )
   // }
+
   const handleDelete = async (selectedIds: number[]) => {
     await deleteSalesAllocs(selectedIds)
     // Update the blendItems state by filtering out deleted items
@@ -531,6 +530,7 @@ export default function BlendAllocator() {
     }
     await fetchBlends()
   }
+
 
   return (
     <div className="grid grid-cols-4 gap-4">
@@ -561,10 +561,10 @@ export default function BlendAllocator() {
           handleConfirm={handleConfirm}
           blendItems={selectedAllocations}
           allocationsChanged={setSelectedAllocations}
+          deleted={allocationsDeleted}
           customerId={selectedPartnerId}
           blendId={editingBlendId}
           editiingInfo={editingBlendInfo}
-          onDelete={handleDelete}
         />
       </div>
 
