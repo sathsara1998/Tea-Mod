@@ -93,12 +93,12 @@ export default function BlendDialog({
         groupBy: 'product_name',
         columns: [
           {
-            title: 'D/ID',
-            field: 'id',
-            headerFilter: true,
-            hozAlign: 'center',
+            title: 'Blend Standard',
+            field: 'product_name',
+            headerFilter: 'input',
+            headerFilterPlaceholder: 'Find By Blend Standard',
+            hozAlign: 'left',
           },
-
           {
             title: 'Finished Product Name',
             field: 'finished_product_name',
@@ -145,13 +145,6 @@ export default function BlendDialog({
           {
             title: 'Blend Description',
             field: 'blend_details',
-            hozAlign: 'left',
-          },
-          {
-            title: 'Product Name',
-            field: 'product_name',
-            headerFilter: 'input',
-            headerFilterPlaceholder: 'Find By Product Name',
             hozAlign: 'left',
           },
         ],
@@ -348,7 +341,10 @@ export default function BlendDialog({
 
       <Card>
         <CardHeader>
-          <CardTitle>Customer Order Lines : {selectedCustomer}</CardTitle>
+          <CardTitle>
+            Customer Order Lines :{' '}
+            {selectedCustomer}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-[55vw]">
