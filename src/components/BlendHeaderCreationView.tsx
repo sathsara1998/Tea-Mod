@@ -521,19 +521,15 @@ export default function BlendAllocator() {
   //   )
   // }
   const handleDelete = async (selectedIds: number[]) => {
-    try {
-      await deleteSalesAllocs(selectedIds)
-      // Update the blendItems state by filtering out deleted items
-      // setBlendItems((prevItems) =>
-      //   prevItems.filter((item) => !selectedIds.includes(item.allocation_id)),
-      // )
-      if (searchParams.get('id')) {
-        await getBlendData(searchParams.get('id')!)
-      }
-      await fetchBlends()
-    } catch (error) {
-      throw error // Let the child component handle the error display
+    await deleteSalesAllocs(selectedIds)
+    // Update the blendItems state by filtering out deleted items
+    // setBlendItems((prevItems) =>
+    //   prevItems.filter((item) => !selectedIds.includes(item.allocation_id)),
+    // )
+    if (searchParams.get('id')) {
+      await getBlendData(searchParams.get('id')!)
     }
+    await fetchBlends()
   }
 
   return (
