@@ -108,9 +108,9 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   }
 
   return (
-    <div className="mb-4 grid grid-cols-12 gap-4 rounded-lg bg-muted/50 p-4">
+    <div className="mb-4 grid grid-cols-9 gap-4 rounded-lg bg-muted/50 p-4">
       {/* Blend Details Card */}
-      <Card className="col-span-4 border border-border bg-background shadow-sm">
+      <Card className="col-span-3 border border-border bg-background shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Blend Details
@@ -184,7 +184,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       </Card>
 
       {/* Cost Analysis Card */}
-      <Card className="col-span-5 border border-border bg-background shadow-sm">
+      <Card className="col-span-3 border border-border bg-background shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Cost Analysis
@@ -218,6 +218,81 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
 
       {/* Actions Card */}
       <Card className="col-span-3 border border-border bg-background shadow-sm">
+        {/* <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-foreground">
+            Contract Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded border border-border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Contract Number
+              </div>
+              <Input
+                // value={blendInfo.contractNumber}
+                // onChange={(e) =>
+                //   onBlendInfoChange({ contractNumber: e.target.value })
+                // }
+                className="bg-background text-foreground"
+                placeholder="Enter contract #"
+              />
+            </div>
+
+            <div className="rounded border border-border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Contract Date
+              </div>
+              <Input
+                type="date"
+                // value={blendInfo.contractDate}
+                // onChange={(e) =>
+                //   onBlendInfoChange({ contractDate: e.target.value })
+                // }
+                className="bg-background text-foreground"
+              />
+            </div>
+
+            <div className="rounded border border-border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Contract Type
+              </div>
+              <Select
+              // value={blendInfo.contractType}
+              // onValueChange={(value) =>
+              //   onBlendInfoChange({ contractType: value })
+              // }
+              >
+                <SelectTrigger className="bg-background text-foreground">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="special">Special</SelectItem>
+                  <SelectItem value="fixed">Fixed Term</SelectItem>
+                  <SelectItem value="flexible">Flexible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="rounded border border-border bg-muted/30 p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Contract Value
+              </div>
+              <Input
+                type="number"
+                // value={blendInfo.contractValue}
+                // onChange={(e) =>
+                //   onBlendInfoChange({
+                //     contractValue: parseFloat(e.target.value) || 0,
+                //   })
+                // }
+                className="bg-background text-foreground"
+                placeholder="Enter value"
+              />
+            </div>
+          </div>
+        </CardContent> */}
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Actions
