@@ -57,12 +57,11 @@ type BlendCreationProps = {
     demand_line_ids: any[]
   }) => void
   isEdit: boolean
-
+  deleted: (arr: number[]) => void
   customerId: number
   blendId: number
   allocationsChanged: (orders: CustomerOrdersTableData[]) => void
   editiingInfo: BlendShowType
-  onDelete: (selectedIds: number[]) => Promise<void>
 }
 
 export interface BlendShowType {
@@ -78,12 +77,11 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
   isConfirming,
   handleConfirm,
   isEdit,
-
+  deleted,
   customerId,
   blendId,
   allocationsChanged,
   editiingInfo,
-  onDelete,
 }) => {
   const [allocationItems, setAllocationItems] = useState<AllocationsData[]>([])
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
@@ -191,17 +189,18 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       const selectedIds = selectedData.map((row: any) => row.allocation_id)
 
       try {
-        await onDelete(selectedIds)
+        await deleteSalesAllocs(selectedIds) // Already passing array of IDs
         toast({
           title: 'Success',
           description: 'Selected allocations have been removed',
           variant: 'default',
         })
         tabulatorRef.current.deselectRow()
+        deleted(selectedIds)
         setSelectedRowCount(0)
         setIsDeleteConfirmOpen(false)
       } catch (err: any) {
-        console.error('Failed to delete allocation:', err)
+        console.error('Failed to allocation:', err)
         toast({
           title: 'Error',
           description: err.message,
