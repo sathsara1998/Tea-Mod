@@ -156,7 +156,7 @@ const Sidebar: React.FC<{
               </li>
             ))}
 
-            <li>
+            {/* <li>
               <Button
                 variant="ghost"
                 onClick={handleSnowfallToggle}
@@ -188,7 +188,7 @@ const Sidebar: React.FC<{
                   </span>
                 )}
               </Button>
-            </li>
+            </li> */}
           </ul>
         </nav>
 
