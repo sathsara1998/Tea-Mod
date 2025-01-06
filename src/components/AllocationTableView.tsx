@@ -100,12 +100,9 @@ export default function AllocationTableView() {
     type: '',
   }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
-<<<<<<< HEAD
-=======
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   const [type, setType] = useState<string | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
->>>>>>> parent of ff56ca6 (Merge branch 'dev' into feature/kavishka/blends-view)
   // const [isLoading, setIsLoading] = useState(false)
 
   const {

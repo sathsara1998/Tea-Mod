@@ -520,8 +520,7 @@ export default function BlendAllocator() {
   //     </div>
   //   )
   // }
-<<<<<<< HEAD
-=======
+
   const handleDelete = async (selectedIds: number[]) => {
     await deleteSalesAllocs(selectedIds)
     // Update the blendItems state by filtering out deleted items
@@ -533,7 +532,6 @@ export default function BlendAllocator() {
     }
     await fetchBlends()
   }
->>>>>>> parent of ff56ca6 (Merge branch 'dev' into feature/kavishka/blends-view)
 
   return (
     <div className="grid grid-cols-4 gap-4">
