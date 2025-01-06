@@ -9,14 +9,23 @@ import {
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 
+interface ReportType {
+  reportType: 'finance' | 'stores'
+}
+
 interface ReportDownloadProps {
   onGenerateReport: () => Promise<void>
   selectedBlend: { id: string } | null
+  type: ReportType['reportType']
+  onTypeChange: (type: ReportType['reportType']) => void
+  isLoading: boolean
 }
 
 const ReportDownloadButton = ({
   onGenerateReport,
   selectedBlend,
+  type,
+  onTypeChange,
 }: ReportDownloadProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -25,65 +34,34 @@ const ReportDownloadButton = ({
     message: string
   }
 
-  interface ReportType {
-    reportType: 'finance' | 'stores'
-  }
-
   const handleGenerateReport = async (
     reportType: ReportType['reportType'],
   ): Promise<void> => {
-    if (reportType === 'finance') {
-      if (!selectedBlend?.id) {
-        toast({
-          title: 'Error',
-          description: 'No blend selected',
-          variant: 'destructive',
-        })
-        return
-      }
+    // Notify parent component about type change
+    onTypeChange?.(reportType)
 
-      setIsLoading(true)
-      try {
-        await onGenerateReport()
-      } catch (error: unknown) {
-        console.error('Report generation error:', error)
-        toast({
-          title: 'Error',
-          description:
-            error instanceof Error
-              ? error.message
-              : 'Failed to generate report',
-          variant: 'destructive',
-        })
-      } finally {
-        setIsLoading(false)
-      }
-    } else if (reportType === 'stores') {
-      if (!selectedBlend?.id) {
-        toast({
-          title: 'Error',
-          description: 'No blend selected',
-          variant: 'destructive',
-        })
-        return
-      }
+    if (!selectedBlend?.id) {
+      toast({
+        title: 'Error',
+        description: 'No blend selected',
+        variant: 'destructive',
+      })
+      return
+    }
 
-      setIsLoading(true)
-      try {
-        await onGenerateReport()
-      } catch (error: unknown) {
-        console.error('Report generation error:', error)
-        toast({
-          title: 'Error',
-          description:
-            error instanceof Error
-              ? error.message
-              : 'Failed to generate report',
-          variant: 'destructive',
-        })
-      } finally {
-        setIsLoading(false)
-      }
+    setIsLoading(true)
+    try {
+      await onGenerateReport()
+    } catch (error: unknown) {
+      console.error('Report generation error:', error)
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to generate report',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 

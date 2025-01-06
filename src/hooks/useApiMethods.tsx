@@ -656,17 +656,16 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
-  const downloadBlendReport = useCallback(
+
+  const getBlendSalesReport = useCallback(
     async (id: number) => {
       const config: CustomConfig = {
-        url: `/api/reports/blendpdf`,
-        errorMessage: 'An error occurred while creating blend.',
-        method: 'post',
-        data: {
-          path: `/reportext/pdf/t_mod_new.tea_blend_report/${id}`,
-          type: 'qweb-pdf',
-          context: {},
-          data: null,
+        url: `/api/reports/store/${id}`,
+        errorMessage: 'An error occurred while fetching Orders.',
+        method: 'get',
+        responseType: 'blob' as const,
+        headers: {
+          Accept: 'application/pdf',
         },
       }
       try {
@@ -712,6 +711,6 @@ export const useApiMethods = () => {
     updateNewBlend,
     addAllocation,
     getBlendReport,
-    downloadBlendReport,
+    getBlendSalesReport,
   }
 }

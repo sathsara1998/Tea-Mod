@@ -101,6 +101,8 @@ export default function AllocationTableView() {
   }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
+  const [type, setType] = useState<String | null>(null)
+  const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
   // const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -112,6 +114,7 @@ export default function AllocationTableView() {
     blendConfirm,
     blendReset,
     getBlendReport,
+    getBlendSalesReport,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -126,6 +129,7 @@ export default function AllocationTableView() {
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([])
   const isInitialAllocations = useRef(true)
   const selectedIdsRef = useRef<number[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (allocationsTableRef.current) {
@@ -915,9 +919,15 @@ export default function AllocationTableView() {
       return
     }
 
+    setIsLoading(true)
     try {
       console.log('Starting report generation for blend:', selectedBlend.id)
-      const blob = await getBlendReport(selectedBlend.id)
+
+      // Check if finance report is needed
+      const reportMethod =
+        reportType === 'finance' ? getBlendSalesReport : getBlendReport
+
+      const blob = await reportMethod(selectedBlend.id)
       console.log('Received response:', blob)
 
       if (!(blob instanceof Blob)) {
@@ -928,7 +938,7 @@ export default function AllocationTableView() {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `blend-report-${selectedBlend.id}.pdf`
+      link.download = `blend-${reportType === 'finance' ? 'finance' : 'standard'}-report-${selectedBlend.id}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -941,6 +951,8 @@ export default function AllocationTableView() {
           error instanceof Error ? error.message : 'Failed to generate report',
         variant: 'destructive',
       })
+    } finally {
+      setIsLoading(false)
     }
   }
   return (
@@ -1005,9 +1017,10 @@ export default function AllocationTableView() {
                   <div>
                     <ReportDownloadButton
                       onGenerateReport={onGenerateReport}
-                      selectedBlend={
-                        selectedBlend ? { id: String(selectedBlend.id) } : null
-                      }
+                      selectedBlend={selectedBlend ? { id: String(selectedBlend.id) } : null}
+                      type={reportType}
+                      onTypeChange={setReportType}
+                      isLoading={isLoading}
                     />
                   </div>
                   <Dialog
