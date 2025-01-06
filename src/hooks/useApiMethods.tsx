@@ -594,24 +594,25 @@ export const useApiMethods = () => {
   // }
 
   // In your useApiMethods.ts file
-  const updateNewBlend = async (data: BatchAllocationUpdateRequest | AllocationUpdate): Promise<any> => {
+  const updateNewBlend = async (
+    data: BatchAllocationUpdateRequest | AllocationUpdate,
+  ): Promise<any> => {
     const response = await fetch('/api/tea_blend/update_allocation', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data)
-    });
+      body: JSON.stringify(data),
+    })
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update allocations');
+      const error = await response.json()
+      throw new Error(error.error || 'Failed to update allocations')
     }
 
-    return response.json();
-  };
+    return response.json()
+  }
 
-  
   // Add Allocation
   const addAllocation = useCallback(
     async (data: any) => {
@@ -632,6 +633,52 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+
+  // Get Customer sales orders
+  const getBlendReport = useCallback(
+    async (id: number) => {
+      const config: CustomConfig = {
+        url: `/api/reports/blend/${id}`,
+        errorMessage: 'An error occurred while fetching Orders.',
+        method: 'get',
+        responseType: 'blob' as const,
+        headers: {
+          Accept: 'application/pdf',
+        },
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
+
+  const getBlendSalesReport = useCallback(
+    async (id: number) => {
+      const config: CustomConfig = {
+        url: `/api/reports/store/${id}`,
+        errorMessage: 'An error occurred while fetching Orders.',
+        method: 'get',
+        responseType: 'blob' as const,
+        headers: {
+          Accept: 'application/pdf',
+        },
+      }
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
+
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -663,5 +710,7 @@ export const useApiMethods = () => {
     createNewBlend,
     updateNewBlend,
     addAllocation,
+    getBlendReport,
+    getBlendSalesReport,
   }
 }
