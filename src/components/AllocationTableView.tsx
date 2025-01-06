@@ -909,52 +909,6 @@ export default function AllocationTableView() {
   // console.log('selected', selectedBlend)
   // console.log('blendinfo', blendInfo)
 
-  const onGenerateReport = async () => {
-    if (!selectedBlend?.id) {
-      toast({
-        title: 'Error',
-        description: 'No blend selected',
-        variant: 'destructive',
-      })
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      console.log('Starting report generation for blend:', selectedBlend.id)
-
-      // Check if finance report is needed
-      const reportMethod =
-        reportType === 'finance' ? getBlendReport : getBlendSalesReport
-
-      const blob = await reportMethod(selectedBlend.id)
-      console.log('Received response:', blob)
-
-      if (!(blob instanceof Blob)) {
-        console.error('Response is not a Blob:', blob)
-        throw new Error('Invalid response format')
-      }
-
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `blend-${reportType === 'finance' ? 'finance' : 'standard'}-report-${selectedBlend.id}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Report generation error:', error)
-      toast({
-        title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to generate report',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
   return (
     <>
       <div className="w-[100%] p-4">
@@ -1016,13 +970,11 @@ export default function AllocationTableView() {
                   )} */}
                   <div>
                     <ReportDownloadButton
-                      onGenerateReport={onGenerateReport}
                       selectedBlend={
-                        selectedBlend ? { id: String(selectedBlend.id) } : null
+                        selectedBlend ? { id: selectedBlend.id } : null
                       }
                       type={reportType}
                       onTypeChange={setReportType}
-                      isLoading={isLoading}
                     />
                   </div>
                   <Dialog

@@ -8,38 +8,26 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
+import { useApiMethods } from '@/hooks/useApiMethods'
 
-interface ReportType {
-  reportType: 'finance' | 'stores'
-}
+type ReportType = 'finance' | 'stores'
 
 interface ReportDownloadProps {
-  onGenerateReport: () => Promise<void>
-  selectedBlend: { id: string } | null
-  type: ReportType['reportType']
-  onTypeChange: (type: ReportType['reportType']) => void
-  isLoading: boolean
+  selectedBlend: { id: number } | null
+  type: ReportType
+  onTypeChange: (type: ReportType) => void
 }
 
 const ReportDownloadButton = ({
-  onGenerateReport,
   selectedBlend,
   type,
   onTypeChange,
 }: ReportDownloadProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { getBlendReport, getBlendSalesReport } = useApiMethods()
 
-  interface ReportGenerationError {
-    message: string
-  }
-
-  const handleGenerateReport = async (
-    reportType: ReportType['reportType'],
-  ): Promise<void> => {
-    // Notify parent component about type change
-    onTypeChange?.(reportType)
-
+  const generateReport = async (reportType: ReportType): Promise<void> => {
     if (!selectedBlend?.id) {
       toast({
         title: 'Error',
@@ -50,9 +38,27 @@ const ReportDownloadButton = ({
     }
 
     setIsLoading(true)
+    onTypeChange(reportType)
+
     try {
-      await onGenerateReport()
-    } catch (error: unknown) {
+      const reportMethod =
+        reportType === 'finance' ? getBlendReport : getBlendSalesReport
+      const blob = await reportMethod(selectedBlend.id)
+
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `blend-${reportType}-report-${selectedBlend.id}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast({
+        title: 'Success',
+        description: 'Report downloaded successfully',
+      })
+    } catch (error) {
       console.error('Report generation error:', error)
       toast({
         title: 'Error',
@@ -79,14 +85,14 @@ const ReportDownloadButton = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem
-          onClick={() => handleGenerateReport('finance')}
+          onClick={() => generateReport('finance')}
           className="cursor-pointer"
           disabled={isLoading}
         >
           Finance Report
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleGenerateReport('stores')}
+          onClick={() => generateReport('stores')}
           className="cursor-pointer"
           disabled={isLoading}
         >
