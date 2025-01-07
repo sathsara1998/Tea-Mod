@@ -78,16 +78,20 @@ const BlendCard: React.FC<BlendCardProps> = ({ data, onEdit, onDelete }) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Order</TableHead>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Quantity</TableHead>
+                      <TableHead>Co No</TableHead>
+                      <TableHead>Co Line</TableHead>
+                      <TableHead>FG Description</TableHead>
+                      <TableHead>Quantity (kg)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {data.allocations.map((allocation, index) => (
                       <TableRow key={index}>
-                        <TableCell>{allocation.sale_order_name}</TableCell>
-                        <TableCell>{allocation.product_name}</TableCell>
+                        <TableCell>{allocation.sale_order}</TableCell>
+                        <TableCell>{allocation.component_id}</TableCell>
+                        <TableCell>
+                          {allocation.finished_product_name}
+                        </TableCell>
                         <TableCell>{allocation.quantity.toFixed(3)}</TableCell>
                       </TableRow>
                     ))}

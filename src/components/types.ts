@@ -310,7 +310,7 @@ export interface OrderBlendDetail {
 export interface CustomerOrdersTableData {
   id: number
   contract_number: string
-  contract_line_no: string
+  contract_line_no: number
   product_internal_ref: string
   product_uom_qty: number
   product_uom: string
@@ -345,6 +345,23 @@ export interface NewCustomerOrdersTableData {
   quantity_remaining: number
   quantity: number
   allocations: []
+  id: number
+  contract_number: string
+  contract_line_no: string
+  product_internal_ref: string
+  product_uom_qty: number
+  product_uom: string
+  product_name: string
+  product_blend_internal_ref: string
+  blend_details: string
+  tea_weight: number
+  allocated_blend_quantity: number
+  product_id: number
+  release_number: number
+  blending_qty: number
+  standard: string
+  line_id: number
+  allocation_id: number
 }
 
 export interface BlendCreateReq {
