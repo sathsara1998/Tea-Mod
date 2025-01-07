@@ -27,6 +27,7 @@ const ReportDownloadButton = ({
   const { toast } = useToast()
   const { getBlendReport, getBlendSalesReport } = useApiMethods()
 
+  //Generate Report According To Report Type
   const generateReport = async (reportType: ReportType): Promise<void> => {
     if (!selectedBlend?.id) {
       toast({

@@ -101,7 +101,6 @@ export default function AllocationTableView() {
   }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
-  const [type, setType] = useState<string | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
   // const [isLoading, setIsLoading] = useState(false)
 
@@ -113,8 +112,6 @@ export default function AllocationTableView() {
     editPackageAllocation,
     blendConfirm,
     blendReset,
-    getBlendReport,
-    getBlendSalesReport,
   } = useApiMethods()
   const { toast } = useToast()
   const router = useRouter()
@@ -129,7 +126,6 @@ export default function AllocationTableView() {
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([])
   const isInitialAllocations = useRef(true)
   const selectedIdsRef = useRef<number[]>([])
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (allocationsTableRef.current) {
@@ -477,19 +473,7 @@ export default function AllocationTableView() {
     }
   }
 
-  /*
-!Updated By Kavishka[Intern SE] 19/11/2024
-  *Modified addSelectedTeasToBlend in AllocationTableView to:
-
-  1.Convert selected teas to the correct table data format
-  2.Directly update the Tabulator table using React state
-  3.Update the total quantities and costs
-  4.Maintain reactivity through React's state management
-
-  !Updated By Kavishka[Intern SE] 20/11/2024
-      quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
-      init_quantity: tea.init_quantity,
-*/
+  //addTea Function
   const addSelectedTeasToBlend = (selectedTeas: any[]) => {
     // setIsLoading(true)
     if (selectedBlend && tabulatorRef.current) {
@@ -948,27 +932,8 @@ export default function AllocationTableView() {
 
                 {/* Actions Section */}
                 <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                  {/* {selectedBlend && (
-                    // <DownloadReportButton
-                    //   tabulatorRef={tabulatorRef}
-                    //   blendInfo={{
-                    //     blendNo: selectedBlend.name,
-                    //     blendRefNo: '',
-                    //     customerName: selectedBlend.customer_name,
-                    //     status: blendInfo?.status || '',
-                    //     blendDate: blendInfo.blend_date,
-                    //     totalContractQty: 0,
-                    //     blendStandard: blendInfo?.blendStandard || '',
-                    //     blendAverage: blendInfo?.averagePrice || 0,
-                    //     rtNo: '',
-                    //     broker: blendInfo?.broker || '',
-                    //     export_quantity: blendInfo?.export_quantity || 0,
-                    //     averagePrice: blendInfo?.averagePrice || 0,
-                    //   }}
-                    // />
-                    <BlendReport id={selectedBlend.id} />
-                  )} */}
                   <div>
+                    {/*Download Report*/ }
                     <ReportDownloadButton
                       selectedBlend={
                         selectedBlend ? { id: selectedBlend.id } : null
