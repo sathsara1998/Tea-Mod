@@ -107,7 +107,7 @@ export interface BlendInfo {
   blendStandard: string
   propSample: number
   requiredDate: string
-  packagingType: string
+  
   status: string
   customer: number
   customerName: string
@@ -117,8 +117,11 @@ export interface BlendInfo {
   balanceToAllocate: number
   to_allocate_quantity?: number
   teaCost: number
-  allocations: Array<ManufacturingAllocationTableData>
+  prop_sample_grams: number
+  allocations: NewCustomerOrdersTableData[]
+  manufacturing_allocations: ManufacturingAllocation[]
   export_quantity: number
+  packing_type: string
 }
 
 export interface TeaAllocation {
@@ -201,9 +204,8 @@ interface Allocation {
   product_name: string
   quantity: number
   contract_no: string
-  tea_weight: number | 0,
-  quantity_remaining:number | 0
-  
+  tea_weight: number | 0
+  quantity_remaining: number | 0
 }
 
 export interface TeaBlend {
@@ -225,7 +227,8 @@ export interface TeaBlend {
   allocations: Allocation[]
   manufacturing_allocations: ManufacturingAllocation[]
   propSample?: number
-  packagingType?: string
+  packing_type: string
+  prop_sample_grams: number
 }
 
 export interface AddAllocationObject {
@@ -321,9 +324,9 @@ export interface CustomerOrdersTableData {
   blending_qty: number
   standard: string
   line_id: number
-  allocation_id:number,
-  quantity_remaining:number,
-  quantity:number
+  allocation_id: number
+  quantity_remaining: number
+  quantity: number
 }
 export interface NewCustomerOrdersTableData {
   finished_product_id: number
@@ -360,10 +363,10 @@ export interface BlendCreateReq {
 }
 
 export interface AllocationUpdate {
-  allocation_id: number;
-  quantity: number;
+  allocation_id: number
+  quantity: number
 }
 
 export interface BatchAllocationUpdateRequest {
-  allocations: AllocationUpdate[];
+  allocations: AllocationUpdate[]
 }

@@ -106,7 +106,8 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   const cn = (...classes: string[]) => {
     return classes.filter(Boolean).join(' ')
   }
-
+  console.log(`info`, blendInfo.allocations[0]?.sale_order)
+  console.log(blendInfo.packing_type, blendInfo.prop_sample_grams)
   return (
     <div className="mb-4 grid grid-cols-9 gap-4 rounded-lg bg-muted/50 p-4">
       {/* Blend Details Card */}
@@ -124,15 +125,15 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               value={blendInfo.blendStandard}
             />
 
-            <div className="rounded border border-border bg-muted/30 p-2">
+            <div className="rounded border border-border  p-2">
               <div className="mb-1 text-xs uppercase text-muted-foreground">
-                Prop Sample (gms)
+                Prop Sample(gms)
               </div>
               <Input
-                value={blendInfo.propSample}
+                value={blendInfo.prop_sample_grams}
                 onChange={(e) =>
                   onBlendInfoChange({
-                    propSample: parseFloat(e.target.value) || 0,
+                    prop_sample_grams: parseFloat(e.target.value) || 0,
                   })
                 }
                 disabled={blendInfo.status.toLowerCase() === 'done'}
@@ -140,30 +141,14 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               />
             </div>
 
-            <div className="rounded border border-border bg-muted/30 p-2">
-              <div className="mb-1 text-xs uppercase text-muted-foreground">
-                Required Date
-              </div>
-              <Input
-                type="date"
-                value={blendInfo.requiredDate}
-                onChange={(e) =>
-                  onBlendInfoChange({ requiredDate: e.target.value })
-                }
-                min={new Date().toISOString().split('T')[0]}
-                disabled
-                className="bg-background text-foreground"
-              />
-            </div>
-
-            <div className="rounded border border-border bg-muted/30 p-2">
+            <div className="rounded border border-border  p-2">
               <div className="mb-1 text-xs uppercase text-muted-foreground">
                 Packaging Type
               </div>
               <Select
-                value={blendInfo.packagingType}
+                value={blendInfo.packing_type}
                 onValueChange={(value) =>
-                  onBlendInfoChange({ packagingType: value })
+                  onBlendInfoChange({ packing_type: value })
                 }
                 disabled={blendInfo.status.toLowerCase() === 'done'}
               >
@@ -172,9 +157,9 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bulk">Bulk</SelectItem>
-                  <SelectItem value="bags">Bags</SelectItem>
-                  <SelectItem value="carton">Carton</SelectItem>
-                  <SelectItem value="container">Container</SelectItem>
+                  <SelectItem value="packet">Packet</SelectItem>
+                  <SelectItem value="tea_bag">Tea Bag</SelectItem>
+                  <SelectItem value="strightline">Straight Line</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -218,7 +203,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
 
       {/* Actions Card */}
       <Card className="col-span-3 border border-border bg-background shadow-sm">
-        {/* <CardHeader className="pb-3">
+        <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Contract Details
           </CardTitle>
@@ -230,10 +215,15 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 Contract Number
               </div>
               <Input
-                // value={blendInfo.contractNumber}
-                // onChange={(e) =>
-                //   onBlendInfoChange({ contractNumber: e.target.value })
-                // }
+                value={blendInfo.allocations[0]?.sale_order || ''}
+                onChange={(e) => {
+                  const newAllocations = [...blendInfo.allocations]
+                  newAllocations[0] = {
+                    ...newAllocations[0],
+                    sale_order: e.target.value,
+                  }
+                  onBlendInfoChange({ allocations: newAllocations })
+                }}
                 className="bg-background text-foreground"
                 placeholder="Enter contract #"
               />
@@ -292,7 +282,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               />
             </div>
           </div>
-        </CardContent> */}
+        </CardContent>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Actions
@@ -301,21 +291,40 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
         <CardContent>
           <div className="flex flex-col gap-3">
             {blendInfo.status === 'draft' && (
-              <Button
-                variant="outline"
-                onClick={onGenerateBlendSheet}
-                className={cn(
-                  'group relative flex w-full items-center justify-between',
-                  'border-green-200 dark:border-green-800',
-                  'bg-green-50 dark:bg-green-900/20',
-                  'text-green-700 dark:text-green-400',
-                  'hover:bg-green-100 dark:hover:bg-green-900/30',
-                  'transition-all hover:shadow-sm',
-                )}
-              >
-                <span className="flex items-center gap-2">
+              <>
+                <Button
+                  variant="outline"
+                  onClick={onGenerateBlendSheet}
+                  className={cn(
+                    'group relative flex w-full items-center justify-between',
+                    'border-green-200 dark:border-green-800',
+                    'bg-green-50 dark:bg-green-900/20',
+                    'text-green-700 dark:text-green-400',
+                    'hover:bg-green-100 dark:hover:bg-green-900/30',
+                    'transition-all hover:shadow-sm',
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="hidden md:block">
+                      Generate Blend Sheet
+                    </span>
+                    <span className="md:hidden">Generate</span>
+                  </span>
                   <svg
-                    className="h-4 w-4"
+                    className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -324,26 +333,56 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      d="M9 5l7 7-7 7"
                     />
                   </svg>
-                  <span className="hidden md:block">Generate Blend Sheet</span>
-                  <span className="md:hidden">Generate</span>
-                </span>
-                <svg
-                  className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                </Button>
+                <Button
+                  variant="outline"
+                  
+                  className={cn(
+                    'group relative flex w-full items-center justify-between',
+                    'border-blue-200 dark:border-blue-800',
+                    'bg-blue-50 dark:bg-blue-900/20',
+                    'text-blue-700 dark:text-blue-400',
+                    'hover:bg-blue-100 dark:hover:bg-blue-900/30',
+                    'transition-all hover:shadow-sm',
+                  )}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Button>
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    <span className="hidden md:block">
+                      Update Blend Details
+                    </span>
+                    <span className="md:hidden">Update</span>
+                  </span>
+                  <svg
+                    className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Button>
+              </>
             )}
             {blendInfo.status === 'confirmed' && (
               <Button

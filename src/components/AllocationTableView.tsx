@@ -620,13 +620,11 @@ export default function AllocationTableView() {
 
   const [blendInfo, setBlendInfo] = useState<BlendInfo>({
     blendNo: '',
-
     broker: '',
     blend_date: '',
     blendStandard: '',
-    propSample: 0,
+    prop_sample_grams: 0,
     requiredDate: '',
-    packagingType: '',
     status: '',
     customer: 0,
     customerName: '',
@@ -637,6 +635,9 @@ export default function AllocationTableView() {
     teaCost: 0,
     export_quantity: 0,
     allocations: [],
+    manufacturing_allocations: [],
+    propSample: 0,
+    packing_type: '',
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -667,12 +668,11 @@ export default function AllocationTableView() {
 
         const teablendInfo: BlendInfo = {
           blendNo: teas.name,
-
           blend_date: teas.blend_date,
           blendStandard: teas.product_name,
           propSample: teas.propSample ?? 0,
           requiredDate: '',
-          packagingType: teas.packagingType ?? '',
+          packing_type: teas.packing_type ?? '',
           status: teas.status,
           customer: teas.customer_id,
           customerName: teas.customer_name,
@@ -684,6 +684,8 @@ export default function AllocationTableView() {
           export_quantity: teas.export_quantity,
           allocations: [],
           broker: teas.broker,
+          prop_sample_grams: teas.prop_sample_grams,
+          manufacturing_allocations: [],
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
@@ -933,7 +935,7 @@ export default function AllocationTableView() {
                 {/* Actions Section */}
                 <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                   <div>
-                    {/*Download Report*/ }
+                    {/*Download Report*/}
                     <ReportDownloadButton
                       selectedBlend={
                         selectedBlend ? { id: selectedBlend.id } : null
@@ -984,6 +986,7 @@ export default function AllocationTableView() {
                   onGenerateBlendSheet={() => setIsGenerateConfirmOpen(true)}
                   onResetBlendSheet={() => setIsResetConfirmOpen(true)}
                   onSaveTableData={() => saveTableData()}
+                  // OnUpdateBlendDetails={()=>setIsGenerateConfirmOpen(true)}
                 />
                 {/* <div ref={blendsTableRef}></div> */}
               </CardContent>

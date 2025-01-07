@@ -678,7 +678,25 @@ export const useApiMethods = () => {
     },
     [apiClient],
   )
+  const updatePacking = useCallback(
+    async (data: any) => {
+      const config: CustomConfig = {
+        url: '/api/blend/updatePacking',
+        errorMessage: 'Failed to update packing Details. Please try again.',
+        method: 'POST',
+        data: data,
+      }
 
+      try {
+        const response = await apiClient(config)
+        const data = response.data
+        return data
+      } catch (error) {
+        throw new Error(config.errorMessage)
+      }
+    },
+    [apiClient],
+  )
   return {
     getConfirmedSaleOrders,
     getBlends,
@@ -712,5 +730,6 @@ export const useApiMethods = () => {
     addAllocation,
     getBlendReport,
     getBlendSalesReport,
+    updatePacking,
   }
 }
