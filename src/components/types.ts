@@ -101,13 +101,13 @@ export type ConfirmedSaleOrder = {
 }
 
 export interface BlendInfo {
+  id: number
   blendNo: string
   broker: string
   blend_date: string
   blendStandard: string
   propSample: number
   requiredDate: string
-  
   status: string
   customer: number
   customerName: string
@@ -118,8 +118,7 @@ export interface BlendInfo {
   to_allocate_quantity?: number
   teaCost: number
   prop_sample_grams: number
-  allocations: NewCustomerOrdersTableData[]
-  manufacturing_allocations: ManufacturingAllocation[]
+  allocations: Array<ManufacturingAllocationTableData>[]
   export_quantity: number
   packing_type: string
 }
@@ -224,7 +223,6 @@ export interface TeaBlend {
   blended_quantity: number
   to_allocate_quantity: number
   average_cost: number
-  allocations: Allocation[]
   manufacturing_allocations: ManufacturingAllocation[]
   propSample?: number
   packing_type: string

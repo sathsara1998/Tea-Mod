@@ -619,6 +619,7 @@ export default function AllocationTableView() {
   }
 
   const [blendInfo, setBlendInfo] = useState<BlendInfo>({
+    id: 0,
     blendNo: '',
     broker: '',
     blend_date: '',
@@ -635,7 +636,7 @@ export default function AllocationTableView() {
     teaCost: 0,
     export_quantity: 0,
     allocations: [],
-    manufacturing_allocations: [],
+
     propSample: 0,
     packing_type: '',
   })
@@ -667,6 +668,7 @@ export default function AllocationTableView() {
         }
 
         const teablendInfo: BlendInfo = {
+          id: teas.id,
           blendNo: teas.name,
           blend_date: teas.blend_date,
           blendStandard: teas.product_name,
@@ -682,10 +684,9 @@ export default function AllocationTableView() {
           balanceToAllocate: teas.to_allocate_quantity,
           teaCost: teas.average_cost,
           export_quantity: teas.export_quantity,
-          allocations: [],
           broker: teas.broker,
           prop_sample_grams: teas.prop_sample_grams,
-          manufacturing_allocations: [],
+          allocations: [],
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
@@ -891,7 +892,7 @@ export default function AllocationTableView() {
       fetchBlendData(id, true)
     }
   }, [searchParams])
-  console.log(blendInfo)
+
   // console.log('selected', selectedBlend)
   // console.log('blendinfo', blendInfo)
 
@@ -1021,7 +1022,7 @@ export default function AllocationTableView() {
                                   <TableHead>Quantity</TableHead>
                                 </TableRow>
                               </TableHeader>
-                              <TableBody>
+                              {/* <TableBody>
                                 {selectedBlend.allocations.map(
                                   (allocation, index) => (
                                     <TableRow key={index}>
@@ -1037,7 +1038,7 @@ export default function AllocationTableView() {
                                     </TableRow>
                                   ),
                                 )}
-                              </TableBody>
+                              </TableBody> */}
                             </Table>
                           </ScrollArea>
                         </PopoverContent>

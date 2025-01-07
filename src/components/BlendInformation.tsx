@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -22,7 +22,16 @@ import {
   DropdownMenuSeparator,
 } from './ui/dropdown-menu'
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
-
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
+import { useApiMethods } from '@/hooks/useApiMethods'
+import { useToast } from './ui/use-toast'
+import ContractDialog from './ContractDialog'
 interface BlendInformationSectionProps {
   blendInfo: BlendInfo
   onBlendInfoChange: (info: Partial<BlendInfo>) => void
@@ -103,10 +112,39 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
   onSaveTableData,
   lotDetails,
 }) => {
+  const [UpdateBlendConfirmOpen, setIsUpdateBlendConfirmOpen] = useState(false)
+
+  const { updatePacking } = useApiMethods()
+  const { toast } = useToast()
   const cn = (...classes: string[]) => {
     return classes.filter(Boolean).join(' ')
   }
-  console.log(`info`, blendInfo.allocations[0]?.sale_order)
+  const handleUpdateBlendDetails = async () => {
+    try {
+      const packingData = {
+        blend_id: blendInfo.id,
+        packing_type: blendInfo.packing_type,
+        prop_sample: blendInfo.prop_sample_grams,
+      }
+
+      await updatePacking(packingData)
+      setIsUpdateBlendConfirmOpen(false)
+
+      toast({
+        title: 'Success',
+        description: 'Packing data updated successfully',
+        variant: 'default',
+      })
+    } catch (error) {
+      console.error('Error updating blend details:', error)
+      toast({
+        title: 'destruct',
+        description: 'Packing data updated unsuccesfull',
+        variant: 'default',
+      })
+    }
+  }
+  
   console.log(blendInfo.packing_type, blendInfo.prop_sample_grams)
   return (
     <div className="mb-4 grid grid-cols-9 gap-4 rounded-lg bg-muted/50 p-4">
@@ -200,89 +238,31 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
           </div>
         </CardContent>
       </Card>
-
+      <Dialog
+        open={UpdateBlendConfirmOpen}
+        onOpenChange={setIsUpdateBlendConfirmOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Reset</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to reset the blend?</p>
+          <DialogFooter>
+            <Button
+              onClick={() => setIsUpdateBlendConfirmOpen(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBlendDetails} variant="destructive">
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {/* Actions Card */}
       <Card className="col-span-3 border border-border bg-background shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-foreground">
-            Contract Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded border border-border bg-muted/30 p-2">
-              <div className="mb-1 text-xs uppercase text-muted-foreground">
-                Contract Number
-              </div>
-              <Input
-                value={blendInfo.allocations[0]?.sale_order || ''}
-                onChange={(e) => {
-                  const newAllocations = [...blendInfo.allocations]
-                  newAllocations[0] = {
-                    ...newAllocations[0],
-                    sale_order: e.target.value,
-                  }
-                  onBlendInfoChange({ allocations: newAllocations })
-                }}
-                className="bg-background text-foreground"
-                placeholder="Enter contract #"
-              />
-            </div>
-
-            <div className="rounded border border-border bg-muted/30 p-2">
-              <div className="mb-1 text-xs uppercase text-muted-foreground">
-                Contract Date
-              </div>
-              <Input
-                type="date"
-                // value={blendInfo.contractDate}
-                // onChange={(e) =>
-                //   onBlendInfoChange({ contractDate: e.target.value })
-                // }
-                className="bg-background text-foreground"
-              />
-            </div>
-
-            <div className="rounded border border-border bg-muted/30 p-2">
-              <div className="mb-1 text-xs uppercase text-muted-foreground">
-                Contract Type
-              </div>
-              <Select
-              // value={blendInfo.contractType}
-              // onValueChange={(value) =>
-              //   onBlendInfoChange({ contractType: value })
-              // }
-              >
-                <SelectTrigger className="bg-background text-foreground">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="special">Special</SelectItem>
-                  <SelectItem value="fixed">Fixed Term</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="rounded border border-border bg-muted/30 p-2">
-              <div className="mb-1 text-xs uppercase text-muted-foreground">
-                Contract Value
-              </div>
-              <Input
-                type="number"
-                // value={blendInfo.contractValue}
-                // onChange={(e) =>
-                //   onBlendInfoChange({
-                //     contractValue: parseFloat(e.target.value) || 0,
-                //   })
-                // }
-                className="bg-background text-foreground"
-                placeholder="Enter value"
-              />
-            </div>
-          </div>
-        </CardContent>
+        <ContractDialog blendInfo={[]} {...blendInfo} />
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Actions
@@ -339,7 +319,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 </Button>
                 <Button
                   variant="outline"
-                  
+                  onClick={() => setIsUpdateBlendConfirmOpen(true)}
                   className={cn(
                     'group relative flex w-full items-center justify-between',
                     'border-blue-200 dark:border-blue-800',
