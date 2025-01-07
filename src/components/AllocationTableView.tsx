@@ -47,6 +47,7 @@ import {
   ManufacturingAllocationTableData,
   TeaBlend,
   StockLot,
+  NewCustomerOrdersTableData,
 } from './types'
 import AllocationDetailsDialog from './AllocationDetailsDialog'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
@@ -102,7 +103,6 @@ export default function AllocationTableView() {
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
-  // const [isLoading, setIsLoading] = useState(false)
 
   const {
     getBlendById,
@@ -635,8 +635,8 @@ export default function AllocationTableView() {
     balanceToAllocate: 0,
     teaCost: 0,
     export_quantity: 0,
+    manufacturing_allocations: [],
     allocations: [],
-
     propSample: 0,
     packing_type: '',
   })
@@ -655,7 +655,10 @@ export default function AllocationTableView() {
       try {
         const data = await getBlendById(id)
         const teas: TeaBlend = data[0]
-
+        // const allocations: NewCustomerOrdersTableData = teas.allocations
+        // console.log(allocations)
+        const allocationData = teas.allocations?.[0] || null
+        console.log(`data`, teas.allocations)
         if (isEdit) {
           setSelectedBlend(teas)
           return
@@ -666,7 +669,9 @@ export default function AllocationTableView() {
         } else {
           setSelectedBlendID(null) // Handle case where no orders are returned
         }
-
+        // const isallocation: NewCustomerOrdersTableData = {
+        //   finished_product_id: allocations.allocations[0].finished_product_id,
+        // }
         const teablendInfo: BlendInfo = {
           id: teas.id,
           blendNo: teas.name,
@@ -686,7 +691,8 @@ export default function AllocationTableView() {
           export_quantity: teas.export_quantity,
           broker: teas.broker,
           prop_sample_grams: teas.prop_sample_grams,
-          allocations: [],
+          manufacturing_allocations: [],
+          allocations: [teas.allocations],
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
@@ -894,7 +900,7 @@ export default function AllocationTableView() {
   }, [searchParams])
 
   // console.log('selected', selectedBlend)
-  // console.log('blendinfo', blendInfo)
+  console.log('blendinfo-allocations', blendInfo)
 
   return (
     <>
@@ -1017,20 +1023,24 @@ export default function AllocationTableView() {
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  <TableHead>Order</TableHead>
-                                  <TableHead>Product</TableHead>
-                                  <TableHead>Quantity</TableHead>
+                                  <TableHead>Co No</TableHead>
+                                  <TableHead>Co Line</TableHead>
+                                  <TableHead>FG Description</TableHead>
+                                  <TableHead>Quantity (kg)</TableHead>
                                 </TableRow>
                               </TableHeader>
-                              {/* <TableBody>
+                              <TableBody>
                                 {selectedBlend.allocations.map(
                                   (allocation, index) => (
                                     <TableRow key={index}>
                                       <TableCell>
-                                        {allocation.sale_order_name}
+                                        {allocation.sale_order}
                                       </TableCell>
                                       <TableCell>
-                                        {allocation.product_name}
+                                        {allocation.component_id}
+                                      </TableCell>
+                                      <TableCell>
+                                        {allocation.finished_product_name}
                                       </TableCell>
                                       <TableCell>
                                         {allocation.quantity.toFixed(3)}
@@ -1038,7 +1048,7 @@ export default function AllocationTableView() {
                                     </TableRow>
                                   ),
                                 )}
-                              </TableBody> */}
+                              </TableBody>
                             </Table>
                           </ScrollArea>
                         </PopoverContent>

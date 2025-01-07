@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Badge, badgeVariants } from '@/components/ui/badge'
-import { BlendInfo, StockLot } from './types'
+import { BlendInfo, NewCustomerOrdersTableData, StockLot } from './types'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -144,7 +144,8 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       })
     }
   }
-  
+
+  console.log(blendInfo)
   console.log(blendInfo.packing_type, blendInfo.prop_sample_grams)
   return (
     <div className="mb-4 grid grid-cols-9 gap-4 rounded-lg bg-muted/50 p-4">
@@ -262,7 +263,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       </Dialog>
       {/* Actions Card */}
       <Card className="col-span-3 border border-border bg-background shadow-sm">
-        <ContractDialog blendInfo={[]} {...blendInfo} />
+        <ContractDialog blendInfo={blendInfo} />
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">
             Actions

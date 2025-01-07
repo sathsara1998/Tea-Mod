@@ -118,7 +118,8 @@ export interface BlendInfo {
   to_allocate_quantity?: number
   teaCost: number
   prop_sample_grams: number
-  allocations: Array<ManufacturingAllocationTableData>[]
+  manufacturing_allocations: Array<ManufacturingAllocationTableData>[]
+  allocations: Array<NewCustomerOrdersTableData>[]
   export_quantity: number
   packing_type: string
 }
@@ -224,6 +225,7 @@ export interface TeaBlend {
   to_allocate_quantity: number
   average_cost: number
   manufacturing_allocations: ManufacturingAllocation[]
+  allocations: NewCustomerOrdersTableData[]
   propSample?: number
   packing_type: string
   prop_sample_grams: number
@@ -341,6 +343,7 @@ export interface NewCustomerOrdersTableData {
   quantity_needed: number
   quantity_allocated: number
   quantity_remaining: number
+  quantity: number
   allocations: []
 }
 

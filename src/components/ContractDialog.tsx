@@ -8,46 +8,41 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table'
+import { BlendInfo } from './types'
 
-interface BlendInfo {
-  allocations: []
-}
+// Define type for blendInfo and its allocations
 
 interface ContractDialogProps {
-  blendInfo: BlendInfo[]
+  blendInfo: BlendInfo
 }
 
 const ContractDialog: React.FC<ContractDialogProps> = ({ blendInfo }) => {
-  console.log(blendInfo)
+  console.log('blendInfo', blendInfo)
+
   return (
     <div>
-      <ScrollArea className="h-[300px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tea</TableHead>
-              <TableHead>Lot Number</TableHead>
-              <TableHead>Available (kg)</TableHead>
-              <TableHead>Quantity (kg)</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* {blendInfo.allocations.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell>{item.tea}</TableCell>
-                <TableCell>{item.lotNumber}</TableCell>
-                <TableCell>{item.availableKg}</TableCell>
-                <TableCell>{item.quantityKg}</TableCell>
-                <TableCell> */}
-            {/* Action buttons or options can be added here */}
-            {/* <button>Action</button>
-                </TableCell>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Co No</TableHead>
+            <TableHead>Co Line</TableHead>
+            <TableHead>FG Description</TableHead>
+            <TableHead>Quantity (kg)</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {blendInfo.allocations?.map((allocationRow, rowIndex) =>
+            allocationRow.map((item, colIndex) => (
+              <TableRow key={`${rowIndex}-${colIndex}`}>
+                <TableCell>{item.sale_order}</TableCell>
+                <TableCell>{item.component_id}</TableCell>
+                <TableCell>{item.finished_product_name}</TableCell>
+                <TableCell>{item.quantity}</TableCell>
               </TableRow>
-            ))} */}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+            )),
+          )}
+        </TableBody>
+      </Table>
     </div>
   )
 }
