@@ -287,7 +287,7 @@ export interface CustomerOrder {
 
 export interface ContractLine {
   line_id: number
-  contract_line_no: string
+  contract_line_no: number
   product_id: number
   product_internal_ref: string
   product_name: string
