@@ -265,3 +265,17 @@ export const apiClient = (configs: ApiclientConfig) => {
   }
   return axios({ ...configs, ...mainConfigs })
 }
+
+
+// For external api calls in reports
+export const apiClientForReports = (configs: ApiclientConfig) => {
+  const token = process.env.NEXT_AUCTION_API_TOKEN
+  const mainConfigs: AxiosRequestConfig = {
+    baseURL: process.env.NEXT_AUCTION_API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  }
+  return axios({ ...configs, ...mainConfigs })
+}
