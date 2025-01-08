@@ -213,13 +213,13 @@ export default function ModernBlendDialog({
           standard: '',
           blending_qty: item.tea_blend_details.length
             ? item.tea_blend_details[0].tea_weight -
-            item.allocated_blend_quantity
+              item.allocated_blend_quantity
             : 0,
           line_id: item.line_id,
           id: item.line_id,
           allocation_id: 0,
           quantity_remaining: 0,
-          quantity: 0
+          quantity: 0,
         })
       })
     })

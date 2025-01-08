@@ -101,13 +101,13 @@ export type ConfirmedSaleOrder = {
 }
 
 export interface BlendInfo {
+  id: number
   blendNo: string
   broker: string
   blend_date: string
   blendStandard: string
   propSample: number
   requiredDate: string
-  packagingType: string
   status: string
   customer: number
   customerName: string
@@ -117,8 +117,11 @@ export interface BlendInfo {
   balanceToAllocate: number
   to_allocate_quantity?: number
   teaCost: number
-  allocations: Array<ManufacturingAllocationTableData>
+  prop_sample_grams: number
+  manufacturing_allocations: Array<ManufacturingAllocationTableData>[]
+  allocations: Array<NewCustomerOrdersTableData>[]
   export_quantity: number
+  packing_type: string
 }
 
 export interface TeaAllocation {
@@ -201,9 +204,8 @@ interface Allocation {
   product_name: string
   quantity: number
   contract_no: string
-  tea_weight: number | 0,
-  quantity_remaining:number | 0
-  
+  tea_weight: number | 0
+  quantity_remaining: number | 0
 }
 
 export interface TeaBlend {
@@ -222,10 +224,11 @@ export interface TeaBlend {
   blended_quantity: number
   to_allocate_quantity: number
   average_cost: number
-  allocations: Allocation[]
   manufacturing_allocations: ManufacturingAllocation[]
+  allocations: NewCustomerOrdersTableData[]
   propSample?: number
-  packagingType?: string
+  packing_type: string
+  prop_sample_grams: number
 }
 
 export interface AddAllocationObject {
@@ -284,7 +287,7 @@ export interface CustomerOrder {
 
 export interface ContractLine {
   line_id: number
-  contract_line_no: string
+  contract_line_no: number
   product_id: number
   product_internal_ref: string
   product_name: string
@@ -307,7 +310,7 @@ export interface OrderBlendDetail {
 export interface CustomerOrdersTableData {
   id: number
   contract_number: string
-  contract_line_no: string
+  contract_line_no: number
   product_internal_ref: string
   product_uom_qty: number
   product_uom: string
@@ -321,9 +324,9 @@ export interface CustomerOrdersTableData {
   blending_qty: number
   standard: string
   line_id: number
-  allocation_id:number,
-  quantity_remaining:number,
-  quantity:number
+  allocation_id: number
+  quantity_remaining: number
+  quantity: number
 }
 export interface NewCustomerOrdersTableData {
   finished_product_id: number
@@ -340,7 +343,25 @@ export interface NewCustomerOrdersTableData {
   quantity_needed: number
   quantity_allocated: number
   quantity_remaining: number
+  quantity: number
   allocations: []
+  id: number
+  contract_number: string
+  contract_line_no: string
+  product_internal_ref: string
+  product_uom_qty: number
+  product_uom: string
+  product_name: string
+  product_blend_internal_ref: string
+  blend_details: string
+  tea_weight: number
+  allocated_blend_quantity: number
+  product_id: number
+  release_number: number
+  blending_qty: number
+  standard: string
+  line_id: number
+  allocation_id: number
 }
 
 export interface BlendCreateReq {
@@ -360,10 +381,10 @@ export interface BlendCreateReq {
 }
 
 export interface AllocationUpdate {
-  allocation_id: number;
-  quantity: number;
+  allocation_id: number
+  quantity: number
 }
 
 export interface BatchAllocationUpdateRequest {
-  allocations: AllocationUpdate[];
+  allocations: AllocationUpdate[]
 }
