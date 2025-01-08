@@ -7,7 +7,7 @@ export async function PUT(req: Request) {
 
     try {
         const response = await apiClient({
-            url: `/tea_blends/update_sales_allocations`,
+            url: `/tea_blend/update_allocation`,
             method: 'PUT',
             data: data
         });

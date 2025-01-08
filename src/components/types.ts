@@ -101,13 +101,13 @@ export type ConfirmedSaleOrder = {
 }
 
 export interface BlendInfo {
+  id: number
   blendNo: string
   broker: string
   blend_date: string
   blendStandard: string
   propSample: number
   requiredDate: string
-  packagingType: string
   status: string
   customer: number
   customerName: string
@@ -117,8 +117,11 @@ export interface BlendInfo {
   balanceToAllocate: number
   to_allocate_quantity?: number
   teaCost: number
-  allocations: Array<ManufacturingAllocationTableData>
+  prop_sample_grams: number
+  manufacturing_allocations: Array<ManufacturingAllocationTableData>[]
+  allocations: Array<NewCustomerOrdersTableData>[]
   export_quantity: number
+  packing_type: string
 }
 
 export interface TeaAllocation {
@@ -179,6 +182,14 @@ export interface ManufacturingAllocationTableData {
 }
 
 interface Allocation {
+  allocation_id: number
+  length: any
+  quantity_needed: number
+  component_id: string
+  quantity_allocated: number
+  component_name: any
+  demand_line_id: string
+  sale_order: string
   id: number
   sale_order_id: number
   sale_order_name: string
@@ -194,6 +205,7 @@ interface Allocation {
   quantity: number
   contract_no: string
   tea_weight: number | 0
+  quantity_remaining: number | 0
 }
 
 export interface TeaBlend {
@@ -212,10 +224,11 @@ export interface TeaBlend {
   blended_quantity: number
   to_allocate_quantity: number
   average_cost: number
-  allocations: Allocation[]
   manufacturing_allocations: ManufacturingAllocation[]
+  allocations: NewCustomerOrdersTableData[]
   propSample?: number
-  packagingType?: string
+  packing_type: string
+  prop_sample_grams: number
 }
 
 export interface AddAllocationObject {
@@ -231,7 +244,7 @@ export interface AddAllocationArray {
 
 export interface AddSalesAllocation {
   blend_id: number
-  sale_order_line_id: number
+  demand_line_id: number
   quantity: number
 }
 
@@ -274,7 +287,7 @@ export interface CustomerOrder {
 
 export interface ContractLine {
   line_id: number
-  contract_line_no: string
+  contract_line_no: number
   product_id: number
   product_internal_ref: string
   product_name: string
@@ -297,6 +310,43 @@ export interface OrderBlendDetail {
 export interface CustomerOrdersTableData {
   id: number
   contract_number: string
+  contract_line_no: number
+  product_internal_ref: string
+  product_uom_qty: number
+  product_uom: string
+  product_name: string
+  product_blend_internal_ref: string
+  blend_details: string
+  tea_weight: number
+  allocated_blend_quantity: number
+  product_id: number
+  release_number: number
+  blending_qty: number
+  standard: string
+  line_id: number
+  allocation_id: number
+  quantity_remaining: number
+  quantity: number
+}
+export interface NewCustomerOrdersTableData {
+  finished_product_id: number
+  finished_product_name: string
+  demand_id: number
+  demand_reference: null
+  sales_qty: number
+  customer_id: number
+  customer_name: string
+  sale_order: string
+  demand_line_id: number
+  component_id: number
+  component_name: string
+  quantity_needed: number
+  quantity_allocated: number
+  quantity_remaining: number
+  quantity: number
+  allocations: []
+  id: number
+  contract_number: string
   contract_line_no: string
   product_internal_ref: string
   product_uom_qty: number
@@ -311,6 +361,7 @@ export interface CustomerOrdersTableData {
   blending_qty: number
   standard: string
   line_id: number
+  allocation_id: number
 }
 
 export interface BlendCreateReq {
@@ -329,64 +380,11 @@ export interface BlendCreateReq {
   ]
 }
 
-export interface AuctionReportDetail {
-  StatusName: string;
-  LotCount: number;
-  Id: number;
-  CatalogId: number;
-  StatusId: number;
-  Status: number;
-  BatchSize: number;
-  StartTimeUtc: string;
-  Name: string;
-  BiddingStartUtc: string;
-  ClosedBuffer: number;
-  PendingBuffer: number;
-  EndedTime: string;
-  PerItemTimeLimit: number;
-  BiddingStartDelay: number;
-  SellExtraTime: number;
-  BidSniperInterval: number;
-  MaxExtensions: number;
-  IdleBidInterval: number;
-  AutoCloseInterval: number;
-  AutoBidInterval: number;
+export interface AllocationUpdate {
+  allocation_id: number
+  quantity: number
 }
 
-export interface AuctionItemDetail {
-  LotNumber: number;
-  Grade: string;
-  ManufacturedDate: string;
-  Units: number;
-  PerUnitWeight: number;
-  TotalWeight: number;
-  SellingMark: string;
-  BrokerName: string;
-  AuctionName: string;
-  CategoryName: string;
-  Standard: string;
-  FinalPrice: number;
-  InvoiceNumber: number;
-  SubElevation: string;
-  RePrint: string;
-  BrokerLotNumber: number;
-}
-
-export const BuyerExcelColumns = {
-  LotNumber: "Box Number",
-  SellingMark: "Selling Mark",
-  Grade: "Grade",
-  BrokerLotNumber: "Lot No",
-  Standard: "Tea Standard",
-  BrokerName: "Trader",
-  Units: "Bags",
-  PerUnitWeight: "Net Weight",
-  TotalWeight: "Total Weight",
-  FinalPrice: "Purchased Price",
-  InvoiceNumber: "Invoice No",
-  CategoryName: "Category",
-  SubElevation: "Sub Elevation",
-  RePrint: "Reprint",
-  ManufacturedDate: "Manufactured Date",
-  AuctionName: "Auction Name",
+export interface BatchAllocationUpdateRequest {
+  allocations: AllocationUpdate[]
 }

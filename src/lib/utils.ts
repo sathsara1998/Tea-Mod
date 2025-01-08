@@ -250,6 +250,7 @@ type ApiclientConfig = {
   url: string
   data?: object
   method: string
+  responseType?: 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'
 }
 
 // For external api calls

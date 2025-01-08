@@ -27,6 +27,7 @@ import {
   CustomerOrder,
   CustomerOrdersTableData,
 } from '../types'
+import { Badge } from '../ui/badge'
 
 export interface EditProp {
   products: AddSalesAllocation[]
@@ -44,10 +45,10 @@ interface ModernBlendDialogProps {
   setIsOpen: (open: boolean) => void
   isEdit: boolean
   blendId?: number
+  productName: string
   currentBlendIds?: number[]
 }
-
-export default function ModernBlendDialog({
+export default function BlendDialog({
   customerId,
   onCreateBlend,
   isOpen,
@@ -55,6 +56,7 @@ export default function ModernBlendDialog({
   isEdit,
   blendId,
   currentBlendIds,
+  productName,
 }: ModernBlendDialogProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
   const [customerOrderLines, setCustomerOrderLines] = useState<CustomerOrder[]>(
@@ -70,45 +72,79 @@ export default function ModernBlendDialog({
   const allocationsTableRef = useRef<HTMLDivElement>(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
 
-  const { getCustomerOrders, addSalesAllocationtoBlend } = useApiMethods()
+  const { getCustomerBlendOrders, addAllocation } = useApiMethods()
   const { toast } = useToast()
 
   useEffect(() => {
-    if (
-      isOpen &&
-      allocationsTableRef.current &&
-      customerOrderLines.length > 0
-    ) {
+    if (isOpen && allocationsTableRef.current) {
       if (tabulatorRef.current) {
         tabulatorRef.current.destroy()
       }
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
-        data: customerOrders,
+        data: isEdit
+          ? customerOrders.filter(
+              (item) => item.product_name === `${productName}`,
+            )
+          : customerOrders,
         height: '400px',
         placeholder: 'No Order Lines Available',
         selectableRows: true,
         groupBy: 'product_name',
         columns: [
-          { title: '#', formatter: 'rownum', width: 40, hozAlign: 'center' },
-          { title: 'Contract No', field: 'contract_number', hozAlign: 'left' },
-          { title: 'Line No', field: 'contract_line_no', hozAlign: 'left' },
           {
-            title: 'FG Description',
-            field: 'product_internal_ref',
+            title: 'Blend Standard',
+            field: 'product_name',
+            headerFilter: 'input',
+            headerFilterPlaceholder: 'Find By Blend Standard',
             hozAlign: 'left',
           },
-          { title: 'FG Quantity', field: 'product_uom_qty', hozAlign: 'right' },
-          { title: 'UOM', field: 'product_uom', hozAlign: 'center' },
+          {
+            title: 'Finished Product Name',
+            field: 'finished_product_name',
+            headerFilterPlaceholder: 'Find By Finished Product',
+            headerFilter: 'input',
+            hozAlign: 'left',
+          },
+          {
+            title: 'Finished Good No',
+            field: 'finished_good_code',
+            headerFilterPlaceholder: 'Find By Finished Good',
+            headerFilter: 'input',
+            hozAlign: 'left',
+          },
+          {
+            title: 'Quantity allocated',
+            field: 'quantity_allocated',
+            headerFilter: true,
+            hozAlign: 'center',
+          },
+          {
+            title: 'Tea Wieght',
+            field: 'quantity_needed',
+            headerFilter: true,
+            hozAlign: 'center',
+          },
+          {
+            title: 'Quantity Remaining',
+            field: 'quantity_remaining',
+            hozAlign: 'center',
+          },
+          {
+            title: 'Contract No',
+            field: 'contract_number',
+            headerFilter: true,
+            hozAlign: 'left',
+          },
+
+          {
+            title: 'Sale Quantity',
+            field: 'sales_qty',
+            hozAlign: 'left',
+          },
           {
             title: 'Blend Description',
             field: 'blend_details',
-            hozAlign: 'left',
-          },
-          { title: 'Blend Quantity', field: 'tea_weight', hozAlign: 'right' },
-          {
-            title: 'Allocated Blend Qty',
-            field: 'allocated_blend_quantity',
             hozAlign: 'left',
           },
         ],
@@ -180,56 +216,50 @@ export default function ModernBlendDialog({
         tabulatorRef.current = null
       }
     }
-  }, [customerOrders])
-
-  useEffect(() => {
-    let customerData: CustomerOrdersTableData[] = []
-
-    customerOrderLines.forEach((line) => {
-      line.order_lines.forEach((item) => {
-        return customerData.push({
-          contract_number: line.contract_number,
-          contract_line_no: item.contract_line_no,
-          product_internal_ref: item.product_internal_ref,
-          product_uom_qty: item.product_uom_qty,
-          product_uom: item.product_uom,
-          product_name: item.tea_blend_details.length
-            ? item.tea_blend_details[0].product_name
-            : '',
-          product_blend_internal_ref: item.tea_blend_details.length
-            ? item.tea_blend_details[0].product_internal_ref
-            : '',
-          blend_details: item.tea_blend_details.length
-            ? item.tea_blend_details[0].product_name
-            : '',
-          tea_weight: item.tea_blend_details.length
-            ? item.tea_blend_details[0].tea_weight
-            : 0,
-          allocated_blend_quantity: item.allocated_blend_quantity,
-          product_id: item.tea_blend_details.length
-            ? item.tea_blend_details[0].product_id
-            : 0,
-          release_number: 1,
-          standard: '',
-          blending_qty: item.tea_blend_details.length
-            ? item.tea_blend_details[0].tea_weight -
-              item.allocated_blend_quantity
-            : 0,
-          line_id: item.line_id,
-          id: item.line_id,
-          allocation_id: 0,
-          quantity_remaining: 0,
-          quantity: 0,
-        })
-      })
-    })
-    setCustomerOrders(customerData)
-  }, [customerOrderLines])
+  }, [customerOrders, isOpen])
 
   const fetchCustomerOrders = async (cusId: number) => {
     try {
-      const orders = await getCustomerOrders(cusId)
-      setCustomerOrderLines(orders)
+      const orders = await getCustomerBlendOrders(cusId)
+      if (orders?.data?.length > 0) {
+        setSelectedCustomer(orders.data[0].customer_name) // Set customer name
+      } else {
+        setSelectedCustomer(null) // Handle case where no orders are returned
+      }
+      const customerData = orders.data.map((line: any) => ({
+        contract_number: line.sale_order, // Map sale_order to contract_number
+        contract_line_no: line.demand_line_id, // Map demand_line_id to contract_line_no
+        customer_name: line.customer_name, // Map demand_line_id to contract_line_no
+        product_internal_ref: line.component_id.toString(), // Assuming component_id as product_internal_ref
+        product_uom_qty: line.quantity_needed, // quantity_needed maps to product_uom_qty
+        product_uom: 'Units', // Assuming 'Units' as the UOM (update if different)
+        product_name: line.component_name.en_US, // Use component_name.en_US as product_name
+        product_blend_internal_ref: line.finished_product_id.toString(), // Assuming finished_product_id
+        blend_details: line.allocations.length
+          ? line.allocations[0].blend_name
+          : '', // Use the first blend_name from allocations
+        tea_weight: line.allocations.length
+          ? line.allocations[0].quantity_needed
+          : 0, // Use the quantity from the first allocation
+        allocated_blend_quantity: line.quantity_allocated, // Use quantity_allocated
+        product_id: line.component_id, // Assuming component_id as product_id
+        release_number: 1, // Hardcoded release number (update logic if needed)
+        standard: '', // Empty standard (update if applicable)
+        blending_qty:
+          line.allocations.length && line.allocations[0].quantity
+            ? line.allocations[0].quantity - line.quantity_allocated
+            : 0, // Calculate blending_qty
+        line_id: line.demand_line_id, // Use demand_line_id as line_id
+        id: line.demand_line_id, // Use demand_line_id as id
+        quantity_allocated: line.quantity_allocated,
+        quantity_needed: line.quantity_needed,
+        quantity_remaining: line.quantity_remaining,
+        sales_qty: line.sales_qty,
+        finished_product_name: line.finished_product_name.en_US,
+        finished_good_code: line.fg_internal_ref,
+      }))
+
+      setCustomerOrders(customerData)
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -259,7 +289,7 @@ export default function ModernBlendDialog({
     })
 
     try {
-      await addSalesAllocationtoBlend(products)
+      await addAllocation(products)
       toast({
         title: 'Success',
         description: 'Blend created successfully',
@@ -267,9 +297,11 @@ export default function ModernBlendDialog({
       })
       createBlend()
     } catch (err: any) {
+      console.error('Failed to allocation:', err)
       toast({
         title: 'Error',
-        description: err.message,
+        description:
+          err instanceof Error ? err.message : 'Failed to create allocation',
         variant: 'destructive',
       })
     }
@@ -280,6 +312,7 @@ export default function ModernBlendDialog({
       partner_id: Number(selectedCustomer),
       products: selectedOrderLines,
     }
+
     onCreateBlend(passObj)
     setIsOpen(false)
   }
@@ -294,7 +327,7 @@ export default function ModernBlendDialog({
       fetchCustomerOrders(customerId)
     }
   }, [isOpen])
-
+  console.log('customer:', selectedCustomer)
   return (
     <DialogContent
       className="max-h-[90vh] max-w-[60vw] overflow-y-auto"
@@ -308,7 +341,10 @@ export default function ModernBlendDialog({
 
       <Card>
         <CardHeader>
-          <CardTitle>Customer Order Lines</CardTitle>
+          <CardTitle>
+            Customer Order Lines :{' '}
+            {selectedCustomer}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-[55vw]">
@@ -327,7 +363,7 @@ export default function ModernBlendDialog({
         </Button>
         <Button
           onClick={handleCreateBlend}
-          disabled={customerOrderLines.length === 0}
+          disabled={selectedOrderLines.length === 0}
         >
           {isEdit ? 'Add' : 'Create Blend'}
         </Button>

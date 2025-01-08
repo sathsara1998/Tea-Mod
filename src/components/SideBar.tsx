@@ -15,6 +15,7 @@ import {
   PanelRightOpen,
   IndentDecrease,
   Menu,
+  LeafyGreen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -155,7 +156,7 @@ const Sidebar: React.FC<{
               </li>
             ))}
 
-            <li>
+            {/* <li>
               <Button
                 variant="ghost"
                 onClick={handleSnowfallToggle}
@@ -173,7 +174,7 @@ const Sidebar: React.FC<{
                     isExpanded ? 'mr-3' : 'mr-0',
                   )}
                 >
-                  <Snowflake
+                  <LeafyGreen
                     className={
                       isSnowfallEnabled
                         ? 'text-blue-400'
@@ -187,7 +188,7 @@ const Sidebar: React.FC<{
                   </span>
                 )}
               </Button>
-            </li>
+            </li> */}
           </ul>
         </nav>
 

@@ -1,4 +1,4 @@
-import TeaInfoTable from '@/components/Tea-Info'
+import TeaInfoTable from '@/components/TeaInfo'
 import React from 'react'
 
 function page() {

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/components/ui/use-toast"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useToast } from '@/components/ui/use-toast'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import BlendCard from '../BlendHeaderCreationViewComponents/BlendCard'
-import NewBlendDialog, { CustomerFullBlends } from '../BlendHeaderCreationViewComponents/NewBlendDialog'
+import NewBlendDialog, {
+  CustomerFullBlends,
+} from '../BlendHeaderCreationViewComponents/NewBlendDialog'
 import EditBlendDialog from '../BlendHeaderCreationViewComponents/EditBlendDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
 import { Customer, TeaBlend } from '../types'
@@ -13,54 +15,58 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter
-} from "@/components/ui/dialog"
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import BlendDialog from './BlendDialog'
 
 export type Blend = {
-  id: number;
-  name: string;
-  blendName: string;
-  quantity: number;
-  status: 'draft' | 'confirmed';
-  allocations: BlendAllocation[];
+  id: number
+  name: string
+  blendName: string
+  quantity: number
+  status: 'draft' | 'confirmed'
+  allocations: BlendAllocation[]
 }
 
 type BlendAllocation = {
-  id: number;
-  sale_order_id: number;
-  sale_order_name: string;
-  sale_order_line_id: number;
-  product_id: number;
-  product_name: string;
-  quantity: number;
+  id: number
+  sale_order_id: number
+  sale_order_name: string
+  sale_order_line_id: number
+  product_id: number
+  product_name: string
+  quantity: number
 }
 
 type BlendsComponentProps = {
-  customerId: number;
-  blends: TeaBlend[];
-  fetchBlends: () => Promise<void>;
-  onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void;
-  onEditPress: (blend: TeaBlend) => void;
-  loading: boolean;
+  customerId: number
+  blends: TeaBlend[]
+  fetchBlends: () => Promise<void>
+  onNewBlendDataAdd: (customerBlends: CustomerFullBlends) => void
+  onEditPress: (blend: TeaBlend) => void
+  loading: boolean
 }
 
-export default function BlendsComponent({ customerId, blends, fetchBlends, onNewBlendDataAdd, onEditPress, loading }: BlendsComponentProps) {
+export default function BlendsComponent({
+  customerId,
+  blends,
+  fetchBlends,
+  onNewBlendDataAdd,
+  onEditPress,
+  loading,
+}: BlendsComponentProps) {
   const [newBlendName, setNewBlendName] = useState('')
   const [editingBlend, setEditingBlend] = useState<TeaBlend | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
-  const [isNewOpen, setIsNewOpen] = useState(false);
+  const [isNewOpen, setIsNewOpen] = useState(false)
   const { toast } = useToast()
-  const { 
-    createBlend, 
-    updateBlend, 
-    deleteBlend,
-    getCustomers
-  } = useApiMethods();
+  const { createBlend, updateBlend, deleteBlend, getCustomers } =
+    useApiMethods()
 
   const handleCreateNewBlend = async (customerOrders: CustomerFullBlends) => {
-    onNewBlendDataAdd(customerOrders);
+    onNewBlendDataAdd(customerOrders)
   }
 
   const fetchCustomers = useCallback(async () => {
@@ -69,15 +75,15 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
       setCustomers(customers)
     } catch (err: any) {
       toast({
-        title: "Error",
+        title: 'Error',
         description: err.message,
-        variant: "destructive",
+        variant: 'destructive',
       })
     }
   }, [])
 
   const handleEditBlend = (blend: TeaBlend) => {
-    onEditPress(blend);
+    onEditPress(blend)
   }
 
   const handleUpdateBlend = async () => {
@@ -89,15 +95,15 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
       await fetchBlends()
       setEditingBlend(null)
       toast({
-        title: "Blend Updated",
+        title: 'Blend Updated',
         description: `Updated blend: ${editingBlend.name}`,
       })
     } catch (error) {
       console.error('Error updating blend:', error)
       toast({
-        title: "Error",
-        description: "Failed to update blend. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update blend. Please try again.',
+        variant: 'destructive',
       })
     }
   }
@@ -107,15 +113,15 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
       await deleteBlend(blendId)
       await fetchBlends()
       toast({
-        title: "Blend Deleted",
+        title: 'Blend Deleted',
         description: `Deleted blend with ID: ${blendId}`,
       })
     } catch (error) {
       console.error('Error deleting blend:', error)
       toast({
-        title: "Error",
-        description: "Failed to delete blend. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete blend. Please try again.',
+        variant: 'destructive',
       })
     }
   }
@@ -125,9 +131,9 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
       setIsNewOpen(true)
     } else {
       toast({
-        title: "Error",
-        description: "Please select a customer",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please select a customer',
+        variant: 'destructive',
       })
     }
   }
@@ -139,7 +145,7 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
+        <CardTitle className="flex items-center justify-between">
           Blends
           <Button variant="outline" size="sm" onClick={() => addNewBlend()}>
             New Blend
@@ -147,20 +153,24 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {loading && <div className="h-[calc(100vh-200px)] flex justify-center items-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>}
+        {loading && (
+          <div className="flex h-[calc(100vh-200px)] items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        )}
 
-        {!loading && <ScrollArea className="h-[calc(100vh-200px)]">
-          {blends.map((blend) => (
-            <BlendCard
-              key={blend.id}
-              data={blend}
-              onEdit={handleEditBlend}
-              onDelete={handleDeleteBlend}
-            />
-          ))}
-        </ScrollArea>}
+        {!loading && (
+          <ScrollArea className="h-[calc(100vh-200px)]">
+            {blends.map((blend) => (
+              <BlendCard
+                key={blend.id}
+                data={blend}
+                onEdit={handleEditBlend}
+                onDelete={handleDeleteBlend}
+              />
+            ))}
+          </ScrollArea>
+        )}
       </CardContent>
       {/* {editingBlend && (
         <EditBlendDialog
@@ -170,14 +180,13 @@ export default function BlendsComponent({ customerId, blends, fetchBlends, onNew
         />
       )} */}
       <Dialog open={isNewOpen} onOpenChange={setIsNewOpen}>
-        <NewBlendDialog
+        <BlendDialog
           isEdit={false}
           isOpen={isNewOpen}
           setIsOpen={setIsNewOpen}
           onCreateBlend={handleCreateNewBlend}
-          customerId={customerId}
-        />
-          </Dialog>
+          customerId={customerId} productName={''}        />
+      </Dialog>
     </Card>
   )
 }
