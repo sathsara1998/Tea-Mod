@@ -520,6 +520,8 @@ export default function BlendAllocator() {
   //     </div>
   //   )
   // }
+
+  
   const handleDelete = async (selectedIds: number[]) => {
     await deleteSalesAllocs(selectedIds)
     // Update the blendItems state by filtering out deleted items
