@@ -135,6 +135,7 @@ export default function AllocationTableView() {
           return {
             ...item,
             init_quantity: item.quantity_packages,
+            free_quantity: item.free_quantity,
           }
         })
 
@@ -178,7 +179,12 @@ export default function AllocationTableView() {
             hozAlign: 'right',
           },
           { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
-
+          {
+            title: 'Available QTY',
+            field: 'free_quantity',
+            hozAlign: 'right',
+            frozen: true,
+          },
           {
             title: 'Quantity (Kg)',
             field: 'quantity_kgs',
@@ -493,6 +499,7 @@ export default function AllocationTableView() {
           grade: tea.grade || '',
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
+          free_quantity: tea.free_quantity || 0,
           quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
           quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,
