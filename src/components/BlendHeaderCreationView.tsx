@@ -444,13 +444,13 @@ export default function BlendAllocator() {
         contract_number: alloc.sale_order,
         contract_line_no: alloc.demand_line_id,
         allocation_id: alloc.allocation_id,
-        product_internal_ref: alloc.component_id,
+        product_internal_ref: alloc.product_internal_ref,
         product_uom_qty: alloc.quantity_needed,
         product_uom: 'Units',
         product_name: alloc.component_name,
         product_blend_internal_ref: alloc.product_internal_ref,
         blend_details: '',
-        tea_weight: alloc.length?.quantity ?? 0,
+        tea_weight: alloc.quantity ?? 0,
         allocated_blend_quantity:
           alloc.quantity_needed - alloc.quantity_remaining,
         product_id: alloc.product_id,
@@ -520,8 +520,8 @@ export default function BlendAllocator() {
   //     </div>
   //   )
   // }
-<<<<<<< HEAD
-=======
+
+  
   const handleDelete = async (selectedIds: number[]) => {
     await deleteSalesAllocs(selectedIds)
     // Update the blendItems state by filtering out deleted items
@@ -533,7 +533,6 @@ export default function BlendAllocator() {
     }
     await fetchBlends()
   }
->>>>>>> parent of ff56ca6 (Merge branch 'dev' into feature/kavishka/blends-view)
 
   return (
     <div className="grid grid-cols-4 gap-4">
