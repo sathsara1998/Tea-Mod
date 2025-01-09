@@ -184,6 +184,13 @@ export default function AllocationTableView() {
             field: 'free_quantity',
             hozAlign: 'right',
             frozen: true,
+            formatter: function (cell) {
+              const rowData = cell.getRow().getData()
+              if (rowData.quantity_packages > 0 || rowData.quantity_kgs > 0) {
+                return '' // Hide available quantity if there's an allocation
+              }
+              return cell.getValue()
+            },
           },
           {
             title: 'Quantity (Kg)',
@@ -330,7 +337,12 @@ export default function AllocationTableView() {
           row.update({
             quantity_kgs: newQuantityKgs,
             quantity_packages: rowData.quantity_packages,
+            free_quantity: '' // Clear available quantity
           })
+        if (cell.getColumn().getField() === 'quantity_kgs') {
+            row.update({
+              free_quantity: '' // Clear available quantity when allocated
+            })
         }
 
         updatedRows.current = [...updatedRows.current, rowData.id]
@@ -338,7 +350,7 @@ export default function AllocationTableView() {
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
         })
-      })
+      }})
 
       return () => {
         if (tabulatorRef.current) {
