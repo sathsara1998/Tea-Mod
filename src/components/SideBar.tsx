@@ -65,14 +65,13 @@ const Sidebar: React.FC<{
 
   const menuItems = [
     { name: 'Dashboard', icon: <PieChart />, route: '/dashboard' },
-    { name: 'Purchasing', icon: <ShoppingCart />, route: '/purchase' },
     { name: 'Blend Creation', icon: <FileText />, route: '/create' },
     { name: 'Allocation', icon: <ListCheck />, route: '/allocate' },
-    { name: 'Tea', icon: <LeafIcon />, route: '/tea-info' },
+    { name: 'Tea', icon: <LeafIcon />, route: '/teaInfo' },
     {
       name: 'Blends',
       icon: <FileChartColumn />,
-      route: '/blend-view',
+      route: '/blendview',
     },
   ]
 
