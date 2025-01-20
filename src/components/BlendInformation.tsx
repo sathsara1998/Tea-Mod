@@ -245,9 +245,9 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Update</DialogTitle>
+            <DialogTitle>Confirm Reset</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to update the blend?</p>
+          <p>Are you sure you want to reset the blend?</p>
           <DialogFooter>
             <Button
               onClick={() => setIsUpdateBlendConfirmOpen(false)}
@@ -255,7 +255,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
             >
               Cancel
             </Button>
-            <Button onClick={handleUpdateBlendDetails} variant="default">
+            <Button onClick={handleUpdateBlendDetails} variant="destructive">
               Confirm
             </Button>
           </DialogFooter>
