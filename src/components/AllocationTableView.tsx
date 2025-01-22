@@ -184,13 +184,6 @@ export default function AllocationTableView() {
             field: 'free_quantity',
             hozAlign: 'right',
             frozen: true,
-            formatter: function (cell) {
-              const rowData = cell.getRow().getData()
-              if (rowData.quantity_packages > 0 || rowData.quantity_kgs > 0) {
-                return '' // Hide available quantity if there's an allocation
-              }
-              return cell.getValue()
-            },
           },
           {
             title: 'Quantity (Kg)',
@@ -324,33 +317,60 @@ export default function AllocationTableView() {
         const row = cell.getRow()
         const rowData = row.getData()
 
-        // If packages column is edited and it's a package allocation type
         if (
           cell.getColumn().getField() === 'quantity_packages' &&
           rowData.allocation_type === 'p' &&
           rowData.net_weight
         ) {
-          // Recalculate quantity in kg
+          // Calculate new quantity in kg
           const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+          const quantityDiff =
+            rowData.quantity_packages - (rowData.init_quantity || 0)
 
-          // Update the row with new quantity in kg
+          // Update available quantity
+          const newFreeQuantity = Math.max(
+            0,
+            rowData.free_quantity - quantityDiff,
+          )
+
+          // Update the row with new quantities
           row.update({
             quantity_kgs: newQuantityKgs,
             quantity_packages: rowData.quantity_packages,
-            free_quantity: '' // Clear available quantity
+            free_quantity: newFreeQuantity,
           })
-        if (cell.getColumn().getField() === 'quantity_kgs') {
-            row.update({
-              free_quantity: '' // Clear available quantity when allocated
-            })
+        } else if (
+          cell.getColumn().getField() === 'quantity_kgs' &&
+          rowData.allocation_type === 'w'
+        ) {
+          // For weight-based allocations
+          const quantityDiff =
+            rowData.quantity_kgs - (rowData.init_quantity || 0)
+          const newFreeQuantity = Math.max(
+            0,
+            rowData.free_quantity - quantityDiff,
+          )
+
+          // Update the row with new free quantity
+          row.update({
+            quantity_kgs: rowData.quantity_kgs,
+            free_quantity: newFreeQuantity,
+          })
         }
 
         updatedRows.current = [...updatedRows.current, rowData.id]
 
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
+
+          // Revert changes on failed submission
+          row.update({
+            quantity_kgs: rowData.init_quantity,
+            quantity_packages: rowData.init_quantity,
+            free_quantity: rowData.free_quantity,
+          })
         })
-      }})
+      })
 
       return () => {
         if (tabulatorRef.current) {
