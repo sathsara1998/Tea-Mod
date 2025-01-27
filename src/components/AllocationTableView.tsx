@@ -156,7 +156,7 @@ export default function AllocationTableView() {
           },
           { title: '#', formatter: 'rownum', hozAlign: 'left' },
           { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
-          { title: 'Broker', field: 'broker', hozAlign: 'left' },
+          { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
@@ -679,6 +679,8 @@ export default function AllocationTableView() {
     allocations: [],
     propSample: 0,
     packing_type: '',
+    avg_tea_cost: 0,
+    avg_to_allocate_tea_cost: 0,
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -712,6 +714,7 @@ export default function AllocationTableView() {
         // const isallocation: NewCustomerOrdersTableData = {
         //   finished_product_id: allocations.allocations[0].finished_product_id,
         // }
+        console.log(teas)
         const teablendInfo: BlendInfo = {
           id: teas.id,
           blendNo: teas.name,
@@ -733,6 +736,8 @@ export default function AllocationTableView() {
           prop_sample_grams: teas.prop_sample_grams,
           manufacturing_allocations: [],
           allocations: [teas.allocations],
+          avg_tea_cost: teas.avg_tea_cost,
+          avg_to_allocate_tea_cost: teas.avg_to_allocate_tea_cost,
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
