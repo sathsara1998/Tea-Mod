@@ -101,9 +101,9 @@ export default function AllocationTableView() {
     type: '',
   }) // To store data from the clicked cell
   const [isTeaDialogOpen, setIsTeaDialogOpen] = useState(false)
-
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
+  // const [isLoading, setIsLoading] = useState(false)
 
   const {
     getBlendById,
