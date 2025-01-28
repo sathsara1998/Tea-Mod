@@ -156,7 +156,7 @@ export default function AllocationTableView() {
           },
           { title: '#', formatter: 'rownum', hozAlign: 'left' },
           { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
-          { title: 'Broker', field: 'broker', hozAlign: 'left' },
+          { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
@@ -184,13 +184,6 @@ export default function AllocationTableView() {
             field: 'free_quantity',
             hozAlign: 'right',
             frozen: true,
-            formatter: function (cell) {
-              const rowData = cell.getRow().getData()
-              if (rowData.quantity_packages > 0 || rowData.quantity_kgs > 0) {
-                return '' // Hide available quantity if there's an allocation
-              }
-              return cell.getValue()
-            },
           },
           {
             title: 'Quantity (Kg)',
@@ -324,33 +317,60 @@ export default function AllocationTableView() {
         const row = cell.getRow()
         const rowData = row.getData()
 
-        // If packages column is edited and it's a package allocation type
         if (
           cell.getColumn().getField() === 'quantity_packages' &&
           rowData.allocation_type === 'p' &&
           rowData.net_weight
         ) {
-          // Recalculate quantity in kg
+          // Calculate new quantity in kg
           const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+          const quantityDiff =
+            rowData.quantity_packages - (rowData.init_quantity || 0)
 
-          // Update the row with new quantity in kg
+          // Update available quantity
+          const newFreeQuantity = Math.max(
+            0,
+            rowData.free_quantity - quantityDiff,
+          )
+
+          // Update the row with new quantities
           row.update({
             quantity_kgs: newQuantityKgs,
             quantity_packages: rowData.quantity_packages,
-            free_quantity: '' // Clear available quantity
+            free_quantity: newFreeQuantity,
           })
-        if (cell.getColumn().getField() === 'quantity_kgs') {
-            row.update({
-              free_quantity: '' // Clear available quantity when allocated
-            })
+        } else if (
+          cell.getColumn().getField() === 'quantity_kgs' &&
+          rowData.allocation_type === 'w'
+        ) {
+          // For weight-based allocations
+          const quantityDiff =
+            rowData.quantity_kgs - (rowData.init_quantity || 0)
+          const newFreeQuantity = Math.max(
+            0,
+            rowData.free_quantity - quantityDiff,
+          )
+
+          // Update the row with new free quantity
+          row.update({
+            quantity_kgs: rowData.quantity_kgs,
+            free_quantity: newFreeQuantity,
+          })
         }
 
         updatedRows.current = [...updatedRows.current, rowData.id]
 
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
+
+          // Revert changes on failed submission
+          row.update({
+            quantity_kgs: rowData.init_quantity,
+            quantity_packages: rowData.init_quantity,
+            free_quantity: rowData.free_quantity,
+          })
         })
-      }})
+      })
 
       return () => {
         if (tabulatorRef.current) {
@@ -659,6 +679,8 @@ export default function AllocationTableView() {
     allocations: [],
     propSample: 0,
     packing_type: '',
+    avg_tea_cost: 0,
+    avg_to_allocate_tea_cost: 0,
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -692,6 +714,7 @@ export default function AllocationTableView() {
         // const isallocation: NewCustomerOrdersTableData = {
         //   finished_product_id: allocations.allocations[0].finished_product_id,
         // }
+        console.log(teas)
         const teablendInfo: BlendInfo = {
           id: teas.id,
           blendNo: teas.name,
@@ -713,6 +736,8 @@ export default function AllocationTableView() {
           prop_sample_grams: teas.prop_sample_grams,
           manufacturing_allocations: [],
           allocations: [teas.allocations],
+          avg_tea_cost: teas.avg_tea_cost,
+          avg_to_allocate_tea_cost: teas.avg_to_allocate_tea_cost,
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {

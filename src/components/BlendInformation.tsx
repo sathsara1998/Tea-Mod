@@ -145,7 +145,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
     }
   }
 
-  console.log(blendInfo)
+  console.log('avgcost', blendInfo.avg_tea_cost)
   console.log(blendInfo.packing_type, blendInfo.prop_sample_grams)
   return (
     <div className="mb-4 grid grid-cols-9 gap-4 rounded-lg bg-muted/50 p-4">
@@ -223,13 +223,13 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
             <LabelField label="Average Price" value={blendInfo.averagePrice} />
             <LabelField
               label="Avg Cost to Allocate"
-              value={blendInfo.averageCostToAllocate}
+              value={blendInfo.avg_to_allocate_tea_cost}
             />
             <LabelField
               label="Balance to Allocate"
               value={blendInfo.balanceToAllocate}
             />
-            <LabelField label="Tea Cost" value={blendInfo.teaCost} />
+            <LabelField label="Tea Cost" value={blendInfo.avg_tea_cost} />
             {blendInfo.export_quantity !== undefined && (
               <LabelField
                 label="Export Quantity"
