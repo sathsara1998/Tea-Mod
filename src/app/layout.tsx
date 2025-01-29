@@ -65,7 +65,7 @@ export default function RootLayout({
         >
           <ReactQueryProvider>
             <div className="duration-600 flex h-screen w-full overflow-hidden transition-all">
-              {pathname !== '/login' && (
+              {pathname !== '/login' && pathname !== '/noaccess' && (
                 <Sidebar
                   onSnowfallToggle={handleSnowfallToggle}
                   isSnowfallEnabled={isSnowfallEnabled}
