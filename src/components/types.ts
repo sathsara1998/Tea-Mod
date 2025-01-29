@@ -182,6 +182,7 @@ export interface ManufacturingAllocationTableData {
   init_quantity?: number
   free_quantity?: number
   allocation_type?: 'p' | 'w'
+  free_packages?: number
 }
 
 interface Allocation {
@@ -232,8 +233,8 @@ export interface TeaBlend {
   propSample?: number
   packing_type: string
   prop_sample_grams: number
-  avg_tea_cost:number
-  avg_to_allocate_tea_cost:number
+  avg_tea_cost: number
+  avg_to_allocate_tea_cost: number
 }
 
 export interface AddAllocationObject {

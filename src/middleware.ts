@@ -2,15 +2,16 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createMiddlewareClient } from '@/utils/supabase'
 
 // Configure your allowed IPs and networks
-const ALLOWED_IPS = [
-  '112.134.192.80', // Example office IP
-  '203.0.113.2', // Example remote IP
-  '192.168.1.0/24', // Example internal network
-]
+const ALLOWED_IPS = (process.env.ALLOWED_IPS || '127.0.0.1')
+  .split(',')
+  .map((ip) => ip.trim())
+
+console.log(ALLOWED_IPS)
 
 // Configure paths that should bypass IP restriction
 const PUBLIC_PATHS = [
   '/login', // Public login page
+  '/noaccess',
 ]
 
 // Helper function to check if an IP is in a CIDR range
@@ -75,19 +76,9 @@ export async function middleware(request: NextRequest) {
     console.warn(
       `Unauthorized access attempt from IP: ${clientIP} to path: ${path}`,
     )
-    // Return 403 Forbidden response
-    return new NextResponse(
-      JSON.stringify({
-        success: false,
-        message: 'Access denied: IP not authorized',
-      }),
-      {
-        status: 403,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    )
+    // Redirect to /noaccess
+    const noAccessUrl = new URL('/noaccess', request.url)
+    return NextResponse.redirect(noAccessUrl)
   }
 
   // Get the session (if available)
