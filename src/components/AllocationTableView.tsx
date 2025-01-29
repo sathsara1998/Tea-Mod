@@ -136,8 +136,11 @@ export default function AllocationTableView() {
             ...item,
             init_quantity: item.quantity_packages,
             free_quantity: item.free_quantity,
+            free_packages: item.free_packages,
           }
         })
+
+      console.log(adjustedAllocations)
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         height: '500px',
@@ -179,6 +182,19 @@ export default function AllocationTableView() {
             hozAlign: 'right',
           },
           { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
+          {
+            title: 'Available Pkgs',
+            field: 'free_packages',
+            hozAlign: 'right',
+            frozen: true,
+            formatter: function (cell) {
+              const rowData = cell.getRow().getData()
+              if (rowData.allocation_type === 'w') {
+                return '' // Hide value for allocation_type 'w'
+              }
+              return cell.getValue() // Show value for other types
+            },
+          },
           {
             title: 'Available QTY',
             field: 'free_quantity',
@@ -269,22 +285,6 @@ export default function AllocationTableView() {
             editable: (cell) => cell.getRow().getData().allocation_type == 'p',
             frozen: true,
           },
-
-          // { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
-          // {
-          //   title: '',
-          //   formatter: () => '<Button>Save</Button>',
-          //   width: 100,
-          //   frozen: true,
-          //   hozAlign: 'center',
-          //   cellClick: (e, cell) => {
-          //     const row = cell.getRow()
-          //     const rowData = row.getData()
-
-          //     updatedRows.current = [...updatedRows.current, rowData.id]
-          //     handleSubmitRow(rowData, row)
-          //   },
-          // },
         ],
         rowFormatter: (row) => {
           const rowData = row.getData()
@@ -298,7 +298,6 @@ export default function AllocationTableView() {
 
       tabulatorRef.current.on('cellClick', (e, cell) => {
         if (cell.getColumn().getField() === 'box_number') {
-          // Only trigger for the "name" column
           const rowData = cell.getRow().getData()
           setCellData({ id: rowData.lot_id, type: rowData.type })
           setIsTeaDialogOpen(true)
@@ -322,38 +321,47 @@ export default function AllocationTableView() {
           rowData.allocation_type === 'p' &&
           rowData.net_weight
         ) {
-          // Calculate new quantity in kg
-          const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+          // Calculate the difference between new and old quantity_packages
           const quantityDiff =
             rowData.quantity_packages - (rowData.init_quantity || 0)
 
-          // Update available quantity
+          // Calculate new quantity_kgs based on net_weight
+          const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+
+          // Update free_packages and free_quantity
+          const newFreePackages = Math.max(
+            0,
+            rowData.free_packages - quantityDiff,
+          )
           const newFreeQuantity = Math.max(
             0,
-            rowData.free_quantity - quantityDiff,
+            rowData.free_quantity -
+              (newQuantityKgs -
+                (rowData.init_quantity || 0) * rowData.net_weight),
           )
 
-          // Update the row with new quantities
+          // Update the row with new values
           row.update({
             quantity_kgs: newQuantityKgs,
-            quantity_packages: rowData.quantity_packages,
+            free_packages: newFreePackages,
             free_quantity: newFreeQuantity,
           })
         } else if (
           cell.getColumn().getField() === 'quantity_kgs' &&
           rowData.allocation_type === 'w'
         ) {
-          // For weight-based allocations
+          // Calculate the difference between new and old quantity_kgs
           const quantityDiff =
             rowData.quantity_kgs - (rowData.init_quantity || 0)
+
+          // Update free_quantity
           const newFreeQuantity = Math.max(
             0,
             rowData.free_quantity - quantityDiff,
           )
 
-          // Update the row with new free quantity
+          // Update the row with new free_quantity
           row.update({
-            quantity_kgs: rowData.quantity_kgs,
             free_quantity: newFreeQuantity,
           })
         }
@@ -368,6 +376,7 @@ export default function AllocationTableView() {
             quantity_kgs: rowData.init_quantity,
             quantity_packages: rowData.init_quantity,
             free_quantity: rowData.free_quantity,
+            free_packages: rowData.free_packages,
           })
         })
       })
@@ -532,6 +541,7 @@ export default function AllocationTableView() {
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
           free_quantity: tea.free_quantity || 0,
+          free_packages: tea.free_packages || 0,
           quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
           quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,

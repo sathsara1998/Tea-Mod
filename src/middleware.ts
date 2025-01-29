@@ -2,11 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createMiddlewareClient } from '@/utils/supabase'
 
 // Configure your allowed IPs and networks
-const ALLOWED_IPS = [
-  '112.134.192.80', // Example office IP
-  '203.0.113.2', // Example remote IP
-  '192.168.1.0/24', // Example internal network
-]
+const ALLOWED_IPS = (process.env.ALLOWED_IPS || '127.0.0.1')
+  .split(',')
+  .map((ip) => ip.trim())
+
+console.log(ALLOWED_IPS)
 
 // Configure paths that should bypass IP restriction
 const PUBLIC_PATHS = [
