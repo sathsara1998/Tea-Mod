@@ -1,9 +1,7 @@
 import AccessDeniedPage from '@/components/AccessDenied'
 import { NextPage } from 'next'
 
-interface Props {}
-
-const Page: NextPage<Props> = ({}) => {
+const Page: NextPage = () => {
   return <AccessDeniedPage />
 }
 
