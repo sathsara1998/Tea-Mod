@@ -191,10 +191,11 @@ export default function AllocationTableView() {
           },
           { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
           {
-            title: 'Available Pkgs',
+            title: 'A/V Pkgs  ',
             field: 'free_packages',
             hozAlign: 'right',
             frozen: true,
+            width: 120,
             formatter: function (cell) {
               const rowData = cell.getRow().getData()
               if (rowData.allocation_type === 'w') {
@@ -204,10 +205,11 @@ export default function AllocationTableView() {
             },
           },
           {
-            title: 'Available QTY',
+            title: 'A/V QTY  ',
             field: 'free_quantity',
             hozAlign: 'right',
             frozen: true,
+            width: 120,
           },
           {
             title: 'Quantity (Kg)',
