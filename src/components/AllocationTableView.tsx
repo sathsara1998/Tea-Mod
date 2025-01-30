@@ -175,7 +175,7 @@ export default function AllocationTableView() {
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           { title: 'Break', field: 'category', hozAlign: 'left' },
           {
-            title: 'Prch Price',
+            title: 'Purchaced Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -189,7 +189,7 @@ export default function AllocationTableView() {
             },
             hozAlign: 'right',
           },
-          { title: 'Prch QTY', field: 'purchased_qty', hozAlign: 'right' },
+          { title: 'Purchaced QTY', field: 'purchased_qty', hozAlign: 'right' },
           {
             title: 'Pkgs A/V',
             field: 'free_packages',
