@@ -333,16 +333,15 @@ export default function AllocationTableView() {
 
           // Calculate new quantity_kgs based on net_weight
           const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
-
+          console.log(
+            `newQuantityKgs`,
+            rowData.quantity_packages,
+            rowData.net_weight,
+          )
           // Update free_packages and free_quantity
           const newFreePackages = rowData.init_packages - quantityDiff
-          console.log('newFreePackages', rowData.free_packages, quantityDiff)
-          const newFreeQuantity = Math.max(
-            0,
-            rowData.free_quantity -
-              (newQuantityKgs -
-                (rowData.init_quantity || 0) * rowData.net_weight),
-          )
+
+          const newFreeQuantity = newFreePackages * rowData.net_weight
 
           // Update the row with new values
           row.update({
