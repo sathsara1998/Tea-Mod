@@ -29,9 +29,6 @@ import CustomerSelection from './BlendHeaderCreationViewComponents/CustomerSelec
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
 export default function BlendAllocator() {
-  const [confirmedSaleOrders, setConfirmedSaleOrders] = useState<
-    ConfirmedSaleOrder[]
-  >([])
   const [selectedSalesOrders, setSelectedSalesOrders] = useState<SalesOrder[]>(
     [],
   )
@@ -59,8 +56,6 @@ export default function BlendAllocator() {
   })
   const { toast } = useToast()
   const {
-    getConfirmedSaleOrders,
-    getBlends,
     getTeaBlendSales,
     updateBlend,
     blendCreate,
@@ -78,20 +73,6 @@ export default function BlendAllocator() {
 
   const initialSalesOrders = useRef<CustomerOrdersTableData[]>([])
   const [blendItems, setBlendItems] = useState<CustomerOrdersTableData[]>([])
-  const fetchConfirmedSaleOrders = useCallback(async () => {
-    setError(null)
-    try {
-      const data = await getConfirmedSaleOrders()
-      setConfirmedSaleOrders(data)
-    } catch (err: any) {
-      setError('Error fetching confirmed sale orders. Please try again.')
-      toast({
-        title: 'Error',
-        description: err.message,
-        variant: 'destructive',
-      })
-    }
-  }, [])
 
   const fetchBlends = async () => {
     setError(null)
@@ -126,9 +107,8 @@ export default function BlendAllocator() {
   }, [])
 
   useEffect(() => {
-    fetchConfirmedSaleOrders()
     fetchCustomers()
-  }, [fetchConfirmedSaleOrders, fetchCustomers])
+  }, [fetchCustomers])
 
   const fetchSalesOrderDetails = async (saleOrderNumber: string) => {
     setError(null)
@@ -143,16 +123,6 @@ export default function BlendAllocator() {
         variant: 'destructive',
       })
       return null
-    }
-  }
-
-  const handleSalesOrderSelect = async (orderId: string) => {
-    const order = confirmedSaleOrders.find((so) => so.id.toString() === orderId)
-    if (order) {
-      const orderDetails = await fetchSalesOrderDetails(order.name)
-      if (orderDetails) {
-        setSelectedSalesOrders((prev) => [...prev, orderDetails])
-      }
     }
   }
 

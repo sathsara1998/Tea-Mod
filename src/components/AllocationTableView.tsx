@@ -175,7 +175,7 @@ export default function AllocationTableView() {
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           { title: 'Break', field: 'category', hozAlign: 'left' },
           {
-            title: 'Purchased Price',
+            title: 'Prch Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -189,13 +189,13 @@ export default function AllocationTableView() {
             },
             hozAlign: 'right',
           },
-          { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
+          { title: 'Prch QTY', field: 'purchased_qty', hozAlign: 'right' },
           {
-            title: 'A/V Pkgs  ',
+            title: 'Pkgs A/V',
             field: 'free_packages',
             hozAlign: 'right',
             frozen: true,
-            width: 120,
+            width: 100,
             formatter: function (cell) {
               const rowData = cell.getRow().getData()
               if (rowData.allocation_type === 'w') {
@@ -205,14 +205,14 @@ export default function AllocationTableView() {
             },
           },
           {
-            title: 'A/V QTY  ',
+            title: 'QTY A/V',
             field: 'free_quantity',
             hozAlign: 'right',
             frozen: true,
-            width: 120,
+            width: 100,
           },
           {
-            title: 'Quantity (Kg)',
+            title: 'QTY (Kg)',
             field: 'quantity_kgs',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -264,7 +264,7 @@ export default function AllocationTableView() {
             },
           },
           {
-            title: 'Packages',
+            title: 'Pkgs',
             field: 'quantity_packages',
             editor: 'number',
             editorParams: {
