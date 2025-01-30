@@ -41,7 +41,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body className="text-foreground">
-        {isTestEnvironment && (
+        {isTestEnvironment && pathname !== '/noaccess' && (
           <div className="w-full bg-orange-600 py-2 text-center font-medium text-white">
             Connected to Staging Instance :{' '}
             {process.env.NEXT_PUBLIC_API_BASE_URL}
