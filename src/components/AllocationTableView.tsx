@@ -173,6 +173,7 @@ export default function AllocationTableView() {
           { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
           { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
+          { title: 'Break', field: 'category', hozAlign: 'left' },
           {
             title: 'Purchased Price',
             field: 'unit_cost',
