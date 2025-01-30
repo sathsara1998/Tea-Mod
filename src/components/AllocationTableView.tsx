@@ -137,10 +137,9 @@ export default function AllocationTableView() {
             init_quantity: item.quantity_packages,
             free_quantity: item.free_quantity,
             free_packages: item.free_packages,
+            init_packages: item.free_packages,
           }
         })
-
-      console.log(adjustedAllocations)
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         height: '500px',
@@ -330,17 +329,14 @@ export default function AllocationTableView() {
           rowData.net_weight
         ) {
           // Calculate the difference between new and old quantity_packages
-          const quantityDiff =
-            rowData.quantity_packages - (rowData.init_quantity || 0)
+          const quantityDiff = rowData.quantity_packages - rowData.init_quantity
 
           // Calculate new quantity_kgs based on net_weight
           const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
 
           // Update free_packages and free_quantity
-          const newFreePackages = Math.max(
-            0,
-            rowData.free_packages - quantityDiff,
-          )
+          const newFreePackages = rowData.init_packages - quantityDiff
+          console.log('newFreePackages', rowData.free_packages, quantityDiff)
           const newFreeQuantity = Math.max(
             0,
             rowData.free_quantity -
@@ -444,7 +440,6 @@ export default function AllocationTableView() {
     per_package_quantity?: number
   }
   const handleSubmitRow = async (rowData: any, row: any): Promise<void> => {
-    console.log('change request works')
     try {
       // Early return if row hasn't been updated
       if (!updatedRows.current?.includes(rowData.id)) {
@@ -467,7 +462,6 @@ export default function AllocationTableView() {
       ) {
         throw new Error('Valid quantity is required')
       }
-      console.log('before params')
 
       const baseParams: Partial<PackageAllocationParams> = {
         blend_id: selectedBlend.id,
@@ -732,7 +726,7 @@ export default function AllocationTableView() {
         // const isallocation: NewCustomerOrdersTableData = {
         //   finished_product_id: allocations.allocations[0].finished_product_id,
         // }
-        console.log(teas)
+
         const teablendInfo: BlendInfo = {
           id: teas.id,
           blendNo: teas.name,
@@ -963,7 +957,6 @@ export default function AllocationTableView() {
   }, [searchParams])
 
   // console.log('selected', selectedBlend)
-  console.log('blendinfo-allocations', blendInfo)
 
   return (
     <>
