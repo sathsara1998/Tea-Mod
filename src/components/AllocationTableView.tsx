@@ -158,7 +158,15 @@ export default function AllocationTableView() {
             headerSort: false,
           },
           { title: '#', formatter: 'rownum', hozAlign: 'left' },
-          { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
+          {
+            title: 'Box Number',
+            field: 'box_number',
+            hozAlign: 'left',
+            formatter: function (cell) {
+              const value = cell.getValue()
+              return value ? value.slice(5) : '' // Remove first 5 digits
+            },
+          },
           { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
@@ -167,7 +175,7 @@ export default function AllocationTableView() {
           { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           {
-            title: 'Cost',
+            title: 'Purchased Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
