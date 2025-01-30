@@ -137,10 +137,9 @@ export default function AllocationTableView() {
             init_quantity: item.quantity_packages,
             free_quantity: item.free_quantity,
             free_packages: item.free_packages,
+            init_packages: item.free_packages,
           }
         })
-
-      console.log(adjustedAllocations)
 
       tabulatorRef.current = new Tabulator(allocationsTableRef.current, {
         height: '500px',
@@ -158,7 +157,15 @@ export default function AllocationTableView() {
             headerSort: false,
           },
           { title: '#', formatter: 'rownum', hozAlign: 'left' },
-          { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
+          {
+            title: 'Box Number',
+            field: 'box_number',
+            hozAlign: 'left',
+            formatter: function (cell) {
+              const value = cell.getValue()
+              return value ? value.slice(5) : '' // Remove first 5 digits
+            },
+          },
           { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
@@ -166,8 +173,9 @@ export default function AllocationTableView() {
           { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
           { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
+          { title: 'Break', field: 'category', hozAlign: 'left' },
           {
-            title: 'Cost',
+            title: 'Purchased Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -322,23 +330,19 @@ export default function AllocationTableView() {
           rowData.net_weight
         ) {
           // Calculate the difference between new and old quantity_packages
-          const quantityDiff =
-            rowData.quantity_packages - (rowData.init_quantity || 0)
+          const quantityDiff = rowData.quantity_packages - rowData.init_quantity
 
           // Calculate new quantity_kgs based on net_weight
           const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
-
+          console.log(
+            `newQuantityKgs`,
+            rowData.quantity_packages,
+            rowData.net_weight,
+          )
           // Update free_packages and free_quantity
-          const newFreePackages = Math.max(
-            0,
-            rowData.free_packages - quantityDiff,
-          )
-          const newFreeQuantity = Math.max(
-            0,
-            rowData.free_quantity -
-              (newQuantityKgs -
-                (rowData.init_quantity || 0) * rowData.net_weight),
-          )
+          const newFreePackages = rowData.init_packages - quantityDiff
+
+          const newFreeQuantity = newFreePackages * rowData.net_weight
 
           // Update the row with new values
           row.update({
@@ -436,7 +440,6 @@ export default function AllocationTableView() {
     per_package_quantity?: number
   }
   const handleSubmitRow = async (rowData: any, row: any): Promise<void> => {
-    console.log('change request works')
     try {
       // Early return if row hasn't been updated
       if (!updatedRows.current?.includes(rowData.id)) {
@@ -459,7 +462,6 @@ export default function AllocationTableView() {
       ) {
         throw new Error('Valid quantity is required')
       }
-      console.log('before params')
 
       const baseParams: Partial<PackageAllocationParams> = {
         blend_id: selectedBlend.id,
@@ -724,7 +726,7 @@ export default function AllocationTableView() {
         // const isallocation: NewCustomerOrdersTableData = {
         //   finished_product_id: allocations.allocations[0].finished_product_id,
         // }
-        console.log(teas)
+
         const teablendInfo: BlendInfo = {
           id: teas.id,
           blendNo: teas.name,
@@ -955,7 +957,6 @@ export default function AllocationTableView() {
   }, [searchParams])
 
   // console.log('selected', selectedBlend)
-  console.log('blendinfo-allocations', blendInfo)
 
   return (
     <>
