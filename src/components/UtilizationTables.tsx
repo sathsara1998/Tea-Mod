@@ -247,7 +247,7 @@ function StraightLineTable({ value }: BlendGainTableProps): React.JSX.Element {
       tableRef.current.setFilter([
         {
           field: 'free_packages',
-          type: checked ? '=' : '!=',
+          type: checked ? '=' : '',
           value: '0',
         },
       ])
