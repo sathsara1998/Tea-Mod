@@ -180,7 +180,6 @@ export interface ManufacturingAllocationTableData {
   grade?: string
   purchased_qty?: number
   init_quantity?: number
-  free_quantity?: number
   allocation_type?: 'p' | 'w'
   free_packages?: number
 }
