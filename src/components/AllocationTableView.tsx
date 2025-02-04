@@ -138,7 +138,6 @@ export default function AllocationTableView() {
             free_quantity: item.free_quantity,
             free_packages: item.free_packages,
             init_packages: item.free_packages,
-
           }
         })
 
@@ -206,7 +205,6 @@ export default function AllocationTableView() {
               return cell.getValue() // Show value for other types
             },
           },
-
           {
             title: 'QTY A/V',
             field: 'free_quantity',
@@ -380,7 +378,6 @@ export default function AllocationTableView() {
           // Update the row with new free_quantity
           row.update({
             free_quantity: newFreeQuantity,
-
           })
         }
 
@@ -558,7 +555,6 @@ export default function AllocationTableView() {
           purchased_qty: tea.purchased_price || 0,
           free_quantity: tea.free_quantity || 0,
           free_packages: tea.free_packages || 0,
-
           quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
           quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,
