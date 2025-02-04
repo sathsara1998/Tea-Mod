@@ -77,8 +77,8 @@ export async function middleware(request: NextRequest) {
       `Unauthorized access attempt from IP: ${clientIP} to path: ${path}`,
     )
     // Redirect to /noaccess
-    // const noAccessUrl = new URL('/noaccess', request.url)
-    // return NextResponse.redirect(noAccessUrl)
+    const noAccessUrl = new URL('/noaccess', request.url)
+    return NextResponse.redirect(noAccessUrl)
   }
 
   // Get the session (if available)
