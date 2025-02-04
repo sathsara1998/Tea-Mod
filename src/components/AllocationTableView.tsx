@@ -161,12 +161,10 @@ export default function AllocationTableView() {
             title: 'Box Number',
             field: 'box_number',
             hozAlign: 'left',
-            // formatter: function (cell) {
-            //   const value = cell.getValue()
-            //                 // Remove first 5 digits
-
-            //   return value ? value.slice(5) : '' 
-            // },
+            formatter: function (cell) {
+              const value = cell.getValue()
+              return value ? value.slice(5) : '' // Remove first 5 digits
+            },
           },
           { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
           { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
