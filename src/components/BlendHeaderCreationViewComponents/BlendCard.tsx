@@ -32,7 +32,7 @@ const BlendCard: React.FC<BlendCardProps> = ({ data, onEdit, onDelete }) => {
 
   const gotoAllocations = (e: MouseEvent, name: string) => {
     e.stopPropagation()
-    router.push(`/allocate?id=${name}`)
+    window.open(`/allocate?id=${name}`, '_blank')
   }
 
   return (
