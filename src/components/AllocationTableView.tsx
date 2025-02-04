@@ -167,10 +167,10 @@ export default function AllocationTableView() {
             },
           },
           { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
+          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
-          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
           { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           { title: 'Break', field: 'category', hozAlign: 'left' },
@@ -195,6 +195,7 @@ export default function AllocationTableView() {
             field: 'free_packages',
             hozAlign: 'right',
             frozen: true,
+            cssClass: 'frozen-column',
             width: 100,
             formatter: function (cell) {
               const rowData = cell.getRow().getData()
@@ -209,6 +210,7 @@ export default function AllocationTableView() {
             field: 'free_quantity',
             hozAlign: 'right',
             frozen: true,
+            cssClass: 'frozen-column',
             width: 100,
           },
           {
@@ -216,11 +218,8 @@ export default function AllocationTableView() {
             field: 'quantity_kgs',
             formatter: function (cell) {
               const value = cell.getValue()
-              const element = cell.getElement()
-
               if (cell.getRow().getData().allocation_type === 'w') {
-                element.style.backgroundColor = '#e8f1fe'
-                element.style.border = '1px solid #bfd2e8'
+                cell.getElement().classList.add('editable-cell')
                 return value
                   ? value.toLocaleString('en-US', {
                       minimumFractionDigits: 4,
@@ -253,6 +252,7 @@ export default function AllocationTableView() {
               selectContents: true,
             },
             frozen: true,
+            cssClass: 'frozen-column',
             cellEditCancelled: function (cell) {
               const rowData = cell.getRow().getData()
               if (rowData.allocation_type === 'p' && rowData.net_weight) {
@@ -273,11 +273,8 @@ export default function AllocationTableView() {
             },
             formatter: function (cell) {
               const value = cell.getValue()
-              const element = cell.getElement()
-
               if (cell.getRow().getData().allocation_type === 'p') {
-                element.style.backgroundColor = '#e8f1fe'
-                element.style.border = '1px solid #bfd2e8'
+                cell.getElement().classList.add('editable-cell')
                 return value
               }
               return ''
@@ -294,17 +291,29 @@ export default function AllocationTableView() {
             hozAlign: 'right',
             editable: (cell) => cell.getRow().getData().allocation_type == 'p',
             frozen: true,
+            cssClass: 'frozen-column',
           },
         ],
-        rowFormatter: (row) => {
+        rowFormatter: function (row) {
           const rowData = row.getData()
+          const element = row.getElement()
+
+          // Remove any existing status classes
+          element.classList.remove('row-over', 'row-under')
+
+          // Add appropriate class based on quantity comparison
           if (rowData.quantity_packages > rowData.init_quantity) {
-            row.getElement().style.backgroundColor = '#8aedb8'
+            element.classList.add('row-over')
           } else if (rowData.quantity_packages < rowData.init_quantity) {
-            row.getElement().style.backgroundColor = '#eda18a'
+            element.classList.add('row-under')
           }
         },
       })
+
+      // Add this CSS to your stylesheet
+      const styles = `
+  
+  `
 
       tabulatorRef.current.on('cellClick', (e, cell) => {
         if (cell.getColumn().getField() === 'box_number') {
