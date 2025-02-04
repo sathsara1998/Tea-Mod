@@ -167,7 +167,7 @@ function BlendBalanceTable({ value }: BlendGainTableProps): React.JSX.Element {
       tableRef.current.setFilter([
         {
           field: 'free_quantity',
-          type: checked ? '=' : '!=',
+          type: checked ? '=' : '',
           value: '0',
         },
       ])

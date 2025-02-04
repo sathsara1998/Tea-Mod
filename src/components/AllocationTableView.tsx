@@ -135,6 +135,10 @@ export default function AllocationTableView() {
           return {
             ...item,
             init_quantity: item.quantity_packages,
+            free_quantity: item.free_quantity,
+            free_packages: item.free_packages,
+            init_packages: item.free_packages,
+
           }
         })
 
@@ -154,16 +158,27 @@ export default function AllocationTableView() {
             headerSort: false,
           },
           { title: '#', formatter: 'rownum', hozAlign: 'left' },
-          { title: 'Box Number', field: 'box_number', hozAlign: 'left' },
-          { title: 'Broker', field: 'broker', hozAlign: 'left' },
+          {
+            title: 'Box Number',
+            field: 'box_number',
+            hozAlign: 'left',
+            // formatter: function (cell) {
+            //   const value = cell.getValue()
+            //                 // Remove first 5 digits
+
+            //   return value ? value.slice(5) : '' 
+            // },
+          },
+          { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
+          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
-          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
           { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
+          { title: 'Break', field: 'category', hozAlign: 'left' },
           {
-            title: 'Cost',
+            title: 'Purchaced Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -177,18 +192,38 @@ export default function AllocationTableView() {
             },
             hozAlign: 'right',
           },
-          { title: 'Purchased QTY', field: 'purchased_qty', hozAlign: 'right' },
+          { title: 'Purchaced QTY', field: 'purchased_qty', hozAlign: 'right' },
+          {
+            title: 'Pkgs A/V',
+            field: 'free_packages',
+            hozAlign: 'right',
+            frozen: true,
+            cssClass: 'frozen-column',
+            width: 100,
+            formatter: function (cell) {
+              const rowData = cell.getRow().getData()
+              if (rowData.allocation_type === 'w') {
+                return '' // Hide value for allocation_type 'w'
+              }
+              return cell.getValue() // Show value for other types
+            },
+          },
 
           {
-            title: 'Quantity (Kg)',
+            title: 'QTY A/V',
+            field: 'free_quantity',
+            hozAlign: 'right',
+            frozen: true,
+            cssClass: 'frozen-column',
+            width: 100,
+          },
+          {
+            title: 'QTY (Kg)',
             field: 'quantity_kgs',
             formatter: function (cell) {
               const value = cell.getValue()
-              const element = cell.getElement()
-
               if (cell.getRow().getData().allocation_type === 'w') {
-                element.style.backgroundColor = '#e8f1fe'
-                element.style.border = '1px solid #bfd2e8'
+                cell.getElement().classList.add('editable-cell')
                 return value
                   ? value.toLocaleString('en-US', {
                       minimumFractionDigits: 4,
@@ -221,6 +256,7 @@ export default function AllocationTableView() {
               selectContents: true,
             },
             frozen: true,
+            cssClass: 'frozen-column',
             cellEditCancelled: function (cell) {
               const rowData = cell.getRow().getData()
               if (rowData.allocation_type === 'p' && rowData.net_weight) {
@@ -232,7 +268,7 @@ export default function AllocationTableView() {
             },
           },
           {
-            title: 'Packages',
+            title: 'Pkgs',
             field: 'quantity_packages',
             editor: 'number',
             editorParams: {
@@ -241,11 +277,8 @@ export default function AllocationTableView() {
             },
             formatter: function (cell) {
               const value = cell.getValue()
-              const element = cell.getElement()
-
               if (cell.getRow().getData().allocation_type === 'p') {
-                element.style.backgroundColor = '#e8f1fe'
-                element.style.border = '1px solid #bfd2e8'
+                cell.getElement().classList.add('editable-cell')
                 return value
               }
               return ''
@@ -262,37 +295,32 @@ export default function AllocationTableView() {
             hozAlign: 'right',
             editable: (cell) => cell.getRow().getData().allocation_type == 'p',
             frozen: true,
+            cssClass: 'frozen-column',
           },
-
-          // { title: "Weight Difference (kg)", field: "weight_diff", hozAlign: "center"},
-          // {
-          //   title: '',
-          //   formatter: () => '<Button>Save</Button>',
-          //   width: 100,
-          //   frozen: true,
-          //   hozAlign: 'center',
-          //   cellClick: (e, cell) => {
-          //     const row = cell.getRow()
-          //     const rowData = row.getData()
-
-          //     updatedRows.current = [...updatedRows.current, rowData.id]
-          //     handleSubmitRow(rowData, row)
-          //   },
-          // },
         ],
-        rowFormatter: (row) => {
+        rowFormatter: function (row) {
           const rowData = row.getData()
+          const element = row.getElement()
+
+          // Remove any existing status classes
+          element.classList.remove('row-over', 'row-under')
+
+          // Add appropriate class based on quantity comparison
           if (rowData.quantity_packages > rowData.init_quantity) {
-            row.getElement().style.backgroundColor = '#8aedb8'
+            element.classList.add('row-over')
           } else if (rowData.quantity_packages < rowData.init_quantity) {
-            row.getElement().style.backgroundColor = '#eda18a'
+            element.classList.add('row-under')
           }
         },
       })
 
+      // Add this CSS to your stylesheet
+      const styles = `
+  
+  `
+
       tabulatorRef.current.on('cellClick', (e, cell) => {
         if (cell.getColumn().getField() === 'box_number') {
-          // Only trigger for the "name" column
           const rowData = cell.getRow().getData()
           setCellData({ id: rowData.lot_id, type: rowData.type })
           setIsTeaDialogOpen(true)
@@ -311,19 +339,50 @@ export default function AllocationTableView() {
         const row = cell.getRow()
         const rowData = row.getData()
 
-        // If packages column is edited and it's a package allocation type
         if (
           cell.getColumn().getField() === 'quantity_packages' &&
           rowData.allocation_type === 'p' &&
           rowData.net_weight
         ) {
-          // Recalculate quantity in kg
-          const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+          // Calculate the difference between new and old quantity_packages
+          const quantityDiff = rowData.quantity_packages - rowData.init_quantity
 
-          // Update the row with new quantity in kg
+          // Calculate new quantity_kgs based on net_weight
+          const newQuantityKgs = rowData.quantity_packages * rowData.net_weight
+          console.log(
+            `newQuantityKgs`,
+            rowData.quantity_packages,
+            rowData.net_weight,
+          )
+          // Update free_packages and free_quantity
+          const newFreePackages = rowData.init_packages - quantityDiff
+
+          const newFreeQuantity = newFreePackages * rowData.net_weight
+
+          // Update the row with new values
           row.update({
             quantity_kgs: newQuantityKgs,
-            quantity_packages: rowData.quantity_packages,
+            free_packages: newFreePackages,
+            free_quantity: newFreeQuantity,
+          })
+        } else if (
+          cell.getColumn().getField() === 'quantity_kgs' &&
+          rowData.allocation_type === 'w'
+        ) {
+          // Calculate the difference between new and old quantity_kgs
+          const quantityDiff =
+            rowData.quantity_kgs - (rowData.init_quantity || 0)
+
+          // Update free_quantity
+          const newFreeQuantity = Math.max(
+            0,
+            rowData.free_quantity - quantityDiff,
+          )
+
+          // Update the row with new free_quantity
+          row.update({
+            free_quantity: newFreeQuantity,
+
           })
         }
 
@@ -331,6 +390,14 @@ export default function AllocationTableView() {
 
         handleSubmitRow(rowData, row).catch(() => {
           row.getElement().style.backgroundColor = '#eda18a'
+
+          // Revert changes on failed submission
+          row.update({
+            quantity_kgs: rowData.init_quantity,
+            quantity_packages: rowData.init_quantity,
+            free_quantity: rowData.free_quantity,
+            free_packages: rowData.free_packages,
+          })
         })
       })
 
@@ -389,7 +456,6 @@ export default function AllocationTableView() {
     per_package_quantity?: number
   }
   const handleSubmitRow = async (rowData: any, row: any): Promise<void> => {
-    console.log('change request works')
     try {
       // Early return if row hasn't been updated
       if (!updatedRows.current?.includes(rowData.id)) {
@@ -412,7 +478,6 @@ export default function AllocationTableView() {
       ) {
         throw new Error('Valid quantity is required')
       }
-      console.log('before params')
 
       const baseParams: Partial<PackageAllocationParams> = {
         blend_id: selectedBlend.id,
@@ -493,6 +558,9 @@ export default function AllocationTableView() {
           grade: tea.grade || '',
           unit_cost: tea.purchased_price || 0,
           purchased_qty: tea.purchased_price || 0,
+          free_quantity: tea.free_quantity || 0,
+          free_packages: tea.free_packages || 0,
+
           quantity_kgs: tea.allocation_type === 'w' ? 0 : 0,
           quantity_packages: tea.allocation_type === 'p' ? 0 : 0,
           init_quantity: tea.init_quantity,
@@ -640,6 +708,8 @@ export default function AllocationTableView() {
     allocations: [],
     propSample: 0,
     packing_type: '',
+    avg_tea_cost: 0,
+    avg_to_allocate_tea_cost: 0,
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -673,6 +743,7 @@ export default function AllocationTableView() {
         // const isallocation: NewCustomerOrdersTableData = {
         //   finished_product_id: allocations.allocations[0].finished_product_id,
         // }
+
         const teablendInfo: BlendInfo = {
           id: teas.id,
           blendNo: teas.name,
@@ -694,6 +765,8 @@ export default function AllocationTableView() {
           prop_sample_grams: teas.prop_sample_grams,
           manufacturing_allocations: [],
           allocations: [teas.allocations],
+          avg_tea_cost: teas.avg_tea_cost,
+          avg_to_allocate_tea_cost: teas.avg_to_allocate_tea_cost,
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
@@ -901,7 +974,6 @@ export default function AllocationTableView() {
   }, [searchParams])
 
   // console.log('selected', selectedBlend)
-  console.log('blendinfo-allocations', blendInfo)
 
   return (
     <>
