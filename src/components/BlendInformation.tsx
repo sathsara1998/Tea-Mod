@@ -58,14 +58,17 @@ const LabelField: React.FC<{ label: string; value: string | number }> = ({
             variant={
               value.toString().toLowerCase() === 'draft'
                 ? 'secondary'
-                : value.toString().toLowerCase() === 'confirmed'
-                  ? 'default'
-                  : value.toString().toLowerCase() === 'completed'
-                    ? 'outline'
-                    : 'destructive'
+                : value.toString().toLowerCase() === 'in_progress'
+                  ? 'secondary'
+                  : value.toString().toLowerCase() === 'confirmed'
+                    ? 'default'
+                    : value.toString().toLowerCase() === 'completed'
+                      ? 'outline'
+                      : 'destructive'
             }
             className={`
           ${value.toString().toLowerCase() === 'draft' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}
+          ${value.toString().toLowerCase() === 'in_progress' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}
           ${value.toString().toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}
           ${value.toString().toLowerCase() === 'completed' ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}
           ${value.toString().toLowerCase() === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : ''}
@@ -125,6 +128,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
         blend_id: blendInfo.id,
         packing_type: blendInfo.packing_type,
         prop_sample: blendInfo.prop_sample_grams,
+        remark: blendInfo.remark,
       }
 
       await updatePacking(packingData)
@@ -175,7 +179,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                     prop_sample_grams: parseFloat(e.target.value) || 0,
                   })
                 }
-                disabled={blendInfo.status.toLowerCase() === 'done'}
+                disabled={blendInfo.status.toLowerCase() !== 'draft'}
                 className="bg-background text-foreground"
               />
             </div>
@@ -189,7 +193,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 onValueChange={(value) =>
                   onBlendInfoChange({ packing_type: value })
                 }
-                disabled={blendInfo.status.toLowerCase() === 'done'}
+                disabled={blendInfo.status.toLowerCase() !== 'draft'}
               >
                 <SelectTrigger className="bg-background text-foreground">
                   <SelectValue placeholder="Select packaging type" />
@@ -203,6 +207,21 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               </Select>
             </div>
             <LabelField label="Status" value={blendInfo.status} />
+            <div className="rounded border border-border  p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Note
+              </div>
+              <Input
+                value={blendInfo.remark}
+                onChange={(e) =>
+                  onBlendInfoChange({
+                    remark: e.target.value || '',
+                  })
+                }
+                disabled={blendInfo.status.toLowerCase() !== 'draft'}
+                className="bg-background text-foreground"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -365,7 +384,8 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 </Button>
               </>
             )}
-            {blendInfo.status === 'confirmed' && (
+            {(blendInfo.status === 'confirmed' ||
+              blendInfo.status === 'in_progress') && (
               <Button
                 variant="outline"
                 onClick={onResetBlendSheet}
