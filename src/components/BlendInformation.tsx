@@ -128,6 +128,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
         blend_id: blendInfo.id,
         packing_type: blendInfo.packing_type,
         prop_sample: blendInfo.prop_sample_grams,
+        remark: blendInfo.remark,
       }
 
       await updatePacking(packingData)
@@ -178,7 +179,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                     prop_sample_grams: parseFloat(e.target.value) || 0,
                   })
                 }
-                disabled={blendInfo.status.toLowerCase() === 'done'}
+                disabled={blendInfo.status.toLowerCase() !== 'draft'}
                 className="bg-background text-foreground"
               />
             </div>
@@ -192,7 +193,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 onValueChange={(value) =>
                   onBlendInfoChange({ packing_type: value })
                 }
-                disabled={blendInfo.status.toLowerCase() === 'done'}
+                disabled={blendInfo.status.toLowerCase() !== 'draft'}
               >
                 <SelectTrigger className="bg-background text-foreground">
                   <SelectValue placeholder="Select packaging type" />
@@ -211,10 +212,10 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 Note
               </div>
               <Input
-                value={blendInfo.remarks}
+                value={blendInfo.remark}
                 onChange={(e) =>
                   onBlendInfoChange({
-                    remarks: e.target.value || '',
+                    remark: e.target.value || '',
                   })
                 }
                 disabled={blendInfo.status.toLowerCase() !== 'draft'}
@@ -385,49 +386,49 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
             )}
             {(blendInfo.status === 'confirmed' ||
               blendInfo.status === 'in_progress') && (
-                  <Button
-                    variant="outline"
-                    onClick={onResetBlendSheet}
-                    className={cn(
-                      'group relative flex w-full items-center justify-between',
-                      'border-orange-200 dark:border-orange-800',
-                      'bg-orange-50 dark:bg-orange-900/20',
-                      'text-orange-700 dark:text-orange-400',
-                      'hover:bg-orange-100 dark:hover:bg-orange-900/30',
-                      'transition-all hover:shadow-sm',
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                      </svg>
-                      Reset
-                    </span>
-                    <svg
-                      className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </Button>
+              <Button
+                variant="outline"
+                onClick={onResetBlendSheet}
+                className={cn(
+                  'group relative flex w-full items-center justify-between',
+                  'border-orange-200 dark:border-orange-800',
+                  'bg-orange-50 dark:bg-orange-900/20',
+                  'text-orange-700 dark:text-orange-400',
+                  'hover:bg-orange-100 dark:hover:bg-orange-900/30',
+                  'transition-all hover:shadow-sm',
                 )}
+              >
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  Reset
+                </span>
+                <svg
+                  className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

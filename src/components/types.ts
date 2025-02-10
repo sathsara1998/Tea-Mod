@@ -124,7 +124,7 @@ export interface BlendInfo {
   packing_type: string
   avg_to_allocate_tea_cost: number
   avg_tea_cost: number
-  remarks: string
+  remark: string
 }
 
 export interface TeaAllocation {
@@ -236,7 +236,7 @@ export interface TeaBlend {
   prop_sample_grams: number
   avg_tea_cost: number
   avg_to_allocate_tea_cost: number
-  remarks: string
+  remark: string
 }
 
 export interface AddAllocationObject {

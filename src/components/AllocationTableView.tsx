@@ -704,7 +704,7 @@ export default function AllocationTableView() {
     packing_type: '',
     avg_tea_cost: 0,
     avg_to_allocate_tea_cost: 0,
-    remarks: '',
+    remark: '',
   })
 
   const handleBlendInfoChange = useCallback((info: Partial<BlendInfo>) => {
@@ -762,7 +762,7 @@ export default function AllocationTableView() {
           allocations: [teas.allocations],
           avg_tea_cost: teas.avg_tea_cost,
           avg_to_allocate_tea_cost: teas.avg_to_allocate_tea_cost,
-          remarks: teas.remarks,
+          remark: teas.remark,
         }
         setBlendInfo(teablendInfo)
         const tableData = teas.manufacturing_allocations.map((item, index) => {
