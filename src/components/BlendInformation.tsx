@@ -203,6 +203,21 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               </Select>
             </div>
             <LabelField label="Status" value={blendInfo.status} />
+            <div className="rounded border border-border  p-2">
+              <div className="mb-1 text-xs uppercase text-muted-foreground">
+                Note
+              </div>
+              <Input
+                value={blendInfo.remarks}
+                onChange={(e) =>
+                  onBlendInfoChange({
+                    remarks: e.target.value || '',
+                  })
+                }
+                disabled={blendInfo.status.toLowerCase() === 'done'}
+                className="bg-background text-foreground"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
