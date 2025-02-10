@@ -58,14 +58,17 @@ const LabelField: React.FC<{ label: string; value: string | number }> = ({
             variant={
               value.toString().toLowerCase() === 'draft'
                 ? 'secondary'
-                : value.toString().toLowerCase() === 'confirmed'
-                  ? 'default'
-                  : value.toString().toLowerCase() === 'completed'
-                    ? 'outline'
-                    : 'destructive'
+                : value.toString().toLowerCase() === 'in_progress'
+                  ? 'secondary'
+                  : value.toString().toLowerCase() === 'confirmed'
+                    ? 'default'
+                    : value.toString().toLowerCase() === 'completed'
+                      ? 'outline'
+                      : 'destructive'
             }
             className={`
           ${value.toString().toLowerCase() === 'draft' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}
+          ${value.toString().toLowerCase() === 'in_progress' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}
           ${value.toString().toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}
           ${value.toString().toLowerCase() === 'completed' ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : ''}
           ${value.toString().toLowerCase() === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : ''}
@@ -214,7 +217,7 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                     remarks: e.target.value || '',
                   })
                 }
-                disabled={blendInfo.status.toLowerCase() === 'done'}
+                disabled={blendInfo.status.toLowerCase() !== 'draft'}
                 className="bg-background text-foreground"
               />
             </div>
@@ -380,50 +383,51 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
                 </Button>
               </>
             )}
-            {blendInfo.status === 'confirmed' && (
-              <Button
-                variant="outline"
-                onClick={onResetBlendSheet}
-                className={cn(
-                  'group relative flex w-full items-center justify-between',
-                  'border-orange-200 dark:border-orange-800',
-                  'bg-orange-50 dark:bg-orange-900/20',
-                  'text-orange-700 dark:text-orange-400',
-                  'hover:bg-orange-100 dark:hover:bg-orange-900/30',
-                  'transition-all hover:shadow-sm',
-                )}
-              >
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+            {(blendInfo.status === 'confirmed' ||
+              blendInfo.status === 'in_progress') && (
+                  <Button
+                    variant="outline"
+                    onClick={onResetBlendSheet}
+                    className={cn(
+                      'group relative flex w-full items-center justify-between',
+                      'border-orange-200 dark:border-orange-800',
+                      'bg-orange-50 dark:bg-orange-900/20',
+                      'text-orange-700 dark:text-orange-400',
+                      'hover:bg-orange-100 dark:hover:bg-orange-900/30',
+                      'transition-all hover:shadow-sm',
+                    )}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  Reset
-                </span>
-                <svg
-                  className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </Button>
-            )}
+                    <span className="flex items-center gap-2">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      Reset
+                    </span>
+                    <svg
+                      className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </Button>
+                )}
           </div>
         </CardContent>
       </Card>
