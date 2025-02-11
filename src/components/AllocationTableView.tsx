@@ -170,15 +170,20 @@ export default function AllocationTableView() {
             },
           },
           { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
-          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
+          { title: 'Lot No', field: 'lot_no', hozAlign: 'right', width: 40 },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
-          { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
+          {
+            title: 'Nt Wgt',
+            field: 'net_weight',
+            hozAlign: 'right',
+            width: 40,
+          },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           { title: 'Break', field: 'category', hozAlign: 'left' },
           {
-            title: 'Purchaced Price',
+            title: 'Pur. Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -192,7 +197,7 @@ export default function AllocationTableView() {
             },
             hozAlign: 'right',
           },
-          { title: 'Purchaced QTY', field: 'purchased_qty', hozAlign: 'right' },
+          { title: 'Pur. QTY', field: 'purchased_qty', hozAlign: 'right' },
           {
             title: 'Pkgs A/V',
             field: 'free_packages',
@@ -421,7 +426,7 @@ export default function AllocationTableView() {
             width: 60,
           },
           { title: 'Tea', field: 'name' },
-          { title: 'Lot Number', field: 'lotNumber' },
+          { title: 'Lot No', field: 'lotNumber' },
           { title: 'Available (kg)', field: 'freeQuantity' },
           { title: 'Package Weight (kg)', field: 'packageWeight' },
           { title: 'Type', field: 'type' },

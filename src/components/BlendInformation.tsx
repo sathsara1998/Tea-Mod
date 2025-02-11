@@ -161,50 +161,6 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Button
-            variant="outline"
-            onClick={() => setIsUpdateBlendConfirmOpen(true)}
-            className={cn(
-              'group relative flex w-full items-center justify-between',
-              'border-red-200 dark:border-red-800',
-              'bg-red-50 dark:bg-red-900/20',
-              'text-red-700 dark:text-red-400',
-              'hover:bg-red-100 dark:hover:bg-red-900/30',
-              'transition-all hover:shadow-sm',
-            )}
-            disabled={blendInfo.status.toLowerCase() !== 'draft'}
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-              <span className="hidden md:block">Update Blend Details</span>
-              <span className="md:hidden">Update</span>
-            </span>
-            <svg
-              className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </Button>
           <div className="grid grid-cols-2 gap-3">
             <LabelField label="Date" value={blendInfo.blend_date} />
             <LabelField
@@ -267,6 +223,50 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               />
             </div>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => setIsUpdateBlendConfirmOpen(true)}
+            className={cn(
+              'group relative mt-2 flex w-full items-center justify-between',
+              'border-red-200 dark:border-red-800',
+              'bg-red-50 dark:bg-red-900/20',
+              'text-red-700 dark:text-red-400',
+              'hover:bg-red-100 dark:hover:bg-red-900/30',
+              'transition-all hover:shadow-sm',
+            )}
+            disabled={blendInfo.status.toLowerCase() !== 'draft'}
+          >
+            <span className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              <span className="hidden md:block">Update Blend Details</span>
+              <span className="md:hidden">Update</span>
+            </span>
+            <svg
+              className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </Button>
         </CardContent>
       </Card>
 
