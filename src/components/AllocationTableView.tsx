@@ -57,6 +57,7 @@ import DownloadReportButton from './DownloadReportButton'
 import TeaViewDialog from './TeaViewDialog'
 import LoadingSpinner from './LoadingSpinner'
 import ReportDownloadButton from './ReportDownload'
+
 // import BlendReport from './BlendReport'
 
 interface Allocation {
@@ -104,7 +105,9 @@ export default function AllocationTableView() {
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
   // const [isLoading, setIsLoading] = useState(false)
-
+  const cn = (...classes: string[]) => {
+    return classes.filter(Boolean).join(' ')
+  }
   const {
     getBlendById,
     updateAllocations,
@@ -1009,30 +1012,83 @@ export default function AllocationTableView() {
                 </CardTitle>
 
                 {/* Actions Section */}
-                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                  <div>
-                    {/*Download Report*/}
-                    <ReportDownloadButton
-                      selectedBlend={
-                        selectedBlend ? { id: selectedBlend.id } : null
-                      }
-                      type={reportType}
-                      onTypeChange={setReportType}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  {blendInfo.status === 'draft' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsGenerateConfirmOpen(true)}
+                      className={cn(
+                        'inline-flex items-center gap-2',
+                        'border-green-200 bg-green-50 text-green-700',
+                        'transition-all hover:bg-green-100',
+                      )}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span className="hidden md:inline">
+                        Generate Blend Sheet
+                      </span>
+                      <span className="md:hidden">Generate</span>
+                    </Button>
+                  )}
+
+                  {(blendInfo.status === 'confirmed' ||
+                    blendInfo.status === 'in_progress') && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsResetConfirmOpen(true)}
+                      className={cn(
+                        'inline-flex items-center gap-2',
+                        'border-orange-200 bg-orange-50 text-orange-700',
+                        'transition-all hover:bg-orange-100',
+                      )}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      Reset
+                    </Button>
+                  )}
+
+                  <ReportDownloadButton
+                    selectedBlend={
+                      selectedBlend ? { id: selectedBlend.id } : null
+                    }
+                    type={reportType}
+                    onTypeChange={setReportType}
+                  />
+
                   <Dialog
                     open={isBlendDialogOpen}
                     onOpenChange={setIsBlendDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button
-                        className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
-                        variant="default"
-                      >
+                      <Button variant="default">
                         <span className="hidden sm:inline">Select Blend</span>
                         <span className="sm:hidden">Blend</span>
                         <svg
-                          className="ml-1 h-3 w-3 sm:h-4 sm:w-4"
+                          className="ml-1 h-4 w-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
