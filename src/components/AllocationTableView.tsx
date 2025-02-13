@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription,
+  
 } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,8 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Label } from '@/components/ui/label'
-import { Info, Search } from 'lucide-react'
+
+import { Info } from 'lucide-react'
 import { ScrollArea } from './ui/scroll-area'
 import {
   Table,
@@ -28,13 +28,10 @@ import {
   TableRow,
 } from './ui/table'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import { useTheme } from 'next-themes'
 
 import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 
-import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection from './BlendInformation'
-import BlendList from './BlendList'
 import AvailableTeaDialog from './AvailableTeaDialog'
 import SelectBlendsDialog from './SelectBlendsDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
@@ -42,20 +39,18 @@ import { useToast } from './ui/use-toast'
 import {
   Blend,
   BlendInfo,
-  TeaAllocation,
   Tea,
   ManufacturingAllocationTableData,
   TeaBlend,
   StockLot,
-  NewCustomerOrdersTableData,
+ 
 } from './types'
-import AllocationDetailsDialog from './AllocationDetailsDialog'
+
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
-import TeaBlendReportButton from './TeaBlendReportButton'
-import DownloadReportButton from './DownloadReportButton'
+
 import TeaViewDialog from './TeaViewDialog'
-import LoadingSpinner from './LoadingSpinner'
+
 import ReportDownloadButton from './ReportDownload'
 
 // import BlendReport from './BlendReport'
@@ -73,14 +68,7 @@ interface SavingAllocation {
 }
 
 export default function AllocationTableView() {
-  const [blend, setBlend] = useState<Blend>({
-    id: 0,
-    name: '',
-    blendName: '',
-    quantity: 0,
-    status: 'draft',
-    allocations: [],
-  })
+  
   const [allocations, setAllocations] = useState<
     ManufacturingAllocationTableData[]
   >([])
@@ -123,12 +111,12 @@ export default function AllocationTableView() {
   const searchParams = useSearchParams()
 
   const allocationsTableRef = useRef(null)
-  const blendsTableRef = useRef(null)
+  
   const availableTeaTableRef = useRef(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
   const updatedRows = useRef<number[]>([])
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([])
-  const isInitialAllocations = useRef(true)
+  
   const selectedIdsRef = useRef<number[]>([])
 
   useEffect(() => {

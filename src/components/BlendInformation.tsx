@@ -13,15 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Badge, badgeVariants } from '@/components/ui/badge'
-import { BlendInfo, NewCustomerOrdersTableData, StockLot } from './types'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from './ui/dropdown-menu'
-import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
+import { BlendInfo, StockLot } from './types'
+
 import {
   Dialog,
   DialogContent,
