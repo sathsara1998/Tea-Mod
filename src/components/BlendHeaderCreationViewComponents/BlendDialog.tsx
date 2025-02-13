@@ -1,21 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-  Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
@@ -57,11 +47,9 @@ export default function BlendDialog({
   blendId,
   currentBlendIds,
   productName,
-}: ModernBlendDialogProps) {
+}: Readonly<ModernBlendDialogProps>) {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null)
-  const [customerOrderLines, setCustomerOrderLines] = useState<CustomerOrder[]>(
-    [],
-  )
+
   const [customerOrders, setCustomerOrders] = useState<
     CustomerOrdersTableData[]
   >([])
@@ -98,6 +86,7 @@ export default function BlendDialog({
             headerFilter: 'input',
             headerFilterPlaceholder: 'Find By Blend Standard',
             hozAlign: 'left',
+            width: 120,
           },
           {
             title: 'Finished Product Name',
@@ -105,12 +94,26 @@ export default function BlendDialog({
             headerFilterPlaceholder: 'Find By Finished Product',
             headerFilter: 'input',
             hozAlign: 'left',
+            width: 120,
           },
           {
             title: 'Finished Good No',
             field: 'finished_good_code',
             headerFilterPlaceholder: 'Find By Finished Good',
             headerFilter: 'input',
+            hozAlign: 'left',
+            width: 150,
+          },
+          {
+            title: 'Contract No',
+            field: 'contract_number',
+            headerFilter: true,
+            hozAlign: 'left',
+          },
+
+          {
+            title: 'Sale Quantity',
+            field: 'sales_qty',
             hozAlign: 'left',
           },
           {
@@ -130,18 +133,7 @@ export default function BlendDialog({
             field: 'quantity_remaining',
             hozAlign: 'center',
           },
-          {
-            title: 'Contract No',
-            field: 'contract_number',
-            headerFilter: true,
-            hozAlign: 'left',
-          },
 
-          {
-            title: 'Sale Quantity',
-            field: 'sales_qty',
-            hozAlign: 'left',
-          },
           {
             title: 'Blend Description',
             field: 'blend_details',
@@ -162,7 +154,7 @@ export default function BlendDialog({
             // Filter out the rows with disabled IDs
             rows.forEach((row) => {
               const rowData = row.getData()
-              if (currentBlendIds && currentBlendIds.includes(rowData.id)) {
+              if (currentBlendIds?.includes(rowData.id)) {
                 row.deselect() // Automatically deselect rows with disabled ids
               } else if (productId != 0 && productId != rowData.product_id) {
                 row.deselect()
@@ -330,7 +322,7 @@ export default function BlendDialog({
   console.log('customer:', selectedCustomer)
   return (
     <DialogContent
-      className="max-h-[90vh] max-w-[60vw] overflow-y-auto"
+      className="max-h-[90vh] max-w-[80vw] overflow-y-auto"
       onInteractOutside={(e) => {
         e.preventDefault()
       }}
@@ -341,13 +333,10 @@ export default function BlendDialog({
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            Customer Order Lines :{' '}
-            {selectedCustomer}
-          </CardTitle>
+          <CardTitle>Customer Order Lines : {selectedCustomer}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-[55vw]">
+          <div className="w-[75vw]">
             <div
               ref={allocationsTableRef}
               className="h-[400px]"
