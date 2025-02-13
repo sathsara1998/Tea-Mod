@@ -158,8 +158,6 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               element.style.backgroundColor = '#f2de79'
               return value
             },
-            bottomCalc: 'avg',
-            bottomCalcParams: { precision: 3 },
           },
         ],
         height: '400px',

@@ -20,14 +20,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import BlendDialog from './BlendDialog'
-import { Input } from '../ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
 
 export type Blend = {
   id: number
@@ -72,10 +64,6 @@ export default function BlendsComponent({
   const { toast } = useToast()
   const { createBlend, updateBlend, deleteBlend, getCustomers } =
     useApiMethods()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<
-    'all' | 'draft' | 'confirmed' | 'done'
-  >('all')
 
   const handleCreateNewBlend = async (customerOrders: CustomerFullBlends) => {
     onNewBlendDataAdd(customerOrders)
@@ -149,18 +137,7 @@ export default function BlendsComponent({
       })
     }
   }
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-  }
-  const filteredBlends = blends.filter((blend) => {
-    const matchesSearchTerm = blend.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
 
-    const matchesStatus =
-      statusFilter === 'all' || blend.status === statusFilter
-    return matchesSearchTerm && matchesStatus
-  })
   useEffect(() => {
     fetchCustomers()
   }, [fetchCustomers])
@@ -168,39 +145,12 @@ export default function BlendsComponent({
   return (
     <Card>
       <CardHeader>
-        <div className="space-y-2">
-          <CardTitle className="flex items-center justify-between">
-            Blends
-            <Button variant="outline" size="sm" onClick={() => addNewBlend()}>
-              New Blend
-            </Button>
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Input
-              placeholder="Search blends..."
-              className="flex-1"
-              onChange={handleSearch}
-            />
-            <Select
-              defaultValue="all"
-              onValueChange={(
-                value: 'all' | 'draft' | 'done' | 'confirmed',
-              ) => {
-                setStatusFilter(value)
-              }}
-            >
-              <SelectTrigger className="w-[80px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <CardTitle className="flex items-center justify-between">
+          Blends
+          <Button variant="outline" size="sm" onClick={() => addNewBlend()}>
+            New Blend
+          </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {loading && (
@@ -211,7 +161,7 @@ export default function BlendsComponent({
 
         {!loading && (
           <ScrollArea className="h-[calc(100vh-200px)]">
-            {filteredBlends.map((blend) => (
+            {blends.map((blend) => (
               <BlendCard
                 key={blend.id}
                 data={blend}
@@ -235,9 +185,7 @@ export default function BlendsComponent({
           isOpen={isNewOpen}
           setIsOpen={setIsNewOpen}
           onCreateBlend={handleCreateNewBlend}
-          customerId={customerId}
-          productName={''}
-        />
+          customerId={customerId} productName={''}        />
       </Dialog>
     </Card>
   )

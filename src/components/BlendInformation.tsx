@@ -13,8 +13,15 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Badge, badgeVariants } from '@/components/ui/badge'
-import { BlendInfo, StockLot } from './types'
-
+import { BlendInfo, NewCustomerOrdersTableData, StockLot } from './types'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from './ui/dropdown-menu'
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import {
   Dialog,
   DialogContent,
@@ -216,50 +223,6 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
               />
             </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setIsUpdateBlendConfirmOpen(true)}
-            className={cn(
-              'group relative mt-2 flex w-full items-center justify-between',
-              'border-red-200 dark:border-red-800',
-              'bg-red-50 dark:bg-red-900/20',
-              'text-red-700 dark:text-red-400',
-              'hover:bg-red-100 dark:hover:bg-red-900/30',
-              'transition-all hover:shadow-sm',
-            )}
-            disabled={blendInfo.status.toLowerCase() !== 'draft'}
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-              <span className="hidden md:block">Update Blend Details</span>
-              <span className="md:hidden">Update</span>
-            </span>
-            <svg
-              className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </Button>
         </CardContent>
       </Card>
 
@@ -320,6 +283,154 @@ const BlendInformationSection: React.FC<BlendInformationSectionProps> = ({
       {/* Actions Card */}
       <Card className="col-span-3 border border-border bg-background shadow-sm">
         <ContractDialog blendInfo={blendInfo} />
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-foreground">
+            Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3">
+            {blendInfo.status === 'draft' && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={onGenerateBlendSheet}
+                  className={cn(
+                    'group relative flex w-full items-center justify-between',
+                    'border-green-200 dark:border-green-800',
+                    'bg-green-50 dark:bg-green-900/20',
+                    'text-green-700 dark:text-green-400',
+                    'hover:bg-green-100 dark:hover:bg-green-900/30',
+                    'transition-all hover:shadow-sm',
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="hidden md:block">
+                      Generate Blend Sheet
+                    </span>
+                    <span className="md:hidden">Generate</span>
+                  </span>
+                  <svg
+                    className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsUpdateBlendConfirmOpen(true)}
+                  className={cn(
+                    'group relative flex w-full items-center justify-between',
+                    'border-blue-200 dark:border-blue-800',
+                    'bg-blue-50 dark:bg-blue-900/20',
+                    'text-blue-700 dark:text-blue-400',
+                    'hover:bg-blue-100 dark:hover:bg-blue-900/30',
+                    'transition-all hover:shadow-sm',
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    <span className="hidden md:block">
+                      Update Blend Details
+                    </span>
+                    <span className="md:hidden">Update</span>
+                  </span>
+                  <svg
+                    className="h-4 w-4 transform transition-transform group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Button>
+              </>
+            )}
+            {(blendInfo.status === 'confirmed' ||
+              blendInfo.status === 'in_progress') && (
+              <Button
+                variant="outline"
+                onClick={onResetBlendSheet}
+                className={cn(
+                  'group relative flex w-full items-center justify-between',
+                  'border-orange-200 dark:border-orange-800',
+                  'bg-orange-50 dark:bg-orange-900/20',
+                  'text-orange-700 dark:text-orange-400',
+                  'hover:bg-orange-100 dark:hover:bg-orange-900/30',
+                  'transition-all hover:shadow-sm',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  Reset
+                </span>
+                <svg
+                  className="h-4 w-4 transform transition-transform group-hover:-rotate-90"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </Button>
+            )}
+          </div>
+        </CardContent>
       </Card>
     </div>
   )

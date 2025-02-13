@@ -47,11 +47,13 @@ const ReportDownloadButton = ({
       const blob = await reportMethod(selectedBlend.id)
 
       const url = window.URL.createObjectURL(blob)
-      window.open(url, '_blank')
-      // Cleanup the URL object after a delay to ensure the blob is loaded
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url)
-      }, 100)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `blend-${reportType}-report-${selectedBlend.id}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
 
       toast({
         title: 'Success',
