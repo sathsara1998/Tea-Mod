@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription,
+  
 } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,8 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Label } from '@/components/ui/label'
-import { Info, Search } from 'lucide-react'
+
+import { Info } from 'lucide-react'
 import { ScrollArea } from './ui/scroll-area'
 import {
   Table,
@@ -28,13 +28,10 @@ import {
   TableRow,
 } from './ui/table'
 import { TabulatorFull as Tabulator } from 'tabulator-tables'
-import { useTheme } from 'next-themes'
 
 import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 
-import { generatePDF, generateTestData } from '@/lib/utils'
 import BlendInformationSection from './BlendInformation'
-import BlendList from './BlendList'
 import AvailableTeaDialog from './AvailableTeaDialog'
 import SelectBlendsDialog from './SelectBlendsDialog'
 import { useApiMethods } from '@/hooks/useApiMethods'
@@ -42,21 +39,20 @@ import { useToast } from './ui/use-toast'
 import {
   Blend,
   BlendInfo,
-  TeaAllocation,
   Tea,
   ManufacturingAllocationTableData,
   TeaBlend,
   StockLot,
-  NewCustomerOrdersTableData,
+ 
 } from './types'
-import AllocationDetailsDialog from './AllocationDetailsDialog'
+
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import SplitTeaDialog from './AllocationViewComponents/SplitTeaDialog'
-import TeaBlendReportButton from './TeaBlendReportButton'
-import DownloadReportButton from './DownloadReportButton'
+
 import TeaViewDialog from './TeaViewDialog'
-import LoadingSpinner from './LoadingSpinner'
+
 import ReportDownloadButton from './ReportDownload'
+
 // import BlendReport from './BlendReport'
 
 interface Allocation {
@@ -72,14 +68,7 @@ interface SavingAllocation {
 }
 
 export default function AllocationTableView() {
-  const [blend, setBlend] = useState<Blend>({
-    id: 0,
-    name: '',
-    blendName: '',
-    quantity: 0,
-    status: 'draft',
-    allocations: [],
-  })
+  
   const [allocations, setAllocations] = useState<
     ManufacturingAllocationTableData[]
   >([])
@@ -104,7 +93,9 @@ export default function AllocationTableView() {
   const [selectedBlendID, setSelectedBlendID] = useState<number | null>(null)
   const [reportType, setReportType] = useState<'finance' | 'stores'>('finance')
   // const [isLoading, setIsLoading] = useState(false)
-
+  const cn = (...classes: string[]) => {
+    return classes.filter(Boolean).join(' ')
+  }
   const {
     getBlendById,
     updateAllocations,
@@ -120,12 +111,12 @@ export default function AllocationTableView() {
   const searchParams = useSearchParams()
 
   const allocationsTableRef = useRef(null)
-  const blendsTableRef = useRef(null)
+  
   const availableTeaTableRef = useRef(null)
   const tabulatorRef = useRef<Tabulator | null>(null)
   const updatedRows = useRef<number[]>([])
   const originalAllocations = useRef<ManufacturingAllocationTableData[]>([])
-  const isInitialAllocations = useRef(true)
+  
   const selectedIdsRef = useRef<number[]>([])
 
   useEffect(() => {
@@ -167,15 +158,20 @@ export default function AllocationTableView() {
             },
           },
           { title: 'Broker', field: 'broker_name', hozAlign: 'left' },
-          { title: 'Lot No', field: 'lot_no', hozAlign: 'right' },
+          { title: 'Lot No', field: 'lot_no', hozAlign: 'right', width: 40 },
           { title: 'Garden Mark', field: 'garden_mark', hozAlign: 'left' },
           { title: 'Standard', field: 'standard', hozAlign: 'left' },
           { title: 'Inv No', field: 'invoice_no', hozAlign: 'right' },
-          { title: 'Net Weight', field: 'net_weight', hozAlign: 'right' },
+          {
+            title: 'Nt Wgt',
+            field: 'net_weight',
+            hozAlign: 'right',
+            width: 40,
+          },
           { title: 'Grade', field: 'grade', hozAlign: 'left' },
           { title: 'Break', field: 'category', hozAlign: 'left' },
           {
-            title: 'Purchaced Price',
+            title: 'Pur. Price',
             field: 'unit_cost',
             formatter: function (cell) {
               const value = cell.getValue()
@@ -189,7 +185,7 @@ export default function AllocationTableView() {
             },
             hozAlign: 'right',
           },
-          { title: 'Purchaced QTY', field: 'purchased_qty', hozAlign: 'right' },
+          { title: 'Pur. QTY', field: 'purchased_qty', hozAlign: 'right' },
           {
             title: 'Pkgs A/V',
             field: 'free_packages',
@@ -418,7 +414,7 @@ export default function AllocationTableView() {
             width: 60,
           },
           { title: 'Tea', field: 'name' },
-          { title: 'Lot Number', field: 'lotNumber' },
+          { title: 'Lot No', field: 'lotNumber' },
           { title: 'Available (kg)', field: 'freeQuantity' },
           { title: 'Package Weight (kg)', field: 'packageWeight' },
           { title: 'Type', field: 'type' },
@@ -1009,30 +1005,83 @@ export default function AllocationTableView() {
                 </CardTitle>
 
                 {/* Actions Section */}
-                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                  <div>
-                    {/*Download Report*/}
-                    <ReportDownloadButton
-                      selectedBlend={
-                        selectedBlend ? { id: selectedBlend.id } : null
-                      }
-                      type={reportType}
-                      onTypeChange={setReportType}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  {blendInfo.status === 'draft' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsGenerateConfirmOpen(true)}
+                      className={cn(
+                        'inline-flex items-center gap-2',
+                        'border-green-200 bg-green-50 text-green-700',
+                        'transition-all hover:bg-green-100',
+                      )}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span className="hidden md:inline">
+                        Generate Blend Sheet
+                      </span>
+                      <span className="md:hidden">Generate</span>
+                    </Button>
+                  )}
+
+                  {(blendInfo.status === 'confirmed' ||
+                    blendInfo.status === 'in_progress') && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsResetConfirmOpen(true)}
+                      className={cn(
+                        'inline-flex items-center gap-2',
+                        'border-orange-200 bg-orange-50 text-orange-700',
+                        'transition-all hover:bg-orange-100',
+                      )}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      Reset
+                    </Button>
+                  )}
+
+                  <ReportDownloadButton
+                    selectedBlend={
+                      selectedBlend ? { id: selectedBlend.id } : null
+                    }
+                    type={reportType}
+                    onTypeChange={setReportType}
+                  />
+
                   <Dialog
                     open={isBlendDialogOpen}
                     onOpenChange={setIsBlendDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button
-                        className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
-                        variant="default"
-                      >
+                      <Button variant="default">
                         <span className="hidden sm:inline">Select Blend</span>
                         <span className="sm:hidden">Blend</span>
                         <svg
-                          className="ml-1 h-3 w-3 sm:h-4 sm:w-4"
+                          className="ml-1 h-4 w-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
