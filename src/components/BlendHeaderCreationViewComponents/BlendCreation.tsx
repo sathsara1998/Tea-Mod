@@ -158,7 +158,7 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
               element.style.backgroundColor = '#f2de79'
               return value
             },
-            bottomCalc: 'avg',
+            bottomCalc: 'sum',
             bottomCalcParams: { precision: 3 },
           },
         ],
@@ -193,7 +193,15 @@ const BlendCreation: React.FC<BlendCreationProps> = ({
       const selectedIds = selectedData.map((row: any) => row.allocation_id)
 
       try {
-        await onDelete(selectedIds)
+        if (isEdit) {
+          await onDelete(selectedIds)
+        } else {
+          // If not editing (first time), just remove rows from tabulator
+          selectedData.forEach((row: any) => {
+            tabulatorRef.current?.deleteRow(row.id)
+          })
+        }
+
         toast({
           title: 'Success',
           description: 'Selected allocations have been removed',
