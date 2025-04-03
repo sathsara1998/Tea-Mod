@@ -16,6 +16,7 @@ import {
   IndentDecrease,
   Menu,
   LeafyGreen,
+  TestTubes
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -25,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { createBrowserClient } from '@/utils/supabase'
 import { motion } from 'framer-motion'
 import ThemeToggle from './ThemeToggle'
+import SampleTracking from './SampleTracking'
 
 const Sidebar: React.FC<{
   onSnowfallToggle: (enabled: boolean) => void
@@ -73,17 +75,15 @@ const Sidebar: React.FC<{
       icon: <FileChartColumn />,
       route: '/blendview',
     },
+    {
+      name: 'Sample',
+      icon: <TestTubes />,
+      route: '/sample',
+    },
   ]
 
   return (
-    <motion.div
-      initial={{ width: isExpanded ? 64 : 18 }} // Initial sidebar width
-      animate={{ width: isExpanded ? 256 : 64 }} // Animates width
-      transition={{ duration: 0.1, type: 'tween' }} // Smooth animation
-      className={cn(
-        'duration-20 flex h-full flex-col bg-gray-100 text-gray-800',
-      )}
-    >
+    
       <div
         className={cn(
           'flex h-full flex-col border-r transition-all duration-200 ease-in-out',
@@ -221,7 +221,6 @@ const Sidebar: React.FC<{
           )}
         </div>
       </div>
-    </motion.div>
   )
 }
 
