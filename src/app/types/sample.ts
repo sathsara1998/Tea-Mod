@@ -12,7 +12,6 @@ export interface TrackingStage {
   }
   
   export interface RequestedSample {
-    id:string
     name: string;
     standerd_code: string;
     net_weight: number;

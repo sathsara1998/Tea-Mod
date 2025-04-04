@@ -6,63 +6,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Stepper } from "@/components/ui/stepper"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import { ArrowLeft } from "lucide-react"
-
-// Mock client data - in a real app, this would come from your API or database
-const clients = [
-  {
-    id: "client1",
-    name: "Acme Corporation",
-    address: "123 Business Ave, Suite 100, Business District",
-    country: "United States",
-  },
-  {
-    id: "client2",
-    name: "Global Enterprises",
-    address: "456 Commerce St, Tower B, Financial Center",
-    country: "United Kingdom",
-  },
-  {
-    id: "client3",
-    name: "Pacific Trading Co.",
-    address: "789 Harbor Blvd, Warehouse 5, Port Area",
-    country: "Japan",
-  },
-]
-
-// Mock tea standards
-const teaStandards = [
-  {
-    id: "tea1",
-    name: "Black Tea Standard",
-    code: "STD 9733 & 9734 SITHAKA TYPE",
-    weight: 100,
-    reference: "-",
-    status: "Requested",
-  },
-  {
-    id: "tea2",
-    name: "Green Tea Standard",
-    code: "STD 9733 & 9740 CEYLON FBOP",
-    weight: 150,
-    reference: "Seal pack",
-    status: "Pending",
-  },
-  {
-    id: "tea3",
-    name: "Oolong Tea Standard",
-    code: "STD 9735 & 9736 NE FBOP",
-    weight: 100,
-    reference: "-",
-    status: "Received",
-  },
-  { id: "tea4", name: "White Tea Standard", code: "STD 9737", weight: 80, reference: "-", status: "Requested" },
-  { id: "tea5", name: "Herbal Tea Standard", code: "STD 9738", weight: 120, reference: "-", status: "Pending" },
-  { id: "tea6", name: "Chai Tea Standard", code: "STD 9739", weight: 90, reference: "-", status: "Received" },
-]
+import type { Sample } from "@/app/types/sample"
+import { TabulatorFull as Tabulator } from "tabulator-tables"
+import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
+import { createRoot } from "react-dom/client"
+import { useToast } from "@/components/ui/use-toast"
+import { Toast, Toast as toast } from "@/components/ui/toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // Mock courier services
 const courierServices = [
@@ -70,90 +33,114 @@ const courierServices = [
   { id: "courier2", name: "Standard Shipping" },
   { id: "courier3", name: "Premium Logistics" },
   { id: "courier4", name: "Global Transport" },
+  { id: "courier5", name: "FedEx" },
 ]
 
 // Mock storage areas
-const storageAreas = [
-  { id: "area1", name: "Main Warehouse" },
-  { id: "area2", name: "Temperature Controlled" },
-  { id: "area3", name: "Secure Storage" },
-  { id: "area4", name: "Quarantine Area" },
-]
-
-interface RowData {
-  id: number
-  reference: string
-  creationdate: string
-  ed: string
-  customer: string
-  trader: string
-  customer_address: string
-  customer_country: string
-  selected_Samples: string[]
-  courier_service?: string
-  storage_area?: string
-  tracking_number?: string
-  status: string
-  handover_date?: string
-  estimated_delivery?: string
-  courier_charges?: string
-  tracking_stages?: {
-    handover_to_courier: { date: string; completed: boolean }
-    package_to_collection: { date: string; completed: boolean }
-    package_shipped: { date: string; completed: boolean }
-    package_arrived: { date: string; completed: boolean }
-    picked_by_clearance: { date: string; completed: boolean }
-  }
-}
+const storageAreas = ["Main Warehouse", "Temperature Controlled", "Secure Storage", "Quarantine Area", "Tea Room"]
 
 export default function SampleDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const [rowData, setRowData] = useState<RowData | null>(null)
+  const { toast } = useToast()
+  const [sampleData, setSampleData] = useState<Sample | null>(null)
   const [loading, setLoading] = useState(true)
   const [courierService, setCourierService] = useState("")
   const [storageArea, setStorageArea] = useState("")
   const [trackingNumber, setTrackingNumber] = useState("")
   const [currentStatus, setCurrentStatus] = useState("Draft")
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null)
+  const [requestSent, setRequestSent] = useState(false)
+  // Add a new state to track the active tab
+  const [activeTab, setActiveTab] = useState("inquiry")
+
+  const tableRef = useRef<HTMLDivElement | null>(null)
+  const tableInstance = useRef<Tabulator | null>(null)
 
   // Fetch the sample data
   useEffect(() => {
     const fetchSampleData = async () => {
       try {
         setLoading(true)
+        console.log(`Attempting to fetch data for sample ID: ${params.id}`)
+
+        // Try to fetch from the API - note the endpoint has changed to match your code
         const response = await axios.get(
-          `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
+          `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id=${params.id}`,
         )
-        setRowData(response.data)
-        setCourierService(response.data.courier_service || "")
-        setStorageArea(response.data.storage_area || "")
-        setTrackingNumber(response.data.tracking_number || "")
-        setCurrentStatus(response.data.status || "Draft")
+
+        // Check if we got an array or a single object
+        const data = Array.isArray(response.data) ? response.data[0] : response.data
+
+        console.log("API response:", data)
+
+        setSampleData(data)
+        setCourierService(data.courier_service?.name || "")
+        setStorageArea(data.sample_storing_area || "")
+        setTrackingNumber( data.tracking_number || "")
+        setCurrentStatus(data.status || "Draft")
       } catch (error) {
         console.error("Error fetching sample data:", error)
-        // Fallback to mock data if API fails
-        const mockData: RowData = {
-          id: Number.parseInt(params.id),
-          reference: `SI-25-${params.id.padStart(3, "0")}`,
-          creationdate: "21/02/2025",
-          ed: "15/03/2025",
-          customer: "client1",
-          trader: "trader1",
-          customer_address: "123 Business Ave, Suite 100, Business District",
-          customer_country: "United States",
-          selected_Samples: ["tea1", "tea2"],
+        console.log("Falling back to mock data")
+
+        // Create mock data with the new structure
+        const mockData: Sample = {
+          id: params.id,
+          reference: `SI-ERM-${params.id.padStart(3, "0")}`,
+          creationdate: "2024/12/01",
+          ed: "2025/01/02",
+          customer: {
+            name: "Sigath",
+            address: "No 1, Colombo",
+            country: "Sri Lanka",
+          },
+          trader: "Jhonethon",
           status: "Draft",
+          requested_samples: [
+            {
+              
+              name: "Chai Tea Srilanka",
+              standerd_code: "ahj_jk_005_al",
+              net_weight: 200,
+              reference: "Get A packing Most Important Sheet",
+              store_stat: "Pending",
+            },
+            {
+             
+              name: "Herbal Tea Standard",
+              standerd_code: "Sdl_Al_0114A_lk",
+              net_weight: 100,
+              reference: "Get A packing Most Important Sheet",
+              store_stat: "Pending",
+            },
+            {
+          
+              name: "White Tea Standard",
+              standerd_code: "Sdl_Al_0114A_lk",
+              net_weight: 300,
+              reference: "Get A packing Most Important Sheet",
+              store_stat: "Pending",
+            },
+          ],
+          courier_service: {
+            name: "FedEx",
+            charges: 2500,
+          },
+          sample_storing_area: "Tea Room",
+          tracking_number: "Tra001",
           tracking_stages: {
-            handover_to_courier: { date: "02/21/2025", completed: true },
-            package_to_collection: { date: "02/22/2025", completed: true },
-            package_shipped: { date: "02/23/2025", completed: true },
-            package_arrived: { date: "03/02/2025", completed: false },
-            picked_by_clearance: { date: "03/04/2025", completed: false },
+            handover_to_courier: { date: "2025-04-01", completed: true },
+            package_to_collection: { date: "2025-04-02", completed: true },
+            package_shipped: { date: "2025-04-03", completed: true },
+            package_arrived: { date: "2025-04-04", completed: false },
+            picked_by_clearance: { date: "2025-04-05", completed: false },
           },
         }
-        setRowData(mockData)
-        setCourierService(mockData.courier_service || "")
-        setStorageArea(mockData.storage_area || "")
-        setTrackingNumber(mockData.tracking_number || "")
+
+        setSampleData(mockData)
+        setCourierService(mockData.courier_service?.name || "")
+        setStorageArea(mockData.sample_storing_area || "")
+        setTrackingNumber( mockData.tracking_number || "")
         setCurrentStatus(mockData.status || "Draft")
       } finally {
         setLoading(false)
@@ -163,7 +150,143 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
     fetchSampleData()
   }, [params.id])
 
-  if (loading || !rowData) {
+  // Initialize Tabulator when sampleData is available
+  // Modify the useEffect for Tabulator initialization to respond to tab changes
+  useEffect(() => {
+    // Only initialize the table if we're on the inquiry tab and have sample data
+    if (tableRef.current && sampleData && activeTab === "inquiry") {
+      // Clean up any existing table instance
+      if (tableInstance.current) {
+        tableInstance.current.destroy()
+        tableInstance.current = null
+      }
+
+      // Format the data for Tabulator
+      const tableData = sampleData.requested_samples.map((sample) => ({
+        ...sample,
+        editable: !requestSent,
+      }))
+
+      // Create the Tabulator instance
+      tableInstance.current = new Tabulator(tableRef.current, {
+        data: tableData,
+        layout: "fitColumns",
+        columns: [
+          { title: "Sample Standard", field: "name", headerSort: true },
+          {
+            title: "Standard Code",
+            field: "standerd_code",
+            editor: "input",
+            editable: (cell) => cell.getData().editable,
+          },
+          {
+            title: "Net weight (g)",
+            field: "net_weight",
+            editor: "number",
+            editable: (cell) => cell.getData().editable,
+          },
+          {
+            title: "Reference",
+            field: "reference",
+            editor: "input",
+            editable: (cell) => cell.getData().editable,
+          },
+          { title: "Stores stat", field: "store_stat" },
+          {
+            title: "Action",
+            field: "action",
+            formatter: (cell) => {
+              const container = document.createElement("div")
+              const root = createRoot(container)
+              const rowData = cell.getRow().getData()
+
+              root.render(
+                <Button
+                  size="sm"
+                  variant="default"
+                  disabled={requestSent || rowData?.store_stat === "Requesting"}
+                  onClick={() => {
+                    console.log("Clicked Button " + rowData.id);
+                    console.log("Clicked Button " + rowData.name);
+                    console.log("Clicked Button " + rowData);
+                    setSelectedSampleId(rowData.name)
+                    setShowConfirmDialog(true)
+                  }}
+                >
+                  Send request 
+                </Button>,
+              )
+
+              return container
+            },
+          },
+        ],
+        footerElement: `<div class="tabulator-footer">
+        <div class="tabulator-footer-contents">
+          <div class="tabulator-calcs-holder"></div>
+          <div class="total-weight">
+            <strong>Total Weight:</strong> ${calculateTotalWeight()} g
+          </div>
+        </div>
+      </div>`,
+      })
+    }
+
+    return () => {
+      if (tableInstance.current) {
+        tableInstance.current.destroy()
+        tableInstance.current = null
+      }
+    }
+  }, [sampleData, requestSent, activeTab]) // Add activeTab as a dependency
+
+  // Calculate total weight of requested samples
+  function calculateTotalWeight() {
+    if (!sampleData?.requested_samples) return 0
+    return sampleData.requested_samples.reduce((sum, sample) => sum + sample.net_weight, 0)
+  }
+
+  // Handle sending request to stores
+  const handleSendRequest = (sampleId: string) => {
+    console.log(sampleId);
+    if (!sampleData) return
+
+    // Update the sample status
+    const updatedSamples = sampleData.requested_samples.map((sample) => {
+      if (sample.name === sampleId) {
+        return { ...sample, store_stat: "Requesting" }
+      }
+      return sample
+    })
+
+    // Update the sample data
+    setSampleData({
+      ...sampleData,
+      requested_samples: updatedSamples,
+    })
+
+    // Update the table data
+    if (tableInstance.current) {
+      tableInstance.current.updateData(
+        updatedSamples.map((sample) => ({
+          ...sample,
+          editable: sample.name === sampleId ? false : !requestSent,
+        })),
+      )
+    }
+
+    console.log(`Request sent for sample ID: ${sampleId}`)
+
+    // Show success toast
+    toast({
+      variant:"success",
+      title: "Request Sent",
+      description: "Your request has been sent to stores successfully.",
+      duration: 3000,
+    })
+  }
+
+  if (loading || !sampleData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -174,41 +297,32 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
     )
   }
 
-  // Default tracking stages if not provided
-  const trackingStages = rowData.tracking_stages || {
-    handover_to_courier: { date: "02/21/2025", completed: true },
-    package_to_collection: { date: "02/22/2025", completed: true },
-    package_shipped: { date: "02/23/2025", completed: true },
-    package_arrived: { date: "03/02/2025", completed: false },
-    picked_by_clearance: { date: "03/04/2025", completed: false },
-  }
-
   // Convert tracking stages to stepper format
   const trackingSteps = [
     {
       title: "Handover to Courier service",
-      description: trackingStages.handover_to_courier.date,
-      completed: trackingStages.handover_to_courier.completed,
+      description: sampleData.tracking_stages.handover_to_courier.date,
+      completed: sampleData.tracking_stages.handover_to_courier.completed,
     },
     {
       title: "Package Handover to Collecting center",
-      description: trackingStages.package_to_collection.date,
-      completed: trackingStages.package_to_collection.completed,
+      description: sampleData.tracking_stages.package_to_collection.date,
+      completed: sampleData.tracking_stages.package_to_collection.completed,
     },
     {
       title: "Package shipped",
-      description: trackingStages.package_shipped.date,
-      completed: trackingStages.package_shipped.completed,
+      description: sampleData.tracking_stages.package_shipped.date,
+      completed: sampleData.tracking_stages.package_shipped.completed,
     },
     {
       title: "Package Arrived to destination airport",
-      description: trackingStages.package_arrived.date,
-      completed: trackingStages.package_arrived.completed,
+      description: sampleData.tracking_stages.package_arrived.date,
+      completed: sampleData.tracking_stages.package_arrived.completed,
     },
     {
       title: "Picked by Clearance company",
-      description: trackingStages.picked_by_clearance.date,
-      completed: trackingStages.picked_by_clearance.completed,
+      description: sampleData.tracking_stages.picked_by_clearance.date,
+      completed: sampleData.tracking_stages.picked_by_clearance.completed,
     },
   ]
 
@@ -227,19 +341,22 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
 
   const handleSave = async () => {
     try {
-      // Update the rowData with the current values
+      // Update the sampleData with the current values
       const updatedData = {
-        ...rowData,
-        courier_service: courierService,
-        storage_area: storageArea,
+        ...sampleData,
+        courier_service: {
+          ...sampleData.courier_service,
+          name: courierService,
+        },
+        sample_storing_area: storageArea,
         tracking_number: trackingNumber,
         status: currentStatus,
       }
 
       // In a real app, you would save this data to your API
-      // await axios.put(`https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`, updatedData);
+      await axios.put(`https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`, updatedData);
 
-      alert("Changes saved successfully")
+     alert("Changes saved successfully")
       router.push("/")
     } catch (error) {
       console.error("Error saving data:", error)
@@ -248,7 +365,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-6xl">
+    <div className=" mx-auto py-6 max-w-full">
       <div className="mb-6">
         <Button variant="outline" onClick={() => router.push("/sample")} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
@@ -299,19 +416,27 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
             <div className="space-y-4">
               <div>
                 <Label>Create Date:</Label>
-                <span className="ml-2">{rowData.creationdate}</span>
+                <span className="ml-2">{sampleData.creationdate}</span>
               </div>
               <div>
                 <Label>Reference Number:</Label>
-                <span className="ml-2">{rowData.reference}</span>
+                <span className="ml-2">{sampleData.reference}</span>
               </div>
               <div>
                 <Label>Customer Name:</Label>
-                <span className="ml-2">{clients.find((c) => c.id === rowData.customer)?.name || rowData.customer}</span>
+                <span className="ml-2">{sampleData.customer.name}</span>
               </div>
               <div>
                 <Label>Customer Address:</Label>
-                <div className="mt-1 text-sm text-gray-600">{rowData.customer_address}</div>
+                <div className="mt-1 text-sm text-gray-600">{sampleData.customer.address}</div>
+              </div>
+              <div>
+                <Label>Customer Country:</Label>
+                <div className="mt-1">{sampleData.customer.country}</div>
+              </div>
+              <div>
+                <Label>Trader:</Label>
+                <div className="mt-1">{sampleData.trader}</div>
               </div>
             </div>
 
@@ -324,7 +449,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                   </SelectTrigger>
                   <SelectContent>
                     {courierServices.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
+                      <SelectItem key={service.id} value={service.name}>
                         {service.name}
                       </SelectItem>
                     ))}
@@ -339,16 +464,12 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                   </SelectTrigger>
                   <SelectContent>
                     {storageAreas.map((area) => (
-                      <SelectItem key={area.id} value={area.id}>
-                        {area.name}
+                      <SelectItem key={area} value={area}>
+                        {area}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label>Customer Country:</Label>
-                <div className="mt-1">{rowData.customer_country}</div>
               </div>
               <div>
                 <Label htmlFor="tracking-number">Tracking (AWB) Number:</Label>
@@ -359,10 +480,15 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                   className="mt-1"
                 />
               </div>
+              <div>
+                <Label>Courier Charges:</Label>
+                <div className="mt-1">{sampleData.courier_service.charges} LKR</div>
+              </div>
             </div>
           </div>
 
-          <Tabs defaultValue="inquiry" className="w-full">
+          {/* Modify the Tabs component to track tab changes */}
+          <Tabs defaultValue="inquiry" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="inquiry">Sample Details</TabsTrigger>
               <TabsTrigger value="tracking">Tracking Summary</TabsTrigger>
@@ -370,41 +496,8 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
 
             <TabsContent value="inquiry" className="border rounded-md p-4 mt-2">
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border p-2 text-left w-10"></th>
-                      <th className="border p-2 text-left">Sample Standard</th>
-                      <th className="border p-2 text-left">Standard Code</th>
-                      <th className="border p-2 text-left">Net weight (g)</th>
-                      <th className="border p-2 text-left">Reference</th>
-                      <th className="border p-2 text-left">Stores stat</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teaStandards.slice(0, 3).map((standard, index) => (
-                      <tr key={standard.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                        <td className="border p-2">
-                          <input type="checkbox" className="rounded" />
-                        </td>
-                        <td className="border p-2">{standard.name}</td>
-                        <td className="border p-2">{standard.code}</td>
-                        <td className="border p-2">{standard.weight}</td>
-                        <td className="border p-2">{standard.reference}</td>
-                        <td className="border p-2">{standard.status}</td>
-                      </tr>
-                    ))}
-                    <tr>
-                      <td className="border p-2" colSpan={2}></td>
-                      <td className="border p-2 font-bold">Total Weight</td>
-                      <td className="border p-2">350</td>
-                      <td className="border p-2" colSpan={2}></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="flex justify-end mt-4">
-                <Button>Send request to stores</Button>
+                {/* Tabulator table */}
+                <div ref={tableRef} className="w-full"></div>
               </div>
             </TabsContent>
 
@@ -412,15 +505,15 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
               <div className="space-y-4">
                 <div>
                   <Label>Date of Handover:</Label>
-                  <span className="ml-2">{rowData.handover_date || "02/21/2025"}</span>
+                  <span className="ml-2">{sampleData.tracking_stages.handover_to_courier.date}</span>
                 </div>
                 <div>
                   <Label>Estimated Delivery date:</Label>
-                  <span className="ml-2">{rowData.estimated_delivery || "15/03/2025"}</span>
+                  <span className="ml-2">{sampleData.ed}</span>
                 </div>
                 <div>
                   <Label>Courier charges for inquiry:</Label>
-                  <span className="ml-2">{rowData.courier_charges || "xxx.xx LKR"}</span>
+                  <span className="ml-2">{sampleData.courier_service.charges} LKR</span>
                 </div>
 
                 <div className="mt-8 px-4">
@@ -431,6 +524,33 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
           </Tabs>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send Request to Stores</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to send this request to stores? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                console.log("selecteed" + selectedSampleId);
+                console.log(selectedSampleId);
+                if (selectedSampleId) {
+                  handleSendRequest(selectedSampleId)
+                  setSelectedSampleId(null)
+                }
+              }}
+            >
+              Sure
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -217,7 +217,6 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
     const requestedSamples: RequestedSample[] = teaStandards
     .filter(ts => selectedSamples.includes(ts.id))
     .map(ts => ({
-      id: ts.id,
       name: ts.name,
       standerd_code: ts.standerd_code,
       net_weight: ts.net_weight,
@@ -238,7 +237,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
       country: clientCountry,
     },
     status: "Draft",
-    requested_samples: [],
+    requested_samples: requestedSamples,
     courier_service: {
       name: "",
       charges: 0
@@ -271,49 +270,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
 
   })
 
-    // const newOne : Sample = {
-    //   id: length + 1,
-    //   reference: `SI-25-${String(length + 1).padStart(3, "0")}`,
-    //   creationdate:creationDateISO,
-    //   ed: "FulFill Anothers",
-    //   customer: {
-    //     name: selectedClientObj?.name || "",
-    //     address: clientAddress,
-    //     country: clientCountry,
-    //   },
-    //   status: "Draft",
-    //   requested_samples: selectedSamples,
-    //   courier_service: {
-    //     name: "",
-    //     charges: 0
-    //   },
-    //   sample_storing_area: "",
-    //   trader:selectedTraderObj?.name || "",
-    //   tracking_number: "",
-    //   tracking_stages: {
-    //     handover_to_courier: { 
-    //       date: "", 
-    //       completed: false 
-    //     },
-    //     package_to_collection: { 
-    //       date: "", 
-    //       completed: false 
-    //     },
-    //     package_shipped: { 
-    //       date: "", 
-    //       completed: false 
-    //     },
-    //     package_arrived: { 
-    //       date: "", 
-    //       completed: false 
-    //     },
-    //     picked_by_clearance: { 
-    //       date: "", 
-    //       completed: false 
-    //     }
-    // },
-
-    // }
+    
 
     
   }, [selectedClient, selectedTrader,clients, traders , clientAddress, clientCountry, selectedSamples, length, creationDate])
@@ -337,7 +294,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
     setSelectedSamples((prev) => prev.filter((id) => id !== sampleId));
   };
 
-  const submithandle = async (): Promise<void> => {
+  const submithandle = async (): Promise<void> => { 
     try {
       const response = await axios.post<RowData>(
         "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata",
@@ -598,7 +555,7 @@ export default function SampleTracking() {
             hozAlign: "left",
             formatter: (cell) => {
               const customerName = cell.getValue();
-              const client = clients.find(c => c.name === customerName);
+              const client = tabledata.find(c => c.customer.name === customerName);
               return client ? customerName : "Unknown Client";
             },
           },
