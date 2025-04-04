@@ -26,7 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { createBrowserClient } from '@/utils/supabase'
 import { motion } from 'framer-motion'
 import ThemeToggle from './ThemeToggle'
-import SampleTracking from './SampleTracking'
+import SampleTracking from './SampleTracking/SampleTracking'
 
 const Sidebar: React.FC<{
   onSnowfallToggle: (enabled: boolean) => void

@@ -1,5 +1,5 @@
 import React from 'react'
-import SampleTracking from '@/components/SampleTracking'
+import SampleTracking from '@/components/SampleTracking/SampleTracking'
 
 
 function page() {

@@ -16,6 +16,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useRouter } from "next/navigation"
 import type { RowComponent } from "tabulator-tables"
 import axios from "axios"
+import { api } from '@/lib/api';
+import { Sample } from '@/app/types/sample';
+import { RequestedSample } from "@/app/types/sample"
 
 // Mock client data - in a real app, this would come from your API or database
 const clients = [
@@ -49,33 +52,86 @@ const traders = [
 // Mock tea standards
 const teaStandards = [
   {
-    id: "tea1",
-    name: "Black Tea Standard",
-    code: "STD 9733 & 9734 SITHAKA TYPE",
-    weight: 100,
-    reference: "-",
-    status: "Requested",
+    id: "1",
+    name: "Chai Tea Srilanka",
+    standerd_code: "ahj_jk_005_al",
+    net_weight: 200,
+    reference: "Get A packing Most Important Sheet",
+    store_stat: "Pending"
   },
   {
-    id: "tea2",
-    name: "Green Tea Standard",
-    code: "STD 9733 & 9740 CEYLON FBOP",
-    weight: 150,
-    reference: "Seal pack",
-    status: "Pending",
+    id: "2",
+    name: "Herbal Tea Standard",
+    standerd_code: "Sdl_Al_0114A_lk",
+    net_weight: 100,
+    reference: "Get A packing Most Important Sheet",
+    store_stat: "Pending"
   },
   {
-    id: "tea3",
-    name: "Oolong Tea Standard",
-    code: "STD 9735 & 9736 NE FBOP",
-    weight: 100,
-    reference: "-",
-    status: "Received",
+    id: "3",
+    name: "White Tea Standard",
+    standerd_code: "Sdl_Al_0114A_lk",
+    net_weight: 300,
+    reference: "Get A packing Most Important Sheet",
+    store_stat: "Pending"
   },
-  { id: "tea4", name: "White Tea Standard", code: "STD 9737", weight: 80, reference: "-", status: "Requested" },
-  { id: "tea5", name: "Herbal Tea Standard", code: "STD 9738", weight: 120, reference: "-", status: "Pending" },
-  { id: "tea6", name: "Chai Tea Standard", code: "STD 9739", weight: 90, reference: "-", status: "Received" },
-]
+  {
+    id: "4",
+    name: "Oolong Tea Premium",
+    standerd_code: "ool_tea_0123_lk",
+    net_weight: 250,
+    reference: "Premium Quality Oolong",
+    store_stat: "Pending"
+  },
+  {
+    id: "5",
+    name: "Black Tea Classic",
+    standerd_code: "blk_tea_0789_lk",
+    net_weight: 150,
+    reference: "Fine Blend Black Tea",
+    store_stat: "Pending"
+  },
+  {
+    id: "6",
+    name: "Chamomile Herbal Tea",
+    standerd_code: "chm_te_0912_lk",
+    net_weight: 180,
+    reference: "Relaxing Herbal Chamomile",
+    store_stat: "Pending"
+  },
+  {
+    id: "7",
+    name: "Peppermint Tea",
+    standerd_code: "pep_te_0345_lk",
+    net_weight: 220,
+    reference: "Minty Fresh Peppermint",
+    store_stat: "Pending"
+  },
+  {
+    id: "8",
+    name: "Golden Tip Tea",
+    standerd_code: "gold_tea_0567_lk",
+    net_weight: 275,
+    reference: "Luxury Golden Tip Tea",
+    store_stat: "Pending"
+  },
+  {
+    id: "9",
+    name: "Organic Green Tea",
+    standerd_code: "org_tea_0678_lk",
+    net_weight: 320,
+    reference: "100% Organic Green Tea",
+    store_stat: "Pending"
+  },
+  {
+    id: "10",
+    name: "Darjeeling First Flush",
+    standerd_code: "dar_tea_0890_lk",
+    net_weight: 350,
+    reference: "Premium Darjeeling First Flush",
+    store_stat: "Pending"
+  }
+];
 
 interface RowData {
   id: number
@@ -103,6 +159,40 @@ interface RowData {
   }
 }
 
+interface inquiry_sample {
+  id: number
+  reference: string
+  creationdate: string
+  ed: string
+  customer: {
+    name: string
+    address: string
+    country: string
+  }
+  trader: string
+  requested_samples: {
+    name: string
+    standerd_code: string
+    net_weight: number
+    reference: string
+    store_stat: string
+  }[]
+  courier_service: {
+    name: string
+    charges: number
+  }
+  sample_storing_aria: string
+  tracking_number: string
+  tracking_stages?: {
+    handover_to_courier: { date: string; completed: boolean }
+    package_to_collection: { date: string; completed: boolean }
+    package_shipped: { date: string; completed: boolean }
+    package_arrived: { date: string; completed: boolean }
+    picked_by_clearance: { date: string; completed: boolean }
+  }
+
+}
+
 interface NewSampleDialogProps {
   length: number
 }
@@ -114,34 +204,119 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
   const [clientAddress, setClientAddress] = useState<string>("")
   const [clientCountry, setClientCountry] = useState<string>("")
   const [selectedSamples, setSelectedSamples] = useState<string[]>([])
-  const [newSample, setNewSample] = useState<any>({
-    id: length + 1,
-    reference: `SI-25-${String(length + 1).padStart(3, "0")}`,
-    creationdate: format(creationDate, "dd/MM/yyyy"),
-    ed: "15/03/2025",
-    customer: selectedClient,
-    trader: selectedTrader,
-    customer_address: clientAddress,
-    customer_country: clientCountry,
-    selected_Samples: selectedSamples,
-    status: "Draft",
-  })
+
+  const [newSample, setNewSample] = useState<Sample>()
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const newOne = {
-      id: length + 1,
-      reference: `SI-25-${String(length + 1).padStart(3, "0")}`,
-      creationdate: format(creationDate, "dd/MM/yyyy"),
-      ed: "15/03/2025",
-      customer: selectedClient,
-      trader: selectedTrader,
-      customer_address: clientAddress,
-      customer_country: clientCountry,
-      selected_Samples: selectedSamples,
-      status: "Draft",
-    }
-    setNewSample(newOne)
-  }, [selectedClient, selectedTrader, clientAddress, clientCountry, selectedSamples, length, creationDate])
+    // Find full client and trader objects based on selected IDs
+    const selectedClientObj = clients.find(c => c.id === selectedClient);
+    const selectedTraderObj = traders.find(t => t.id === selectedTrader);
+
+    // Map selected sample IDs to full RequestedSample objects
+    const requestedSamples: RequestedSample[] = teaStandards
+    .filter(ts => selectedSamples.includes(ts.id))
+    .map(ts => ({
+      id: ts.id,
+      name: ts.name,
+      standerd_code: ts.standerd_code,
+      net_weight: ts.net_weight,
+      reference: ts.reference,
+      store_stat: ts.store_stat
+    }));
+
+  // Create ISO date strings (recommended format)
+  const creationDateISO = creationDate.toISOString().split("T")[0];
+  setNewSample( {
+    id: (length + 1).toString() ,
+    reference: `SI-25-${String(length + 1).padStart(3, "0")}`,
+    creationdate:creationDateISO,
+    ed:"Waiting...",
+    customer: {
+      name: selectedClientObj?.name || "",
+      address: clientAddress,
+      country: clientCountry,
+    },
+    status: "Draft",
+    requested_samples: [],
+    courier_service: {
+      name: "",
+      charges: 0
+    },
+    sample_storing_area: "",
+    trader:selectedTraderObj?.name || "",
+    tracking_number: "",
+    tracking_stages: {
+      handover_to_courier: { 
+        date: "", 
+        completed: false 
+      },
+      package_to_collection: { 
+        date: "", 
+        completed: false 
+      },
+      package_shipped: { 
+        date: "", 
+        completed: false 
+      },
+      package_arrived: { 
+        date: "", 
+        completed: false 
+      },
+      picked_by_clearance: { 
+        date: "", 
+        completed: false 
+      }
+  },
+
+  })
+
+    // const newOne : Sample = {
+    //   id: length + 1,
+    //   reference: `SI-25-${String(length + 1).padStart(3, "0")}`,
+    //   creationdate:creationDateISO,
+    //   ed: "FulFill Anothers",
+    //   customer: {
+    //     name: selectedClientObj?.name || "",
+    //     address: clientAddress,
+    //     country: clientCountry,
+    //   },
+    //   status: "Draft",
+    //   requested_samples: selectedSamples,
+    //   courier_service: {
+    //     name: "",
+    //     charges: 0
+    //   },
+    //   sample_storing_area: "",
+    //   trader:selectedTraderObj?.name || "",
+    //   tracking_number: "",
+    //   tracking_stages: {
+    //     handover_to_courier: { 
+    //       date: "", 
+    //       completed: false 
+    //     },
+    //     package_to_collection: { 
+    //       date: "", 
+    //       completed: false 
+    //     },
+    //     package_shipped: { 
+    //       date: "", 
+    //       completed: false 
+    //     },
+    //     package_arrived: { 
+    //       date: "", 
+    //       completed: false 
+    //     },
+    //     picked_by_clearance: { 
+    //       date: "", 
+    //       completed: false 
+    //     }
+    // },
+
+    // }
+
+    
+  }, [selectedClient, selectedTrader,clients, traders , clientAddress, clientCountry, selectedSamples, length, creationDate])
 
   // Update client details when a client is selected
   useEffect(() => {
@@ -159,8 +334,8 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
 
   // Remove a selected sample
   const removeSample = (sampleId: string) => {
-    setSelectedSamples((prev) => prev.filter((id) => id !== sampleId))
-  }
+    setSelectedSamples((prev) => prev.filter((id) => id !== sampleId));
+  };
 
   const submithandle = async (): Promise<void> => {
     try {
@@ -176,9 +351,9 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>New</Button>
+        <Button onClick={() => setOpen(true)}>New</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto flex flex-col justify-start items-start">
         <div className="w-full flex justify-between items-center mb-4">
@@ -189,6 +364,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
           onSubmit={(e) => {
             e.preventDefault()
             submithandle()
+            setOpen(false);
           }}
         >
           <Card className="w-full max-w-4xl mx-auto">
@@ -267,24 +443,36 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
                 <div className="flex flex-wrap gap-2 mb-2">
                   {selectedSamples.length > 0 ? (
                     selectedSamples.map((sampleId) => {
-                      const sample = teaStandards.find((s) => s.id === sampleId)
+                      const sample = teaStandards.find((s) => s.id === sampleId);
                       return sample ? (
-                        <Badge key={sampleId} variant="secondary" className="flex items-center gap-1">
-                          {sample.name}
-                          <X className="h-3 w-3 cursor-pointer" onClick={() => removeSample(sampleId)} />
+                        <Badge
+                          key={sample.id}
+                          variant="secondary"
+                          className="flex items-center gap-1 pr-2"
+                        >
+                          <span className="max-w-[200px] truncate">{sample.name}</span>
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeSample(sample.id);
+                            }}
+                          />
                         </Badge>
-                      ) : null
+                      ) : null;
                     })
                   ) : (
-                    <div className="text-muted-foreground text-sm">No samples selected</div>
+                    <div className="text-muted-foreground text-sm">
+                      No samples selected yet
+                    </div>
                   )}
                 </div>
 
                 {/* Multi-select dropdown */}
                 <Select
-                  onValueChange={(value) => {
+                  onValueChange={(value: string) => {
                     if (!selectedSamples.includes(value)) {
-                      setSelectedSamples((prev) => [...prev, value])
+                      setSelectedSamples((prev) => [...prev, value]);
                     }
                   }}
                 >
@@ -298,7 +486,12 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
                         value={standard.id}
                         disabled={selectedSamples.includes(standard.id)}
                       >
-                        {standard.name}
+                        <div className="flex justify-between items-center w-full">
+                          <span>{standard.name}</span>
+                          <span className="text-muted-foreground text-sm">
+                            {standard.standerd_code}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -359,15 +552,15 @@ const StatusBadge = ({ status }: { status: StatusType["status"] }) => {
 // tracking list function
 export default function SampleTracking() {
   const router = useRouter()
-  const [tabledata, setTabledata] = useState<RowData[]>([])
+  const [tabledata, setTabledata] = useState<Sample[]>([])
   const tableRef = useRef<HTMLDivElement | null>(null) // Reference to table div
   const tableInstance = useRef<Tabulator | null>(null) // Reference to Tabulator instance
 
   // Function to handle row click and navigate to details page
   const handleRowClick = (row: RowComponent) => {
     console.log("Row clicked:", row.getData())
-    const rowData = row.getData() as RowData
-    router.push(`/sample/${rowData.id}`)
+    const sampleData = row.getData() as Sample
+    router.push(`/sample/${sampleData.id}`)
   }
 
   //   fetch data for the Table
@@ -376,52 +569,16 @@ export default function SampleTracking() {
       const response = await axios.get("https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata")
       console.log(response.data)
       setTabledata(response.data) // Set the fetched data in state
+      console.log(tabledata);
     } catch (error) {
       console.error("Error fetching data:", error) // Handle errors
       // Fallback to mock data if API fails
-      setTabledata([
-        {
-          id: 1,
-          reference: "SI-25-001",
-          creationdate: "21/02/2025",
-          ed: "15/03/2025",
-          customer: "client1",
-          trader: "trader1",
-          customer_address: "123 Business Ave, Suite 100, Business District",
-          customer_country: "United States",
-          selected_Samples: ["tea1", "tea2"],
-          status: "Draft",
-        },
-        {
-          id: 2,
-          reference: "SI-25-002",
-          creationdate: "22/02/2025",
-          ed: "20/03/2025",
-          customer: "client2",
-          trader: "trader2",
-          customer_address: "456 Commerce St, Tower B, Financial Center",
-          customer_country: "United Kingdom",
-          selected_Samples: ["tea3"],
-          status: "Sent",
-        },
-        {
-          id: 3,
-          reference: "SI-25-003",
-          creationdate: "23/02/2025",
-          ed: "25/03/2025",
-          customer: "client3",
-          trader: "trader3",
-          customer_address: "789 Harbor Blvd, Warehouse 5, Port Area",
-          customer_country: "Japan",
-          selected_Samples: ["tea4", "tea5", "tea6"],
-          status: "Done",
-        },
-      ])
     }
   }
 
   // adding data on Table
   useEffect(() => {
+    console.log("table data :   =>  "+tabledata)
     if (tableRef.current && !tableInstance.current) {
       tableInstance.current = new Tabulator(tableRef.current, {
         height: "auto",
@@ -436,13 +593,13 @@ export default function SampleTracking() {
           { title: "Expected Delivery", field: "ed" },
           {
             title: "Customer",
-            field: "customer",
+            field: "customer.name",
             sorter: "string",
             hozAlign: "left",
             formatter: (cell) => {
-              const customerId = cell.getValue()
-              const customer = clients.find((c) => c.id === customerId)
-              return customer ? customer.name : customerId
+              const customerName = cell.getValue();
+              const client = clients.find(c => c.name === customerName);
+              return client ? customerName : "Unknown Client";
             },
           },
           {
@@ -471,7 +628,7 @@ export default function SampleTracking() {
       // Add row click event listener after table is initialized
       tableInstance.current.on("rowClick", (e, row) => {
         console.log("Row clicked:", row.getData())
-        const rowData = row.getData() as RowData
+        const rowData = row.getData() as Sample
         router.push(`/sample/${rowData.id}`)
       })
     }
@@ -499,7 +656,7 @@ export default function SampleTracking() {
       <div className="flex justify-between items-center">
         {/* Add button and topic section */}
         <div className="flex justify-center items-center gap-7">
-          <NewSampleDialog length={tabledata?.length || 0} />
+          <NewSampleDialog   length={tabledata?.length || 0} />
           <h1 className="font-bold">Samples</h1>
         </div>
         {/* Search bar */}
