@@ -19,6 +19,8 @@ import axios from "axios"
 import { api } from '@/lib/api';
 import { Sample } from '@/app/types/sample';
 import { RequestedSample } from "@/app/types/sample"
+import { useToast } from "../ui/use-toast"
+import { Toast, Toast as toast } from "@/components/ui/toast"
 
 // Mock client data - in a real app, this would come from your API or database
 const clients = [
@@ -195,9 +197,11 @@ interface inquiry_sample {
 
 interface NewSampleDialogProps {
   length: number
+  onSuccess: () => void
 }
 
-const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
+const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length,onSuccess }) => {
+  const { toast } = useToast()
   const [creationDate] = useState<Date>(new Date())
   const [selectedClient, setSelectedClient] = useState<string>("")
   const [selectedTrader, setSelectedTrader] = useState<string>("")
@@ -301,9 +305,23 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length }) => {
         newSample,
       )
       console.log("Data successfully posted:", response.data)
-      alert("Successfully submitted")
+
+      // Show success toast
+    toast({
+      variant:"success",
+      title: "Successfully Submit Inquary",
+      description: "Your New Inquery has been save to successfully.",
+      duration: 3000,
+    })
+    onSuccess();
     } catch (error) {
       console.error("Error posting data:", error)
+      toast({
+        variant:"destructive",
+        title: "Unsuccessfull",
+        description: "Your New Inquery Unsuccessfully.",
+        duration: 3000,
+      })
     }
   }
 
@@ -482,6 +500,8 @@ const StatusBadge = ({ status }: { status: StatusType["status"] }) => {
         return "bg-gray-200 text-gray-800"
       case "done":
         return "bg-green-100 text-green-800"
+      case "cancel" :
+        return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -613,7 +633,10 @@ export default function SampleTracking() {
       <div className="flex justify-between items-center">
         {/* Add button and topic section */}
         <div className="flex justify-center items-center gap-7">
-          <NewSampleDialog   length={tabledata?.length || 0} />
+          <NewSampleDialog   
+          length={tabledata?.length || 0} 
+          onSuccess={fetchData}
+          />
           <h1 className="font-bold">Samples</h1>
         </div>
         {/* Search bar */}

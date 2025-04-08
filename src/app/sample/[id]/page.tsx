@@ -15,7 +15,6 @@ import { TabulatorFull as Tabulator } from "tabulator-tables"
 import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
 import { createRoot } from "react-dom/client"
 import { useToast } from "@/components/ui/use-toast"
-import { Toast, Toast as toast } from "@/components/ui/toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +25,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+
+import type { StoreSample } from "@/app/types/store_sample"
 
 // Mock courier services
 const courierServices = [
@@ -50,108 +51,98 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
   const [currentStatus, setCurrentStatus] = useState("Draft")
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null)
+  const [selectedSampleData, setSelectedSampleData] = useState<any>(null)
   const [requestSent, setRequestSent] = useState(false)
+  const [resivedSample, setResivedSample] = useState<StoreSample | any>();
+
+  const [storeLength, setStoreLength] = useState<number>();
   // Add a new state to track the active tab
   const [activeTab, setActiveTab] = useState("inquiry")
+  const [updatedStatus, setUpdatedStatus] = useState("")
+  const [apiUpdating, setApiUpdating] = useState(false)
 
   const tableRef = useRef<HTMLDivElement | null>(null)
   const tableInstance = useRef<Tabulator | null>(null)
 
   // Fetch the sample data
+  const fetchSampleData = async () => {
+    try {
+      setLoading(true)
+      console.log(`Attempting to fetch data for sample ID: ${params.id}`)
+
+      // Try to fetch from the API - note the endpoint has changed to match your code
+      const response = await axios.get(
+        `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id=${params.id}`,
+      )
+
+      // Check if we got an array or a single object
+      const data = Array.isArray(response.data) ? response.data[0] : response.data
+
+      console.log("API response:", data)
+
+      setSampleData(data)
+      setCourierService(data.courier_service?.name || "")
+      setStorageArea(data.sample_storing_area || "")
+      setTrackingNumber(data.tracking_number || "")
+      setCurrentStatus(data.status || "Draft")
+    } catch (error) {
+      console.error("Error fetching sample data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const fetchSampleData = async () => {
-      try {
-        setLoading(true)
-        console.log(`Attempting to fetch data for sample ID: ${params.id}`)
+    fetchSampleData()
+  }, [])
 
-        // Try to fetch from the API - note the endpoint has changed to match your code
-        const response = await axios.get(
-          `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id=${params.id}`,
-        )
+  const changeStatus = async (sampleName: string) => {
+    const response2 = await axios.get(
+      `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id=${params.id}`,
+    )
+    console.log(response2.data)
 
-        // Check if we got an array or a single object
-        const data = Array.isArray(response.data) ? response.data[0] : response.data
-
-        console.log("API response:", data)
-
-        setSampleData(data)
-        setCourierService(data.courier_service?.name || "")
-        setStorageArea(data.sample_storing_area || "")
-        setTrackingNumber( data.tracking_number || "")
-        setCurrentStatus(data.status || "Draft")
-      } catch (error) {
-        console.error("Error fetching sample data:", error)
-        console.log("Falling back to mock data")
-
-        // Create mock data with the new structure
-        const mockData: Sample = {
-          id: params.id,
-          reference: `SI-ERM-${params.id.padStart(3, "0")}`,
-          creationdate: "2024/12/01",
-          ed: "2025/01/02",
-          customer: {
-            name: "Sigath",
-            address: "No 1, Colombo",
-            country: "Sri Lanka",
-          },
-          trader: "Jhonethon",
-          status: "Draft",
-          requested_samples: [
-            {
-              
-              name: "Chai Tea Srilanka",
-              standerd_code: "ahj_jk_005_al",
-              net_weight: 200,
-              reference: "Get A packing Most Important Sheet",
-              store_stat: "Pending",
-            },
-            {
-             
-              name: "Herbal Tea Standard",
-              standerd_code: "Sdl_Al_0114A_lk",
-              net_weight: 100,
-              reference: "Get A packing Most Important Sheet",
-              store_stat: "Pending",
-            },
-            {
-          
-              name: "White Tea Standard",
-              standerd_code: "Sdl_Al_0114A_lk",
-              net_weight: 300,
-              reference: "Get A packing Most Important Sheet",
-              store_stat: "Pending",
-            },
-          ],
-          courier_service: {
-            name: "FedEx",
-            charges: 2500,
-          },
-          sample_storing_area: "Tea Room",
-          tracking_number: "Tra001",
-          tracking_stages: {
-            handover_to_courier: { date: "2025-04-01", completed: true },
-            package_to_collection: { date: "2025-04-02", completed: true },
-            package_shipped: { date: "2025-04-03", completed: true },
-            package_arrived: { date: "2025-04-04", completed: false },
-            picked_by_clearance: { date: "2025-04-05", completed: false },
-          },
-        }
-
-        setSampleData(mockData)
-        setCourierService(mockData.courier_service?.name || "")
-        setStorageArea(mockData.sample_storing_area || "")
-        setTrackingNumber( mockData.tracking_number || "")
-        setCurrentStatus(mockData.status || "Draft")
-      } finally {
-        setLoading(false)
+    const updatedSampleData = response2.data[0];
+    console.log(updatedSampleData);
+    console.log(response2.data.requested_samples?.length)
+    for(let i = 0 ; i< updatedSampleData.requested_samples?.length ; i++){
+      if (updatedSampleData.requested_samples[i].name === sampleName) {
+        updatedSampleData.requested_samples[i].store_stat = "Recieved"
       }
     }
+    console.log(updatedSampleData);
 
-    fetchSampleData()
-  }, [params.id])
+    // Send the updated data to the API
+    const response = await axios.put(
+      `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
+      updatedSampleData)
+
+      fetchSampleData(); 
+  }
+
+  useEffect(() => {
+    const fetchStoreMonitor = async () => {
+      const response = await axios.get("https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample")
+      setStoreLength(response.data.length + 1);
+      let i = 0;
+      for ( i = 0; i < response.data.length; i++) {
+        console.log(response.data[i].status)
+        console.log(response.data[i].sampleId)
+        console.log(params.id);
+        if (response.data[i].status === "Done" && response.data[i].sampleId === params.id) {
+          console.log(response.data[i].requested_sample_name , i);
+          changeStatus(response.data[i].requested_sample_name);
+
+        }
+      }
+
+    }
+
+    fetchStoreMonitor()
+
+  }, [])
 
   // Initialize Tabulator when sampleData is available
-  // Modify the useEffect for Tabulator initialization to respond to tab changes
   useEffect(() => {
     // Only initialize the table if we're on the inquiry tab and have sample data
     if (tableRef.current && sampleData && activeTab === "inquiry") {
@@ -178,18 +169,33 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
             field: "standerd_code",
             editor: "input",
             editable: (cell) => cell.getData().editable,
+            cellEdited: (cell) => {
+              // Get the updated data
+              const data = cell.getData()
+              console.log("Cell edited:", data)
+            },
           },
           {
             title: "Net weight (g)",
             field: "net_weight",
             editor: "number",
             editable: (cell) => cell.getData().editable,
+            cellEdited: (cell) => {
+              // Get the updated data
+              const data = cell.getData()
+              console.log("Cell edited:", data)
+            },
           },
           {
             title: "Reference",
             field: "reference",
             editor: "input",
             editable: (cell) => cell.getData().editable,
+            cellEdited: (cell) => {
+              // Get the updated data
+              const data = cell.getData()
+              console.log("Cell edited:", data)
+            },
           },
           { title: "Stores stat", field: "store_stat" },
           {
@@ -204,16 +210,15 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                 <Button
                   size="sm"
                   variant="default"
-                  disabled={requestSent || rowData?.store_stat === "Requesting"}
+                  disabled={requestSent || rowData?.store_stat === "Requesting" || apiUpdating || rowData?.store_stat === "Recieved" || rowData?.store_stat === "Done"}
                   onClick={() => {
-                    console.log("Clicked Button " + rowData.id);
-                    console.log("Clicked Button " + rowData.name);
-                    console.log("Clicked Button " + rowData);
+                    console.log("Clicked Button " + rowData.name)
                     setSelectedSampleId(rowData.name)
+                    setSelectedSampleData(rowData)
                     setShowConfirmDialog(true)
                   }}
                 >
-                  Send request 
+                  Send request
                 </Button>,
               )
 
@@ -238,7 +243,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
         tableInstance.current = null
       }
     }
-  }, [sampleData, requestSent, activeTab]) // Add activeTab as a dependency
+  }, [sampleData, requestSent, activeTab, apiUpdating]) // Add activeTab as a dependency
 
   // Calculate total weight of requested samples
   function calculateTotalWeight() {
@@ -246,44 +251,119 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
     return sampleData.requested_samples.reduce((sum, sample) => sum + sample.net_weight, 0)
   }
 
+  const postStoreSample = async (obj: any) => {
+    const response2 = await axios.post("https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample", obj);
+  }
+
   // Handle sending request to stores
-  const handleSendRequest = (sampleId: string) => {
-    console.log(sampleId);
-    if (!sampleData) return
+  const handleSendRequest = async (sampleId: string) => {
+    if (!sampleData || !selectedSampleData) return
 
-    // Update the sample status
-    const updatedSamples = sampleData.requested_samples.map((sample) => {
-      if (sample.name === sampleId) {
-        return { ...sample, store_stat: "Requesting" }
+    setApiUpdating(true)
+
+    try {
+      // Get the current table data for the selected sample
+      const currentTableData = tableInstance.current?.getData()
+      const updatedSampleData = currentTableData?.find((item: any) => item.name === sampleId)
+
+      if (!updatedSampleData) {
+        throw new Error("Could not find the selected sample data")
       }
-      return sample
-    })
 
-    // Update the sample data
-    setSampleData({
-      ...sampleData,
-      requested_samples: updatedSamples,
-    })
+      console.log("Updated sample data to send:", updatedSampleData)
 
-    // Update the table data
-    if (tableInstance.current) {
-      tableInstance.current.updateData(
-        updatedSamples.map((sample) => ({
-          ...sample,
-          editable: sample.name === sampleId ? false : !requestSent,
-        })),
+      // Update the sample status
+      const updatedSamples = sampleData.requested_samples.map((sample) => {
+        if (sample.name === sampleId) {
+          return {
+            ...sample,
+            store_stat: "Requesting",
+            // Update with the edited values from the table
+            standerd_code: updatedSampleData.standerd_code,
+            net_weight: updatedSampleData.net_weight,
+            reference: updatedSampleData.reference,
+          }
+        }
+        return sample
+      })
+
+      // Create the updated sample data object
+      const updatedData = {
+        ...sampleData,
+        requested_samples: updatedSamples,
+      }
+
+      // Send the updated data to the API
+      const response = await axios.put(
+        `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
+        updatedData,
       )
+
+
+      console.log("API update response:", response.data)
+
+
+      console.log(storeLength)
+      console.log(updatedData.reference)
+      console.log(updatedData.customer.name)
+      console.log(updatedSampleData.net_weight)
+      console.log(updatedSampleData.standerd_code)
+
+      let obj = {
+        id: `${storeLength}`,
+        reference: updatedData.reference,
+        requestedDate: new Date().toISOString().split('T')[0],
+        trader: updatedData.trader,
+        customer: updatedData.customer.name,
+        quantity: updatedSampleData.net_weight,
+        contractNo: "",
+        blendNo: "",
+        straightLineQuantity: 0,
+        propQuantity: 0,
+        standard: updatedSampleData.standerd_code,
+        requested_sample_name: updatedSampleData.name,
+        status: "Pending",
+        sampleId: updatedData.id
+      }
+      console.log(obj)
+      postStoreSample(obj);
+
+
+      // Update the local state with the response data
+      setSampleData(response.data)
+
+      // Update the table data
+      if (tableInstance.current) {
+        tableInstance.current.updateData(
+          updatedSamples.map((sample) => ({
+            ...sample,
+            editable: sample.name === sampleId ? false : !requestSent,
+          })),
+        )
+      }
+
+      console.log(`Request sent for sample ID: ${sampleId}`)
+
+      // Show success toast
+      toast({
+        variant: "default",
+        title: "Request Sent",
+        description: "Your request has been sent to stores successfully.",
+        duration: 3000,
+      })
+    } catch (error) {
+      console.error("Error updating sample data:", error)
+
+      // Show error toast
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "There was an error sending your request. Please try again.",
+        duration: 3000,
+      })
+    } finally {
+      setApiUpdating(false)
     }
-
-    console.log(`Request sent for sample ID: ${sampleId}`)
-
-    // Show success toast
-    toast({
-      variant:"success",
-      title: "Request Sent",
-      description: "Your request has been sent to stores successfully.",
-      duration: 3000,
-    })
   }
 
   if (loading || !sampleData) {
@@ -326,12 +406,39 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
     },
   ]
 
-  const handleCancel = () => {
+
+
+  const handleCancel = async () => {
     // Only allow cancellation if status is Draft
     if (currentStatus.toLowerCase() === "draft") {
-      // Handle cancellation logic here
-      alert("Sample request cancelled successfully")
-      router.push("/")
+      // Handle cancellation logic
+
+      try {
+        const updatedData = {
+          ...sampleData,
+          status: "Cancel",
+        }
+        const response = await axios.put(
+          `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
+          updatedData,
+        )
+        console.log(response);
+        toast({
+          variant: "default",
+          title: "Successfully Cancelled",
+          description: "Sample request cancelled successfully.",
+          duration: 3000,
+        })
+
+        router.push("/sample")
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Something wrong",
+          description: "Come some errors",
+          duration: 1000,
+        })
+      }
     }
   }
 
@@ -354,13 +461,25 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
       }
 
       // In a real app, you would save this data to your API
-      await axios.put(`https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`, updatedData);
+      const response = await axios.put(
+        `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
+        updatedData,
+      )
 
-     alert("Changes saved successfully")
-      router.push("/")
+      toast({
+        variant: "default",
+        title: "Changes saved successfully",
+        description: "Changes saved successfully Completed.",
+        duration: 3000,
+      })
+      router.push("/sample")
     } catch (error) {
-      console.error("Error saving data:", error)
-      alert("Failed to save changes")
+      toast({
+        variant: "destructive",
+        title: "Failed to save changes",
+        description: "Error :" + error,
+        duration: 3000,
+      })
     }
   }
 
@@ -379,24 +498,36 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
             <div>
               <h2 className="text-xl font-semibold">Sample inquiry management system</h2>
             </div>
+
+            {/* status buttons */}
             <div className="flex space-x-2">
               <Button
+                disabled={currentStatus.toLowerCase() !== "cancel"}
+                variant={currentStatus === "Cancel" ? "default" : "outline"}
+              // onClick={() => handleStatusChange("Cancle")}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={currentStatus.toLowerCase() !== "draft"}
                 variant={currentStatus === "Draft" ? "default" : "outline"}
-                onClick={() => handleStatusChange("Draft")}
+              // onClick={() => handleStatusChange("Draft")}
               >
                 Draft
               </Button>
               <Button
+                disabled={currentStatus.toLowerCase() !== "sent"}
                 variant={currentStatus === "Sent" ? "default" : "outline"}
                 className={currentStatus === "Sent" ? "bg-blue-500" : ""}
-                onClick={() => handleStatusChange("Sent")}
+              // onClick={() => handleStatusChange("Sent")}
               >
                 Sent
               </Button>
               <Button
+                disabled={currentStatus.toLowerCase() !== "done"}
                 variant={currentStatus === "Done" ? "default" : "outline"}
                 className={currentStatus === "Done" ? "bg-green-500" : ""}
-                onClick={() => handleStatusChange("Done")}
+              // onClick={() => handleStatusChange("Done")}
               >
                 Done
               </Button>
@@ -538,8 +669,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                console.log("selecteed" + selectedSampleId);
-                console.log(selectedSampleId);
+                console.log("Selected sample: " + selectedSampleId)
                 if (selectedSampleId) {
                   handleSendRequest(selectedSampleId)
                   setSelectedSampleId(null)

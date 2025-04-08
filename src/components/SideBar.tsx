@@ -15,6 +15,7 @@ import {
   PanelRightOpen,
   IndentDecrease,
   Menu,
+  Store,
   LeafyGreen,
   TestTubes
 } from 'lucide-react'
@@ -79,6 +80,11 @@ const Sidebar: React.FC<{
       name: 'Sample',
       icon: <TestTubes />,
       route: '/sample',
+    },
+    {
+      name: 'Store',
+      icon: <Store />,
+      route: '/store-monitor',
     },
   ]
 
