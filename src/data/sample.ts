@@ -164,3 +164,140 @@ export const samples: Sample[] = [
   },
 }
 ]
+
+// Tea Tang brand colors
+export const BRAND_COLORS = {
+  primary: "#B91C1C", // Tea Tang red
+  secondary: "#FFFFFF", // White
+  accent: "#8B0000", // Darker red for hover states
+  text: "#333333",
+  background: "#FFFFFF",
+}
+
+// Mock client data - in a real app, this would come from your API or database
+export const clients = [
+  {
+    id: "client1",
+    name: "Acme Corporation",
+    address: "123 Business Ave, Suite 100, Business District",
+    country: "United States",
+  },
+  {
+    id: "client2",
+    name: "Global Enterprises",
+    address: "456 Commerce St, Tower B, Financial Center",
+    country: "United Kingdom",
+  },
+  {
+    id: "client3",
+    name: "Pacific Trading Co.",
+    address: "789 Harbor Blvd, Warehouse 5, Port Area",
+    country: "Japan",
+  },
+]
+
+// Mock trader data
+export const traders = [
+  { id: "trader1", name: "John Smith" },
+  { id: "trader2", name: "Emma Johnson" },
+  { id: "trader3", name: "Michael Wong" },
+  { id: "trader4", name: "Sarah Davis" },
+]
+
+// Mock tea standards
+export const teaStandards = [
+  {
+    id: "1",
+    name: "Chai Tea Srilanka",
+    standerd_code: "ahj_jk_005_al",
+    net_weight: 200,
+    reference: "Get A packing Most Important Sheet",
+    store_stat: "Pending",
+  },
+  {
+    id: "2",
+    name: "Herbal Tea Standard",
+    standerd_code: "Sdl_Al_0114A_lk",
+    net_weight: 100,
+    reference: "Get A packing Most Important Sheet",
+    store_stat: "Pending",
+  },
+  {
+    id: "3",
+    name: "White Tea Standard",
+    standerd_code: "Sdl_Al_0114A_lk",
+    net_weight: 300,
+    reference: "Get A packing Most Important Sheet",
+    store_stat: "Pending",
+  },
+  {
+    id: "4",
+    name: "Oolong Tea Premium",
+    standerd_code: "ool_tea_0123_lk",
+    net_weight: 250,
+    reference: "Premium Quality Oolong",
+    store_stat: "Pending",
+  },
+  {
+    id: "5",
+    name: "Black Tea Classic",
+    standerd_code: "blk_tea_0789_lk",
+    net_weight: 150,
+    reference: "Fine Blend Black Tea",
+    store_stat: "Pending",
+  },
+  {
+    id: "6",
+    name: "Chamomile Herbal Tea",
+    standerd_code: "chm_te_0912_lk",
+    net_weight: 180,
+    reference: "Relaxing Herbal Chamomile",
+    store_stat: "Pending",
+  },
+  {
+    id: "7",
+    name: "Peppermint Tea",
+    standerd_code: "pep_te_0345_lk",
+    net_weight: 220,
+    reference: "Minty Fresh Peppermint",
+    store_stat: "Pending",
+  },
+  {
+    id: "8",
+    name: "Golden Tip Tea",
+    standerd_code: "gold_tea_0567_lk",
+    net_weight: 275,
+    reference: "Luxury Golden Tip Tea",
+    store_stat: "Pending",
+  },
+  {
+    id: "9",
+    name: "Organic Green Tea",
+    standerd_code: "org_tea_0678_lk",
+    net_weight: 320,
+    reference: "100% Organic Green Tea",
+    store_stat: "Pending",
+  },
+  {
+    id: "10",
+    name: "Darjeeling First Flush",
+    standerd_code: "dar_tea_0890_lk",
+    net_weight: 350,
+    reference: "Premium Darjeeling First Flush",
+    store_stat: "Pending",
+  },
+]
+
+// Mock courier services
+export const courierServices = [
+  { id: "courier1", name: "Express Delivery" },
+  { id: "courier2", name: "Standard Shipping" },
+  { id: "courier3", name: "Premium Logistics" },
+  { id: "courier4", name: "Global Transport" },
+  { id: "courier5", name: "FedEx" },
+]
+
+// Mock storage areas
+export const storageAreas = ["Main Warehouse", "Temperature Controlled", "Secure Storage", "Quarantine Area", "Tea Room"]
+
+

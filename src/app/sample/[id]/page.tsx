@@ -28,17 +28,11 @@ import {
 
 import type { StoreSample } from "@/app/types/store_sample"
 
-// Mock courier services
-const courierServices = [
-  { id: "courier1", name: "Express Delivery" },
-  { id: "courier2", name: "Standard Shipping" },
-  { id: "courier3", name: "Premium Logistics" },
-  { id: "courier4", name: "Global Transport" },
-  { id: "courier5", name: "FedEx" },
-]
+import { courierServices } from "@/data/sample"
+import { storageAreas } from "@/data/sample"
 
-// Mock storage areas
-const storageAreas = ["Main Warehouse", "Temperature Controlled", "Secure Storage", "Quarantine Area", "Tea Room"]
+
+
 
 export default function SampleDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -64,16 +58,26 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
   const tableRef = useRef<HTMLDivElement | null>(null)
   const tableInstance = useRef<Tabulator | null>(null)
 
+  // get one with params id change it (tabledata)
+  const backendGetOneUrl = "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id="
+
+  // Put one with params id change it (tabledata) 
+  const backendPutOneUrl = "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/";
+
+  // get All (store_sample database)
+  const backendGetAllUrl = "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample"
+
+  // Post One (store_sample database)
+  const backendPostUrl = "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample";
+
   // Fetch the sample data
   const fetchSampleData = async () => {
     try {
       setLoading(true)
       console.log(`Attempting to fetch data for sample ID: ${params.id}`)
 
-      // Try to fetch from the API - note the endpoint has changed to match your code
-      const response = await axios.get(
-        `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id=${params.id}`,
-      )
+      // Try to fetch from the API 
+      const response = await axios.get(`${backendGetOneUrl+params.id}`)
 
       // Check if we got an array or a single object
       const data = Array.isArray(response.data) ? response.data[0] : response.data
@@ -97,49 +101,41 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
   }, [])
 
   const changeStatus = async (sampleName: string) => {
-    const response2 = await axios.get(
-      `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata?id=${params.id}`,
-    )
-    console.log(response2.data)
+    const response2 = await axios.get(`${backendGetOneUrl+params.id}`)
+    // console.log(response2.data)
 
     const updatedSampleData = response2.data[0];
-    console.log(updatedSampleData);
-    console.log(response2.data.requested_samples?.length)
+    // console.log(updatedSampleData);
+    // console.log(response2.data.requested_samples?.length)
     for(let i = 0 ; i< updatedSampleData.requested_samples?.length ; i++){
       if (updatedSampleData.requested_samples[i].name === sampleName) {
         updatedSampleData.requested_samples[i].store_stat = "Recieved"
       }
     }
-    console.log(updatedSampleData);
+    // console.log(updatedSampleData);
 
     // Send the updated data to the API
-    const response = await axios.put(
-      `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
-      updatedSampleData)
-
-      fetchSampleData(); 
+    const response = await axios.put(`${backendPutOneUrl+params.id}`,updatedSampleData)
+    fetchSampleData(); 
   }
 
   useEffect(() => {
     const fetchStoreMonitor = async () => {
-      const response = await axios.get("https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample")
+      const response = await axios.get(backendGetAllUrl)
       setStoreLength(response.data.length + 1);
       let i = 0;
       for ( i = 0; i < response.data.length; i++) {
-        console.log(response.data[i].status)
-        console.log(response.data[i].sampleId)
-        console.log(params.id);
+        // console.log(response.data[i].status)
+        // console.log(response.data[i].sampleId)
+        // console.log(params.id);
         if (response.data[i].status === "Done" && response.data[i].sampleId === params.id) {
           console.log(response.data[i].requested_sample_name , i);
           changeStatus(response.data[i].requested_sample_name);
 
         }
       }
-
     }
-
     fetchStoreMonitor()
-
   }, [])
 
   // Initialize Tabulator when sampleData is available
@@ -252,7 +248,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
   }
 
   const postStoreSample = async (obj: any) => {
-    const response2 = await axios.post("https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample", obj);
+    const response2 = await axios.post(backendPostUrl, obj);
   }
 
   // Handle sending request to stores
@@ -381,7 +377,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
   const trackingSteps = [
     {
       title: "Handover to Courier service",
-      description: sampleData.tracking_stages.handover_to_courier.date,
+      description: sampleData.tracking_stages?.handover_to_courier.date,
       completed: sampleData.tracking_stages.handover_to_courier.completed,
     },
     {
@@ -406,8 +402,6 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
     },
   ]
 
-
-
   const handleCancel = async () => {
     // Only allow cancellation if status is Draft
     if (currentStatus.toLowerCase() === "draft") {
@@ -419,7 +413,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
           status: "Cancel",
         }
         const response = await axios.put(
-          `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
+          `${backendPutOneUrl+params.id}`,
           updatedData,
         )
         console.log(response);
@@ -462,9 +456,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
 
       // In a real app, you would save this data to your API
       const response = await axios.put(
-        `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/tabledata/${params.id}`,
-        updatedData,
-      )
+        `${backendPutOneUrl+params.id}`,updatedData)
 
       toast({
         variant: "default",

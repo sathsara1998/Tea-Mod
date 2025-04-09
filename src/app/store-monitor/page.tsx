@@ -1,15 +1,11 @@
 "use client"
-
 import { useEffect, useState, useRef } from "react"
+import { createRoot } from "react-dom/client"
+import { useRouter } from "next/navigation"
+// Shadcn Ui Components
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { TabulatorFull as Tabulator } from "tabulator-tables"
-import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
-import { createRoot } from "react-dom/client"
 import { useToast } from "@/components/ui/use-toast"
-import axios from "axios"
-import { Search } from "lucide-react"
-import type { StoreSample } from "../types/store_sample"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +16,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useRouter } from "next/navigation"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+// tabulator table 
+import { TabulatorFull as Tabulator } from "tabulator-tables"
+import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
+//axios 
+import axios from "axios"
+// lucide icons
+import { Search, Info } from "lucide-react"
+// types
+import type { StoreSample } from "../types/store_sample"
+
+// Tea Tang brand colors
+const BRAND_COLORS = {
+  primary: "#B91C1C", // Tea Tang red
+  secondary: "#FFFFFF", // White
+  accent: "#8B0000", // Darker red for hover states
+  text: "#333333",
+  background: "#FFFFFF",
+}
 
 export default function StoreMonitorPage() {
   const router = useRouter()
@@ -30,40 +44,70 @@ export default function StoreMonitorPage() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [currentSample, setCurrentSample] = useState<StoreSample | null>(null)
+  const [tableInitialized, setTableInitialized] = useState(false)
+
+  // State for standard details dialog
+  const [showStandardDetails, setShowStandardDetails] = useState(false)
+  const [standardDetails, setStandardDetails] = useState<{
+    name: string
+    details: Record<string, any>
+  }>({ name: "", details: {} })
 
   const tableRef = useRef<HTMLDivElement | null>(null)
-  const tableInstance = useRef<Tabulator | null>(null)
+  const tableInstance = useRef<Tabulator | any>(null)
+
+  // you can change this get API url store sample 
+  const backendUri = "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample/"
 
   // Fetch store samples data
   const fetchStoreSamples = async () => {
     try {
       setLoading(true)
-
-      const response = await axios.get("https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample")
+      const response = await axios.get(backendUri);
       setSamples(response.data)
-      console.log("Transformed store samples:", samples);
+      console.log("Fetched store samples:", response.data)
+
     } catch (error) {
       console.error("Error fetching store samples:", error)
+
     } finally {
       setLoading(false)
     }
   }
 
-  // Initialize Tabulator
-  useEffect(() => {
-    if (tableRef.current && samples.length > 0) {
-      // Clean up any existing table instance
-      if (tableInstance.current) {
-        tableInstance.current.destroy()
-        tableInstance.current = null
-      }
+  // Function to show standard details
 
+  const handleShowStandardDetails = (rowData: any) => {
+    setStandardDetails({
+      name: rowData.requested_sample_name || rowData.standard,
+      details: {
+        Reference: rowData.reference || "N/A",
+        Customer: rowData.customer || "N/A",
+        Standard: rowData.standard || "N/A",
+        "Requested Date": rowData.requestedDate || "N/A",
+        Quantity: rowData.quantity || "N/A",
+        Trader: rowData.trader || "N/A",
+        Status: rowData.status || "N/A",
+      },
+    })
+    setShowStandardDetails(true)
+  }
+
+  // Initialize Tabulator
+  const initializeTable = () => {
+    if (!tableRef.current || tableInstance.current || samples.length === 0) return
+
+    try {
+      // Ensure the table container has a defined height
+      if (tableRef.current) {
+        tableRef.current.style.minHeight = "400px"
+      }
       // Create the Tabulator instance
       tableInstance.current = new Tabulator(tableRef.current, {
         data: samples,
         layout: "fitColumns",
         pagination: true,
-        paginationSize: 10,
+        paginationSize: 20,
         columns: [
           { title: "Reference", field: "reference", headerSort: true },
           { title: "Requested Date", field: "requestedDate", headerSort: true },
@@ -74,7 +118,33 @@ export default function StoreMonitorPage() {
           { title: "Blend No", field: "blendNo", headerSort: true },
           { title: "S/Line Q", field: "straightLineQuantity", headerSort: true },
           { title: "Prop Q", field: "propQuantity", headerSort: true },
-          { title: "Standard", field: "standard", headerSort: true },
+          {
+            title: "Standard",
+            field: "standard",
+            headerSort: true,
+            formatter: (cell) => {
+              const value = cell.getValue() as string
+              const rowData = cell.getRow().getData()
+              const displayName = rowData.requested_sample_name || value
+              const container = document.createElement("div")
+              const root = createRoot(container)
+
+              root.render(
+                <div
+                  className="flex items-center space-x-1 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleShowStandardDetails(rowData)
+                  }}
+                >
+                  <span>{displayName}</span>
+                  <Info size={14} className="text-[#B91C1C] hover:text-[#8B0000]" />
+                </div>,
+              )
+
+              return container
+            },
+          },
           {
             title: "Status",
             field: "status",
@@ -110,7 +180,7 @@ export default function StoreMonitorPage() {
                 <Button
                   size="sm"
                   disabled={rowData.status === "Done"}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                  className="bg-[#B91C1C] hover:bg-[#8B0000] text-white"
                   onClick={(e) => {
                     e.stopPropagation()
                     setCurrentSample(rowData)
@@ -126,43 +196,100 @@ export default function StoreMonitorPage() {
           },
         ],
       })
-    }
 
-    return () => {
-      if (tableInstance.current) {
-        tableInstance.current.destroy()
-        tableInstance.current = null
+      setTableInitialized(true)
+
+      // Apply search filter if there's a query
+      if (searchQuery && tableInstance.current) {
+        applySearchFilter(searchQuery)
       }
+    } catch (error) {
+      console.error("Error initializing table:", error)
+    }
+  }
+
+  // Apply search filter
+  const applySearchFilter = (query: string) => {
+    if (!tableInstance.current) return
+
+    if (query) {
+      const lowercaseQuery = query.toLowerCase()
+
+      // Use standard Tabulator filtering with a custom filter function
+      tableInstance.current.setFilter((data:any) => {
+        // Search in reference field
+        if (data.reference && data.reference.toLowerCase().includes(lowercaseQuery)) {
+          return true
+        }
+
+        // Search in customer field
+        if (data.customer && data.customer.toLowerCase().includes(lowercaseQuery)) {
+          return true
+        }
+
+        // Search in standard field
+        if (data.standard && data.standard.toLowerCase().includes(lowercaseQuery)) {
+          return true
+        }
+
+        return false
+      })
+    } else {
+      tableInstance.current.clearFilter()
+    }
+  }
+
+  // Initialize table when data is available
+  useEffect(() => {
+    if (samples.length > 0 && tableRef.current && !tableInitialized) {
+      // Use setTimeout to ensure DOM is fully rendered
+      const timer = setTimeout(() => {
+        initializeTable()
+      }, 100)
+
+      return () => clearTimeout(timer)
     }
   }, [samples])
+
+  // Handle search query changes
+  useEffect(() => {
+    if (tableInstance.current && tableInitialized) {
+      applySearchFilter(searchQuery)
+    }
+  }, [searchQuery, tableInitialized])
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (tableInstance.current) {
+        try {
+          tableInstance.current.destroy()
+        } catch (e) {
+          console.error("Error destroying table:", e)
+        }
+        tableInstance.current = null
+      }
+      setTableInitialized(false)
+    }
+  }, [])
 
   // Fetch data on component mount
   useEffect(() => {
     fetchStoreSamples()
   }, [])
 
-  // Handle search
-  useEffect(() => {
-    if (tableInstance.current && searchQuery) {
-      tableInstance.current.setFilter(
-        [
-          { field: "reference", type: "like", value: searchQuery },
-          { field: "customer", type: "like", value: searchQuery },
-          { field: "standard", type: "like", value: searchQuery },
-        ],
-        "or",
+  // update data
+  const fintUpdated = async (sample: any) => {
+    try {
+      const response = await axios.put(
+        `${backendUri+sample.id}`,
+        sample,
       )
-    } 
-    // else if (tableInstance.current) {
-    //   tableInstance.current.clearFilter()
-    // }
-  }, [searchQuery])
-
-  const fintUpdated = async(sample:any) =>{
-    const response = await axios.put(
-      `https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample/${sample.id}`,
-      sample,
-    )
+      return response.data
+    } catch (error) {
+      console.error("Error updating sample:", error)
+      throw error
+    }
   }
 
   // Handle sending a sample
@@ -178,8 +305,7 @@ export default function StoreMonitorPage() {
     }
 
     try {
-      // In a real app, you would update the sample in the database
-      // For now, we'll just update the local state
+      // update the sample in the database
       const updatedSamples = samples.map((sample) => {
         if (sample.id === currentSample.id) {
           return { ...sample, status: "Done" }
@@ -187,11 +313,12 @@ export default function StoreMonitorPage() {
         return sample
       })
 
-      updatedSamples.map((sample)=>{
-        if(sample.status === "Done"){
-          fintUpdated(sample)   
-        }
-      })
+      // Update samples that have status "Done"
+      const updatePromises = updatedSamples
+        .filter((sample) => sample.status === "Done")
+        .map((sample) => fintUpdated(sample))
+
+      await Promise.all(updatePromises)
 
       setSamples(updatedSamples)
       setCurrentSample(null)
@@ -225,7 +352,7 @@ export default function StoreMonitorPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#B91C1C] mx-auto"></div>
           <p className="mt-4">Loading store samples...</p>
         </div>
       </div>
@@ -234,15 +361,21 @@ export default function StoreMonitorPage() {
 
   return (
     <div className="">
-      <div className="bg-white ">
-        <div className="p-4 ">
+      <div className="bg-white">
+        <div className="p-4 bg-[#B91C1C] text-white">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold">Stores sample point</h1>
-            {/* <div>
-              <Button variant="outline" onClick={() => router.push("/sample")}>
-                Back to Samples
-              </Button>
-            </div> */}
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 relative">
+                <img
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-XUWqp10SrqLFPpCq4p2mXus0hcvi8O.png"
+                  alt="Tea Tang Logo"
+                  className="object-contain"
+                  width={40}
+                  height={40}
+                />
+              </div>
+              <h1 className="text-xl font-semibold">Stores sample point</h1>
+            </div>
           </div>
         </div>
 
@@ -251,36 +384,63 @@ export default function StoreMonitorPage() {
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <Input
-                placeholder="Search..."
+                placeholder="Search by standard, customer, or reference..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-[#B91C1C] focus:ring-[#B91C1C]"
               />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <div ref={tableRef} className="w-full"></div>
+            <div ref={tableRef} className="w-full min-h-[400px]"></div>
           </div>
         </div>
       </div>
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-[#B91C1C]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Sample Dispatch</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#B91C1C]">Confirm Sample Dispatch</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to mark this sample as sent? This action will change the status from "Pending" to
               "Done".
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSendSample}>Confirm</AlertDialogAction>
+            <AlertDialogCancel className="border-[#B91C1C] text-[#B91C1C]">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSendSample} className="bg-[#B91C1C] hover:bg-[#8B0000] text-white">
+              Confirm
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Standard Details Dialog */}
+      <Dialog open={showStandardDetails} onOpenChange={setShowStandardDetails}>
+        <DialogContent className="sm:max-w-md border-[#B91C1C]">
+          <DialogHeader>
+            <div className="flex items-center justify-center mb-4">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-XUWqp10SrqLFPpCq4p2mXus0hcvi8O.png"
+                alt="Tea Tang Logo"
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <DialogTitle className="text-xl text-[#B91C1C]">{standardDetails.name}</DialogTitle>
+            <DialogDescription>Tea standard details</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {Object.entries(standardDetails.details).map(([key, value]) => (
+              <div key={key} className="grid grid-cols-3 items-center gap-4 border-b pb-2">
+                <p className="text-sm font-medium text-[#B91C1C]">{key}:</p>
+                <p className="col-span-2 text-sm">{value}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
