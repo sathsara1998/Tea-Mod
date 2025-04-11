@@ -2,11 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createMiddlewareClient } from '@/utils/supabase'
 
 // Configure your allowed IPs and networks
-const ALLOWED_IPS = (process.env.ALLOWED_IPS || '127.0.0.1')
-  .split(',')
-  .map((ip) => ip.trim())
+// const ALLOWED_IPS = (process.env.ALLOWED_IPS || '127.0.0.1')
+//   .split(',')
+//   .map((ip) => ip.trim())
 
-console.log(ALLOWED_IPS)
+// console.log(ALLOWED_IPS)
 
 // Configure paths that should bypass IP restriction
 const PUBLIC_PATHS = [
@@ -36,22 +36,22 @@ function isPublicPath(path: string): boolean {
 }
 
 // Helper function to get client IP from various headers
-function getClientIP(request: NextRequest): string {
-  // Check forwarded headers first (common with proxies/load balancers)
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
-  }
+// function getClientIP(request: NextRequest): string {
+//   // Check forwarded headers first (common with proxies/load balancers)
+//   const forwarded = request.headers.get('x-forwarded-for')
+//   if (forwarded) {
+//     return forwarded.split(',')[0].trim()
+//   }
 
-  // Fall back to direct IP
-  const ip = request.ip
-  if (ip) {
-    return ip
-  }
+//   // Fall back to direct IP
+//   const ip = request.ip
+//   if (ip) {
+//     return ip
+//   }
 
-  // Last resort: remote address
-  return request.headers.get('remote-addr') || '0.0.0.0'
-}
+//   // Last resort: remote address
+//   return request.headers.get('remote-addr') || '0.0.0.0'
+// }
 
 export async function middleware(request: NextRequest) {
   const { supabase, response } = createMiddlewareClient(request)
@@ -61,25 +61,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const clientIP = getClientIP(request)
+  // const clientIP = getClientIP(request)
 
   // Check if client IP is allowed
-  const isAllowed = ALLOWED_IPS.some((allowedIP) => {
-    if (allowedIP.includes('/')) {
-      return ipInCIDR(clientIP, allowedIP)
-    }
-    return clientIP === allowedIP
-  })
+  // const isAllowed = ALLOWED_IPS.some((allowedIP) => {
+  //   if (allowedIP.includes('/')) {
+  //     return ipInCIDR(clientIP, allowedIP)
+  //   }
+  //   return clientIP === allowedIP
+  // })
 
-  if (!isAllowed) {
-    // Optional: Log unauthorized access attempts
-    console.warn(
-      `Unauthorized access attempt from IP: ${clientIP} to path: ${path}`,
-    )
-    // Redirect to /noaccess
-    const noAccessUrl = new URL('/noaccess', request.url)
-    return NextResponse.redirect(noAccessUrl)
-  }
+  // if (!isAllowed) {
+  //   // Optional: Log unauthorized access attempts
+  //   console.warn(
+  //     `Unauthorized access attempt from IP: ${clientIP} to path: ${path}`,
+  //   )
+  //   // Redirect to /noaccess
+  //   const noAccessUrl = new URL('/noaccess', request.url)
+  //   return NextResponse.redirect(noAccessUrl)
+  // }
 
   // Get the session (if available)
   const {
