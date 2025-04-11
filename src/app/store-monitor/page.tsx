@@ -17,10 +17,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-// tabulator table 
+// tabulator table
 import { TabulatorFull as Tabulator } from "tabulator-tables"
 import "tabulator-tables/dist/css/tabulator_semanticui.min.css"
-//axios 
+//axios
 import axios from "axios"
 // lucide icons
 import { Search, Info } from "lucide-react"
@@ -29,9 +29,9 @@ import type { StoreSample } from "../types/store_sample"
 
 // Tea Tang brand colors
 const BRAND_COLORS = {
-  primary: "#B91C1C", // Tea Tang red
+  primary: "#875A7B", // purppl
   secondary: "#FFFFFF", // White
-  accent: "#8B0000", // Darker red for hover states
+  accent: "#875A7B", // light purpel for hover states
   text: "#333333",
   background: "#FFFFFF",
 }
@@ -45,6 +45,8 @@ export default function StoreMonitorPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentSample, setCurrentSample] = useState<StoreSample | null>(null)
   const [tableInitialized, setTableInitialized] = useState(false)
+  // Add these state variables after the other state declarations (around line 40)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
 
   // State for standard details dialog
   const [showStandardDetails, setShowStandardDetails] = useState(false)
@@ -56,20 +58,18 @@ export default function StoreMonitorPage() {
   const tableRef = useRef<HTMLDivElement | null>(null)
   const tableInstance = useRef<Tabulator | any>(null)
 
-  // you can change this get API url store sample 
+  // you can change this get API url store sample
   const backendUri = "https://67ecc34faa794fb3222ebb52.mockapi.io/api/teafactory/store_sample/"
 
   // Fetch store samples data
   const fetchStoreSamples = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(backendUri);
+      const response = await axios.get(backendUri)
       setSamples(response.data)
       console.log("Fetched store samples:", response.data)
-
     } catch (error) {
       console.error("Error fetching store samples:", error)
-
     } finally {
       setLoading(false)
     }
@@ -138,7 +138,7 @@ export default function StoreMonitorPage() {
                   }}
                 >
                   <span>{displayName}</span>
-                  <Info size={14} className="text-[#B91C1C] hover:text-[#8B0000]" />
+                  <Info size={14} className="text-[#875A7B] hover:text-[#875A7B]" />
                 </div>,
               )
 
@@ -180,7 +180,7 @@ export default function StoreMonitorPage() {
                 <Button
                   size="sm"
                   disabled={rowData.status === "Done"}
-                  className="bg-[#B91C1C] hover:bg-[#8B0000] text-white"
+                  className="bg-[#875A7B] hover:bg-[#875A7B] text-white"
                   onClick={(e) => {
                     e.stopPropagation()
                     setCurrentSample(rowData)
@@ -216,7 +216,7 @@ export default function StoreMonitorPage() {
       const lowercaseQuery = query.toLowerCase()
 
       // Use standard Tabulator filtering with a custom filter function
-      tableInstance.current.setFilter((data:any) => {
+      tableInstance.current.setFilter((data: any) => {
         // Search in reference field
         if (data.reference && data.reference.toLowerCase().includes(lowercaseQuery)) {
           return true
@@ -239,6 +239,22 @@ export default function StoreMonitorPage() {
     }
   }
 
+  // Add this function after the applySearchFilter function (around line 190)
+  const applyStatusFilter = (status: string) => {
+    if (!tableInstance.current) return
+
+    if (status && status !== "all") {
+      tableInstance.current.setFilter("status", "=", status)
+    } else {
+      // If "all" is selected, clear the status filter but keep any search filter
+      tableInstance.current.removeFilter("status")
+      // Re-apply search filter if it exists
+      if (searchQuery) {
+        applySearchFilter(searchQuery)
+      }
+    }
+  }
+
   // Initialize table when data is available
   useEffect(() => {
     if (samples.length > 0 && tableRef.current && !tableInitialized) {
@@ -257,6 +273,13 @@ export default function StoreMonitorPage() {
       applySearchFilter(searchQuery)
     }
   }, [searchQuery, tableInitialized])
+
+  // Add this effect to handle status filter changes (after the search query effect)
+  useEffect(() => {
+    if (tableInstance.current && tableInitialized) {
+      applyStatusFilter(statusFilter)
+    }
+  }, [statusFilter, tableInitialized])
 
   // Clean up on unmount
   useEffect(() => {
@@ -281,10 +304,7 @@ export default function StoreMonitorPage() {
   // update data
   const fintUpdated = async (sample: any) => {
     try {
-      const response = await axios.put(
-        `${backendUri+sample.id}`,
-        sample,
-      )
+      const response = await axios.put(`${backendUri + sample.id}`, sample)
       return response.data
     } catch (error) {
       console.error("Error updating sample:", error)
@@ -352,7 +372,7 @@ export default function StoreMonitorPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#B91C1C] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#875A7B] mx-auto"></div>
           <p className="mt-4">Loading store samples...</p>
         </div>
       </div>
@@ -362,7 +382,7 @@ export default function StoreMonitorPage() {
   return (
     <div className="">
       <div className="bg-white">
-        <div className="p-4 bg-[#B91C1C] text-white">
+        <div className="p-4 bg-[#875A7B] text-white">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 relative">
@@ -381,14 +401,56 @@ export default function StoreMonitorPage() {
 
         <div className="p-4">
           <div className="mb-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <Input
-                placeholder="Search by standard, customer, or reference..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-[#B91C1C] focus:ring-[#B91C1C]"
-              />
+            {/* Search bar and filter buttons in the same row */}
+            <div className="flex items-center justify-between">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 border-[#875A7B] focus:ring-[#875A7B]"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Button
+                  size="sm"
+                  variant={statusFilter === "all" ? "default" : "outline"}
+                  onClick={() => setStatusFilter("all")}
+                  className={
+                    statusFilter === "all"
+                      ? "bg-[#875A7B] hover:bg-[#875A7B] text-white"
+                      : "border-[#875A7B] text-[#875A7B] hover:bg-[#875A7B]/10"
+                  }
+                >
+                  All
+                </Button>
+                <Button
+                  size="sm"
+                  variant={statusFilter === "Pending" ? "default" : "outline"}
+                  onClick={() => setStatusFilter("Pending")}
+                  className={
+                    statusFilter === "Pending"
+                      ? "bg-[#875A7B] hover:bg-[#875A7B] text-white"
+                      : "border-[#875A7B] text-[#875A7B] hover:bg-[#875A7B]/10"
+                  }
+                >
+                  Pending
+                </Button>
+                <Button
+                  size="sm"
+                  variant={statusFilter === "Done" ? "default" : "outline"}
+                  onClick={() => setStatusFilter("Done")}
+                  className={
+                    statusFilter === "Done"
+                      ? "bg-[#875A7B] hover:bg-[#875A7B] text-white"
+                      : "border-[#875A7B] text-[#875A7B] hover:bg-[#875A7B]/10"
+                  }
+                >
+                  Done
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -400,17 +462,17 @@ export default function StoreMonitorPage() {
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="border-[#B91C1C]">
+        <AlertDialogContent className="border-[#875A7B]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#B91C1C]">Confirm Sample Dispatch</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#875A7B]">Confirm Sample Dispatch</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to mark this sample as sent? This action will change the status from "Pending" to
               "Done".
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-[#B91C1C] text-[#B91C1C]">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSendSample} className="bg-[#B91C1C] hover:bg-[#8B0000] text-white">
+            <AlertDialogCancel className="border-[#875A7B] text-[#875A7B]">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSendSample} className="bg-[#875A7B] hover:bg-[#875A7B] text-white">
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -419,7 +481,7 @@ export default function StoreMonitorPage() {
 
       {/* Standard Details Dialog */}
       <Dialog open={showStandardDetails} onOpenChange={setShowStandardDetails}>
-        <DialogContent className="sm:max-w-md border-[#B91C1C]">
+        <DialogContent className="sm:max-w-md border-[#875A7B]">
           <DialogHeader>
             <div className="flex items-center justify-center mb-4">
               <img
@@ -428,13 +490,13 @@ export default function StoreMonitorPage() {
                 className="w-16 h-16 object-contain"
               />
             </div>
-            <DialogTitle className="text-xl text-[#B91C1C]">{standardDetails.name}</DialogTitle>
+            <DialogTitle className="text-xl text-[#875A7B]">{standardDetails.name}</DialogTitle>
             <DialogDescription>Tea standard details</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {Object.entries(standardDetails.details).map(([key, value]) => (
               <div key={key} className="grid grid-cols-3 items-center gap-4 border-b pb-2">
-                <p className="text-sm font-medium text-[#B91C1C]">{key}:</p>
+                <p className="text-sm font-medium text-[#875A7B]">{key}:</p>
                 <p className="col-span-2 text-sm">{value}</p>
               </div>
             ))}

@@ -33,19 +33,24 @@ import type { Sample as RowData } from "@/app/types/sample"
 import type { StatusType } from "@/app/types/sample"
 
 // import mock data
-import { BRAND_COLORS } from "@/data/sample"
+// import { BRAND_COLORS } from "@/data/sample"
 import { clients } from "@/data/sample"
 import { traders } from "@/data/sample"
 import { teaStandards } from "@/data/sample"
-
 
 interface NewSampleDialogProps {
   length: number
   onSuccess: () => void
 }
+const BRAND_COLORS = {
+  primary: "#800080", // purppl
+  secondary: "#FFFFFF", // White
+  accent: "#875A7B", // light purpel for hover states
+  text: "#333333",
+  background: "#FFFFFF",
+}
 
 const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) => {
-
   const { toast } = useToast()
   const [creationDate] = useState<Date>(new Date())
   const [selectedClient, setSelectedClient] = useState<string>("")
@@ -81,8 +86,8 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
     setNewSample({
       id: (length + 1).toString(),
       reference: `SI-25-${String(length + 1).padStart(3, "0")}`,
-      creationdate: creationDateISO,
-      ed: "Waiting...",
+      creation_date: creationDateISO,
+      expected_delivery: "Waiting...",
       customer: {
         name: selectedClientObj?.name || "",
         address: clientAddress,
@@ -156,6 +161,13 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
     try {
       const response = await axios.post<RowData>(backEndUrl,newSample,)
       console.log("Data successfully posted:", response.data)
+      setSelectedTrader("");
+      setSelectedClient("")
+      setClientAddress("")
+      setClientCountry("")
+      setSelectedSamples([""]);
+
+
       // Show success toast
       toast({
         variant: "success",
@@ -179,11 +191,11 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)} className="bg-[#B91C1C] hover:bg-[#8B0000] text-white">
+        <Button onClick={() => setOpen(true)} className="bg-[#875A7B] hover:bg-[#875A7B] text-white">
           New
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto flex flex-col justify-start items-start border-[#B91C1C]">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto flex flex-col justify-start items-start border-[#875A7B]">
         <div className="w-full flex justify-between items-center mb-4">
           <div className="flex items-center space-x-3">
             <img
@@ -191,7 +203,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
               alt="Tea Tang Logo"
               className="w-8 h-8 object-contain"
             />
-            <h2 className="text-xl font-bold text-[#B91C1C]">Add New Sample</h2>
+            <h2 className="text-xl font-bold text-[#875A7B]">Add New Sample</h2>
           </div>
         </div>
 
@@ -202,15 +214,15 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
             setOpen(false)
           }}
         >
-          <Card className="w-full max-w-4xl mx-auto border-[#B91C1C]/20">
-            <CardHeader className="border-b border-[#B91C1C]/10">
-              <CardTitle className="text-[#B91C1C]">Tea Sample Request Form</CardTitle>
+          <Card className="w-full max-w-4xl mx-auto border-[#875A7B]/20">
+            <CardHeader className="border-b border-[#875A7B]/10">
+              <CardTitle className="text-[#875A7B]">Tea Sample Request Form</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pt-4">
               {/* Creation Date (Auto-filled) */}
               <div className="space-y-2">
-                <Label className="text-[#B91C1C]">Creation Date</Label>
-                <div className="p-2 border rounded-md bg-muted/20 border-[#B91C1C]/20">
+                <Label className="text-[#875A7B]">Creation Date</Label>
+                <div className="p-2 border rounded-md bg-muted/20 border-[#875A7B]/20">
                   {creationDate ? format(creationDate, "PPP") : "Invalid Date"}
                 </div>
               </div>
@@ -218,11 +230,11 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Client Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="client-name" className="text-[#B91C1C]">
+                  <Label htmlFor="client-name" className="text-[#875A7B]">
                     Client Name
                   </Label>
                   <Select value={selectedClient} onValueChange={setSelectedClient}>
-                    <SelectTrigger id="client-name" className="border-[#B91C1C]/20 focus:ring-[#B91C1C]/20">
+                    <SelectTrigger id="client-name" className="border-[#875A7B]/20 focus:ring-[#875A7B]/20">
                       <SelectValue placeholder="Select client" />
                     </SelectTrigger>
                     <SelectContent>
@@ -237,11 +249,11 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
 
                 {/* Trader Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="trader" className="text-[#B91C1C]">
+                  <Label htmlFor="trader" className="text-[#875A7B]">
                     Trader
                   </Label>
                   <Select value={selectedTrader} onValueChange={setSelectedTrader}>
-                    <SelectTrigger id="trader" className="border-[#B91C1C]/20 focus:ring-[#B91C1C]/20">
+                    <SelectTrigger id="trader" className="border-[#875A7B]/20 focus:ring-[#875A7B]/20">
                       <SelectValue placeholder="Select trader" />
                     </SelectTrigger>
                     <SelectContent>
@@ -259,16 +271,16 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Customer Address (Auto-filled) */}
                 <div className="space-y-2">
-                  <Label className="text-[#B91C1C]">Customer Address</Label>
-                  <div className="p-1 border rounded-md min-h-[60px] bg-muted/20 text-gray-500 text-sm border-[#B91C1C]/20">
+                  <Label className="text-[#875A7B]">Customer Address</Label>
+                  <div className="p-1 border rounded-md min-h-[60px] bg-muted/20 text-gray-500 text-sm border-[#875A7B]/20">
                     {clientAddress || "Address will appear here after selecting a client"}
                   </div>
                 </div>
 
                 {/* Customer Country (Auto-filled) */}
                 <div className="space-y-2">
-                  <Label className="text-[#B91C1C]">Customer's Country</Label>
-                  <div className="p-1 border rounded-md bg-muted/20 text-gray-500 text-sm border-[#B91C1C]/20">
+                  <Label className="text-[#875A7B]">Customer's Country</Label>
+                  <div className="p-1 border rounded-md bg-muted/20 text-gray-500 text-sm border-[#875A7B]/20">
                     {clientCountry || "Country will appear here after selecting a client"}
                   </div>
                 </div>
@@ -276,7 +288,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
 
               {/* Requested Samples (Multi-select) */}
               <div className="space-y-2">
-                <Label className="text-[#B91C1C]">Requested Samples</Label>
+                <Label className="text-[#875A7B]">Requested Samples</Label>
 
                 {/* Display selected samples as badges */}
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -287,11 +299,11 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
                         <Badge
                           key={sample.id}
                           variant="secondary"
-                          className="flex items-center gap-1 pr-2 bg-[#B91C1C]/10 text-[#B91C1C] hover:bg-[#B91C1C]/20"
+                          className="flex items-center gap-1 pr-2 bg-[#875A7B]/10 text-[#875A7B] hover:bg-[#875A7B]/20"
                         >
                           <span className="max-w-[200px] truncate">{sample.name}</span>
                           <X
-                            className="h-3 w-3 cursor-pointer hover:text-[#8B0000]"
+                            className="h-3 w-3 cursor-pointer hover:text-[#875A7B]"
                             onClick={(e) => {
                               e.stopPropagation()
                               removeSample(sample.id)
@@ -313,7 +325,7 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
                     }
                   }}
                 >
-                  <SelectTrigger className="w-full border-[#B91C1C]/20 focus:ring-[#B91C1C]/20">
+                  <SelectTrigger className="w-full border-[#875A7B]/20 focus:ring-[#875A7B]/20">
                     <SelectValue placeholder="Select tea standards" />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,8 +345,8 @@ const NewSampleDialog: React.FC<NewSampleDialogProps> = ({ length, onSuccess }) 
                 </Select>
               </div>
             </CardContent>
-            <CardFooter className="border-t border-[#B91C1C]/10 pt-4">
-              <Button className="ml-auto bg-[#B91C1C] hover:bg-[#8B0000] text-white" type="submit">
+            <CardFooter className="border-t border-[#875A7B]/10 pt-4">
+              <Button className="ml-auto bg-[#875A7B] hover:bg-[#875A7B] text-white" type="submit">
                 Submit Request
               </Button>
             </CardFooter>
@@ -435,8 +447,8 @@ export default function SampleTracking() {
         paginationSize: 20,
         columns: [
           { title: "Reference", field: "reference", width: 150 },
-          { title: "Creation Date ", field: "creationdate", hozAlign: "left" },
-          { title: "Expected Delivery", field: "ed" },
+          { title: "Creation Date ", field: "creation_date", hozAlign: "left" },
+          { title: "Expected Delivery", field: "expected_delivery" },
           {
             title: "Customer",
             field: "customer",
@@ -538,7 +550,7 @@ export default function SampleTracking() {
   return (
     <div>
       {/* Heading */}
-      <div className="text-left bg-[#B91C1C] text-white p-4 rounded-t-md flex items-center space-x-3">
+      <div className="text-left bg-[#875A7B] text-white p-4 rounded-t-md flex items-center space-x-3">
         <img
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-XUWqp10SrqLFPpCq4p2mXus0hcvi8O.png"
           alt="Tea Tang Logo"
@@ -548,7 +560,7 @@ export default function SampleTracking() {
       </div>
 
       {/* Search Bar topic And Add Button */}
-      <div className="flex justify-between items-center p-4 bg-white border-x border-b border-[#B91C1C]/20 rounded-b-md mb-4">
+      <div className="flex justify-between items-center p-4 bg-white border-x border-b border-[#875A7B]/20 rounded-b-md mb-4">
         {/* Add button and topic section */}
         <div className="flex justify-center items-center gap-7">
           <NewSampleDialog
@@ -563,18 +575,18 @@ export default function SampleTracking() {
               }
             }}
           />
-          <h1 className="font-bold text-[#B91C1C]">Samples</h1>
+          <h1 className="font-bold text-[#875A7B]">Samples</h1>
           {/* <Button
             variant="outline"
-            className="border-[#B91C1C] text-[#B91C1C] hover:bg-[#B91C1C]/10"
+            className="border-[#875A7B] text-[#875A7B] hover:bg-[#875A7B]/10"
             onClick={() => router.push("/store-monitor")}
           >
             Store Monitor
           </Button> */}
         </div>
         {/* Search bar */}
-        <div className="w-full outline-2 border-2 border-[#B91C1C]/20 flex flex-row px-4 mx-10 me-4 py-2 gap-4 rounded-md">
-          <Search className="text-[#B91C1C]" />
+        <div className="w-full outline-2 border-2 border-[#875A7B]/20 flex flex-row px-4 mx-10 me-4 py-2 gap-4 rounded-md">
+          <Search className="text-[#875A7B]" />
           <input
             className="outline-none w-full"
             placeholder="Search"

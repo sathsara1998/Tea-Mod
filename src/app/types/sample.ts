@@ -33,8 +33,8 @@ export interface Customer {
 export interface Sample {
   id: string;
   reference: string;
-  creationdate: string;
-  ed: string;
+  creation_date: string;
+  expected_delivery: string;
   customer: Customer;
   status: string;
   requested_samples: RequestedSample[];
@@ -52,4 +52,54 @@ export interface ApiResponse<T> {
 
 export interface StatusType {
   status: "sent" | "draft" | "done" | "cancel" | string | null | undefined
+}
+
+
+interface Sample1 {
+  id: string;
+  reference: string;
+  creationdate: string;
+  ed: string;
+  customer: {
+    name: string;
+    address: string;
+    country: string;
+  };
+  status: string;
+  requested_samples: {
+    name: string;
+    standerd_code: string;
+    net_weight: number;
+    reference: string;
+    store_stat: string;
+  }[];
+  courier_service: {
+    name: string;
+    charges: number;
+  };
+  sample_storing_area: string;
+  trader: string;
+  tracking_number: string;
+  tracking_stages: {
+    handover_to_courier: {
+      date: string;
+      completed: boolean;
+    };
+    package_to_collection: {
+      date: string;
+      completed: boolean;
+    };
+    package_shipped: {
+      date: string;
+      completed: boolean;
+    };
+    package_arrived: {
+      date: string;
+      completed: boolean;
+    };
+    picked_by_clearance: {
+      date: string;
+      completed: boolean;
+    };
+  };
 }

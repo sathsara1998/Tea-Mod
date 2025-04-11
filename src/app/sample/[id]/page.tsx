@@ -1,5 +1,4 @@
 "use client"
-
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -25,14 +24,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
 import type { StoreSample } from "@/app/types/store_sample"
-
 import { courierServices } from "@/data/sample"
 import { storageAreas } from "@/data/sample"
-
-
-
 
 export default function SampleDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -483,8 +477,8 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
           Back to Samples
         </Button>
       </div>
-
-      <div className="bg-white rounded-lg shadow-md">
+      
+      <div className="bg-white ">
         <div className="p-4 border-b">
           <div className="flex justify-between items-start">
             <div>
@@ -538,41 +532,41 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-4">
               <div>
-                <Label>Create Date:</Label>
-                <span className="ml-2">{sampleData.creationdate}</span>
+                <Label className="font-bold">Create Date:</Label>
+                <span className="ml-2 text-sm text-gray-600">{sampleData.creation_date}</span>
               </div>
               <div>
-                <Label>Reference Number:</Label>
-                <span className="ml-2">{sampleData.reference}</span>
+                <Label className="font-bold">Reference Number:</Label>
+                <span className="ml-2 text-sm text-gray-600">{sampleData.reference}</span>
               </div>
               <div>
-                <Label>Customer Name:</Label>
-                <span className="ml-2">{sampleData.customer.name}</span>
+                <Label className="font-bold">Customer Name:</Label>
+                <span className="ml-2 text-sm text-gray-600">{sampleData.customer.name}</span>
               </div>
               <div>
-                <Label>Customer Address:</Label>
+                <Label className="font-bold">Customer Address:</Label>
                 <div className="mt-1 text-sm text-gray-600">{sampleData.customer.address}</div>
               </div>
               <div>
-                <Label>Customer Country:</Label>
-                <div className="mt-1">{sampleData.customer.country}</div>
+                <Label className="font-bold">Customer Country:</Label>
+                <div className="mt-1 text-sm text-gray-600">{sampleData.customer.country}</div>
               </div>
               <div>
-                <Label>Trader:</Label>
-                <div className="mt-1">{sampleData.trader}</div>
+                <Label className="font-bold">Trader:</Label>
+                <div className="mt-1 text-sm text-gray-600">{sampleData.trader}</div>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="courier-service">Courier Service:</Label>
+                <Label htmlFor="courier-service" className="font-bold">Courier Service:</Label>
                 <Select value={courierService} onValueChange={setCourierService}>
-                  <SelectTrigger id="courier-service" className="mt-1">
+                  <SelectTrigger id="courier-service" className="mt-1 text-sm text-gray-600">
                     <SelectValue placeholder="Select courier service" />
                   </SelectTrigger>
                   <SelectContent>
                     {courierServices.map((service) => (
-                      <SelectItem key={service.id} value={service.name}>
+                      <SelectItem  key={service.id} value={service.name}>
                         {service.name}
                       </SelectItem>
                     ))}
@@ -580,9 +574,9 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                 </Select>
               </div>
               <div>
-                <Label htmlFor="storage-area">Sample Storing Area:</Label>
+                <Label htmlFor="storage-area" className="font-bold">Sample Storing Area:</Label>
                 <Select value={storageArea} onValueChange={setStorageArea}>
-                  <SelectTrigger id="storage-area" className="mt-1">
+                  <SelectTrigger id="storage-area" className="mt-1 text-sm text-gray-600">
                     <SelectValue placeholder="Select storage area" />
                   </SelectTrigger>
                   <SelectContent>
@@ -595,17 +589,17 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                 </Select>
               </div>
               <div>
-                <Label htmlFor="tracking-number">Tracking (AWB) Number:</Label>
+                <Label htmlFor="tracking-number" className="font-bold">Tracking (AWB) Number:</Label>
                 <Input
                   id="tracking-number"
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
-                  className="mt-1"
+                  className="mt-1 text-sm text-gray-600"
                 />
               </div>
               <div>
-                <Label>Courier Charges:</Label>
-                <div className="mt-1">{sampleData.courier_service.charges} LKR</div>
+                <Label className="font-bold">Courier Charges:</Label>
+                <div className="mt-1 text-sm text-gray-600">{sampleData.courier_service.charges} LKR</div>
               </div>
             </div>
           </div>
@@ -632,7 +626,7 @@ export default function SampleDetailsPage({ params }: { params: { id: string } }
                 </div>
                 <div>
                   <Label>Estimated Delivery date:</Label>
-                  <span className="ml-2">{sampleData.ed}</span>
+                  <span className="ml-2">{sampleData.expected_delivery}</span>
                 </div>
                 <div>
                   <Label>Courier charges for inquiry:</Label>
